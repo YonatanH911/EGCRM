@@ -79,10 +79,10 @@ section "4. MySQL 8"
 # =============================================================================
 
 if ! command -v mysql &>/dev/null; then
-    info "Installing MySQL Server..."
-    sudo apt-get install -y mysql-server
-    sudo systemctl start mysql
-    sudo systemctl enable mysql
+    info "Installing MariaDB Server..."
+    sudo apt-get install -y mariadb-server
+    sudo systemctl start mariadb
+    sudo systemctl enable mariadb
 
     info "Securing MySQL installation..."
     sudo mysql -u root <<MYSQL_SECURE
