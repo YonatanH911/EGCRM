@@ -13,7 +13,8 @@ if [ -d "/var/www/egcrm" ]; then
     
     # 2. Start PM2 background processes (Frontend & Backend)
     cd "/var/www/egcrm"
-    pm2 start ecosystem.config.js || pm2 restart all
+    pm2 start ecosystem.config.js --force
+    pm2 save
     
     # 3. Ensure Nginx reverse proxy is running
     sudo systemctl start nginx || true

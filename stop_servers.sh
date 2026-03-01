@@ -10,7 +10,7 @@ if [ -d "/var/www/egcrm" ]; then
     
     # 1. Stop PM2 background processes (Frontend & Backend)
     if command -v pm2 &> /dev/null; then
-        cd "/var/www/egcrm" && pm2 stop all || true
+        cd "/var/www/egcrm" && pm2 stop all && pm2 save || true
     fi
     
     # 2. Stop Nginx reverse proxy
