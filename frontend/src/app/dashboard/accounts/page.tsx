@@ -6,6 +6,10 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
 
+/* ── shared dark-table helpers ── */
+const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
+const tdCls = "px-6 py-4 whitespace-nowrap";
+
 export default function AccountsPage() {
     const router = useRouter();
     const [accounts, setAccounts] = useState<any[]>([]);
@@ -38,128 +42,103 @@ export default function AccountsPage() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
+            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 text-blue-600 rounded-lg">
-                        <Building2 className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }}>
+                        <Building2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Accounts</h1>
-                        <p className="text-sm text-slate-500">Manage client organizations and companies.</p>
+                        <h1 className="text-2xl font-bold text-white">Accounts</h1>
+                        <p className="text-xs text-slate-500">Manage client organizations and companies.</p>
                     </div>
                 </div>
-
-                <Link
-                    href="/dashboard/accounts/new"
-                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-lg text-white bg-crm-600 hover:bg-crm-700 shadow-sm transition-colors text-sm"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Account
+                <Link href="/dashboard/accounts/new"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg transition-all duration-200"
+                    style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
+                    <Plus className="w-4 h-4" /> Add Account
                 </Link>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="relative max-w-sm w-full">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Search names or industries..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-crm-500 focus:border-crm-500 sm:text-sm transition-all"
-                        />
+            {/* Card */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                {/* Toolbar */}
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-white/5">
+                    <div className="relative flex-1 max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                        <input type="text" placeholder="Search names or industries…"
+                            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                            onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(99,102,241,0.5)'; }}
+                            onBlur={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; }} />
                     </div>
-
-                    <div className="w-full sm:w-auto min-w-[200px]">
-                        <select
-                            value={filterIndustry}
-                            onChange={(e) => setFilterIndustry(e.target.value)}
-                            className="bg-white block w-full pl-3 pr-10 py-2 text-base border border-slate-200 hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-crm-500 focus:border-crm-500 sm:text-sm rounded-lg transition-all"
-                        >
-                            <option value="">All Industries...</option>
-                            {uniqueIndustries.map(ind => (
-                                <option key={ind as string} value={ind as string}>{ind as string}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <select value={filterIndustry} onChange={(e) => setFilterIndustry(e.target.value)}
+                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none transition-all sm:w-48"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <option value="">All Industries…</option>
+                        {uniqueIndustries.map(ind => (
+                            <option key={ind as string} value={ind as string}>{ind as string}</option>
+                        ))}
+                    </select>
                 </div>
 
+                {/* Table */}
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-8 text-center text-slate-500">Loading accounts...</div>
+                        <div className="p-12 text-center text-slate-500 text-sm">Loading accounts…</div>
                     ) : filteredAccounts.length === 0 ? (
-                        <div className="p-12 text-center flex flex-col items-center justify-center">
-                            <Building className="w-12 h-12 text-slate-300 mb-4" />
-                            <h3 className="text-lg font-medium text-slate-900">No accounts found</h3>
-                            <p className="text-slate-500 mt-1 max-w-sm">Get started by creating a new account to track organizations you do business with.</p>
-                            <Link href="/dashboard/accounts/new" className="mt-6 text-crm-600 font-medium hover:underline">
-                                Create Account &rarr;
+                        <div className="p-16 flex flex-col items-center justify-center">
+                            <Building className="w-10 h-10 text-slate-700 mb-3" />
+                            <h3 className="text-base font-semibold text-slate-400">No accounts found</h3>
+                            <p className="text-slate-600 mt-1 text-sm">Get started by creating a new account.</p>
+                            <Link href="/dashboard/accounts/new" className="mt-5 text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors">
+                                Create Account →
                             </Link>
                         </div>
                     ) : (
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Account Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Industry</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Street</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">City</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">State / Prov</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">ZIP</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Country</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Phone / Website</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
+                        <table className="min-w-full">
+                            <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                                    {['Account Name', 'Industry', 'Street', 'City', 'State / Prov', 'ZIP', 'Country', 'Phone / Website', 'Created'].map(h => (
+                                        <th key={h} scope="col" className={thCls}>{h}</th>
+                                    ))}
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-200">
+                            <tbody>
                                 {filteredAccounts.map((account) => (
-                                    <tr
-                                        key={account.id}
+                                    <tr key={account.id}
                                         onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                                        className="hover:bg-slate-50 transition-colors cursor-pointer group"
-                                    >
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="h-8 w-8 rounded bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs uppercase border border-slate-200 group-hover:border-crm-300 group-hover:bg-crm-50 group-hover:text-crm-600 transition-colors">
+                                        className="cursor-pointer group transition-all duration-150"
+                                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.07)'; }}
+                                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                                        <td className={tdCls}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm"
+                                                    style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                                                     {account.name.charAt(0)}
                                                 </div>
-                                                <div className="ml-3">
-                                                    <div className="text-sm font-medium text-slate-900">{account.name}</div>
-                                                </div>
+                                                <span className="text-sm font-medium text-slate-200">{account.name}</span>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{account.industry || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{account.street || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{account.city || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{account.state_or_province || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{account.zip_code || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{account.country || '-'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-900">{account.phone || '-'}</div>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.industry || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.street || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.city || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.state_or_province || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.zip_code || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.country || '—'}</span></td>
+                                        <td className={tdCls}>
+                                            <div className="text-sm text-slate-300">{account.phone || '—'}</div>
                                             {account.website && (
-                                                <div className="text-sm text-crm-600 hover:text-crm-800 mt-0.5">
-                                                    <a href={account.website.startsWith('http') ? account.website : `https://${account.website}`} target="_blank" rel="noopener noreferrer">
-                                                        Website ↗
-                                                    </a>
+                                                <div className="text-xs text-indigo-400 hover:text-indigo-300 mt-0.5">
+                                                    <a href={account.website.startsWith('http') ? account.website : `https://${account.website}`}
+                                                        target="_blank" rel="noopener noreferrer">Website ↗</a>
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-500">
+                                        <td className={`${tdCls} text-right text-sm text-slate-500`}>
                                             {new Date(account.created_at).toLocaleDateString()}
                                         </td>
                                     </tr>

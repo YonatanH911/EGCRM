@@ -7,6 +7,13 @@ import { Briefcase, Plus, MoreHorizontal, ArrowRight, DollarSign, Calendar, Sear
 
 const STATUSES = ['New', 'Contacted', 'Qualified', 'Lost'];
 
+const STATUS_STYLES: Record<string, { top: string; bg: string; badge: string; badgeTxt: string }> = {
+    New: { top: '#6366f1', bg: 'rgba(99,102,241,0.06)', badge: 'rgba(99,102,241,0.15)', badgeTxt: '#a5b4fc' },
+    Contacted: { top: '#3b82f6', bg: 'rgba(59,130,246,0.06)', badge: 'rgba(59,130,246,0.15)', badgeTxt: '#93c5fd' },
+    Qualified: { top: '#10b981', bg: 'rgba(16,185,129,0.06)', badge: 'rgba(16,185,129,0.15)', badgeTxt: '#6ee7b7' },
+    Lost: { top: '#ef4444', bg: 'rgba(239,68,68,0.06)', badge: 'rgba(239,68,68,0.15)', badgeTxt: '#fca5a5' },
+};
+
 export default function LeadsKanbanPage() {
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -24,9 +31,7 @@ export default function LeadsKanbanPage() {
         }
     };
 
-    useEffect(() => {
-        fetchLeads();
-    }, []);
+    useEffect(() => { fetchLeads(); }, []);
 
     const moveLead = async (leadId: number, newStatus: string) => {
         try {
@@ -46,106 +51,108 @@ export default function LeadsKanbanPage() {
 
     const leadsByStatus = (status: string) => filteredLeads.filter((l) => l.status === status);
 
+    const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
+
     return (
-        <div className="h-[calc(100vh-8rem)] flex flex-col space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0 mx-6 mt-6">
+        <div className="h-[calc(100vh-8rem)] flex flex-col space-y-5">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 flex-shrink-0">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-100 text-amber-600 rounded-lg">
-                        <Briefcase className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}>
+                        <Briefcase className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Sales Pipeline</h1>
-                        <p className="text-sm text-slate-500">Track and manage your opportunities across stages.</p>
+                        <h1 className="text-2xl font-bold text-white">Sales Pipeline</h1>
+                        <p className="text-xs text-slate-500">Track and manage your opportunities across stages.</p>
                     </div>
                 </div>
-
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mt-4 sm:mt-0 items-center">
-                    <div className="relative w-full sm:w-64">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Search leads..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-crm-500 focus:border-crm-500 sm:text-sm transition-all shadow-sm"
-                        />
+                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
+                    <div className="relative w-full sm:w-56">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                        <input type="text" placeholder="Search leads…"
+                            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
+                            style={inputStyle}
+                            onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(99,102,241,0.5)'; }}
+                            onBlur={(e) => { e.currentTarget.style.border = inputStyle.border; }} />
                     </div>
-
-                    <select
-                        value={filterLead}
-                        onChange={(e) => setFilterLead(e.target.value)}
-                        className="bg-white block w-full sm:w-36 pl-3 pr-8 py-2 text-base border border-slate-200 hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-crm-500 focus:border-crm-500 sm:text-sm rounded-lg transition-all shadow-sm"
-                    >
+                    <select value={filterLead} onChange={(e) => setFilterLead(e.target.value)}
+                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none w-full sm:w-32"
+                        style={inputStyle}>
                         <option value="">All Leads</option>
                         <option value="has_value">Has Value</option>
                     </select>
-
-                    <Link
-                        href="/dashboard/leads/new"
-                        className="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-lg text-white bg-crm-600 hover:bg-crm-700 shadow-sm transition-colors text-sm whitespace-nowrap"
-                    >
-                        <Plus className="w-4 h-4 mr-2" />
-                        New Lead
+                    <Link href="/dashboard/leads/new"
+                        className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg whitespace-nowrap"
+                        style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
+                        <Plus className="w-4 h-4" /> New Lead
                     </Link>
                 </div>
             </div>
 
-            <div className="flex-1 overflow-x-auto pb-6 px-6">
+            {/* Kanban */}
+            <div className="flex-1 overflow-x-auto pb-4">
                 {loading ? (
-                    <div className="flex h-full items-center justify-center p-8 text-slate-500">Loading pipeline...</div>
+                    <div className="flex h-full items-center justify-center text-slate-500 text-sm">Loading pipeline…</div>
                 ) : (
-                    <div className="flex h-full gap-6 min-w-max">
+                    <div className="flex h-full gap-4 min-w-max">
                         {STATUSES.map(status => {
+                            const st = STATUS_STYLES[status];
                             const columnLeads = leadsByStatus(status);
                             const totalValue = columnLeads.reduce((acc, lead) => acc + (lead.value || 0), 0);
 
                             return (
-                                <div key={status} className="w-80 flex flex-col bg-slate-100 rounded-xl max-h-full">
-                                    <div className="p-4 flex justify-between items-center border-b border-slate-200">
+                                <div key={status} className="w-72 flex flex-col rounded-2xl max-h-full overflow-hidden"
+                                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderTop: `2px solid ${st.top}` }}>
+                                    {/* Column header */}
+                                    <div className="px-4 py-3.5 flex justify-between items-center border-b border-white/5">
                                         <div className="flex items-center gap-2">
-                                            <h3 className="font-semibold text-slate-800">{status}</h3>
-                                            <span className="bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full text-xs font-medium">
+                                            <h3 className="font-semibold text-slate-200 text-sm">{status}</h3>
+                                            <span className="px-2 py-0.5 rounded-full text-xs font-bold"
+                                                style={{ background: st.badge, color: st.badgeTxt }}>
                                                 {columnLeads.length}
                                             </span>
                                         </div>
                                         {totalValue > 0 && (
-                                            <span className="text-sm font-medium text-slate-500">
+                                            <span className="text-xs font-semibold text-slate-400">
                                                 ${totalValue.toLocaleString()}
                                             </span>
                                         )}
                                     </div>
 
-                                    <div className="flex-1 overflow-y-auto p-3 space-y-3">
+                                    {/* Cards */}
+                                    <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
                                         {columnLeads.map(lead => (
-                                            <div key={lead.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 hover:border-crm-300 transition-colors group">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="font-medium text-slate-900 leading-tight">{lead.title}</h4>
-                                                    <button className="text-slate-400 hover:text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <div key={lead.id} className="rounded-xl p-4 group cursor-default transition-all duration-200 hover:-translate-y-0.5"
+                                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}
+                                                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = st.top + '60'; }}
+                                                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.07)'; }}>
+                                                <div className="flex justify-between items-start mb-2.5">
+                                                    <h4 className="font-semibold text-slate-200 text-sm leading-snug">{lead.title}</h4>
+                                                    <button className="text-slate-600 hover:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity ml-2 flex-shrink-0">
                                                         <MoreHorizontal className="w-4 h-4" />
                                                     </button>
                                                 </div>
 
-                                                <div className="flex items-center gap-1 text-emerald-600 font-medium text-sm mb-4">
-                                                    <DollarSign className="w-3 h-3" />
+                                                <div className="flex items-center gap-1 text-emerald-400 font-semibold text-sm mb-3">
+                                                    <DollarSign className="w-3.5 h-3.5" />
                                                     {lead.value?.toLocaleString() || '0'}
                                                 </div>
 
-                                                <div className="flex items-center justify-between text-xs text-slate-500 border-t border-slate-100 pt-3">
+                                                <div className="flex items-center justify-between text-xs text-slate-500 pt-2.5 border-t border-white/5">
                                                     <div className="flex items-center gap-1">
                                                         <Calendar className="w-3 h-3" />
                                                         {new Date(lead.created_at).toLocaleDateString()}
                                                     </div>
-
                                                     {status !== 'Lost' && status !== 'Qualified' && (
                                                         <button
                                                             onClick={() => {
                                                                 const nextStatus = STATUSES[STATUSES.indexOf(status) + 1];
                                                                 if (nextStatus) moveLead(lead.id, nextStatus);
                                                             }}
-                                                            className="flex items-center gap-1 text-crm-600 hover:text-crm-800 font-medium bg-crm-50 px-2 py-1 rounded"
-                                                        >
+                                                            className="flex items-center gap-1 px-2.5 py-1 rounded-lg font-semibold transition-all duration-150"
+                                                            style={{ background: st.badge, color: st.badgeTxt }}>
                                                             Advance <ArrowRight className="w-3 h-3" />
                                                         </button>
                                                     )}
@@ -154,7 +161,8 @@ export default function LeadsKanbanPage() {
                                         ))}
 
                                         {columnLeads.length === 0 && (
-                                            <div className="text-center p-4 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm">
+                                            <div className="text-center py-8 rounded-xl text-slate-600 text-sm"
+                                                style={{ border: '1.5px dashed rgba(255,255,255,0.07)' }}>
                                                 No leads in this stage
                                             </div>
                                         )}

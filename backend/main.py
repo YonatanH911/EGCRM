@@ -159,12 +159,28 @@ def create_contract(contract: schemas.ContractCreate, db: Session = Depends(get_
 def read_contracts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_contracts(db, skip=skip, limit=limit)
 
+@app.get("/contracts/{contract_id}", response_model=schemas.ContractResponse)
+def read_contract(contract_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_contract = crud.get_contract(db, contract_id=contract_id)
+    if db_contract is None:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    return db_contract
+
 @app.put("/contracts/{contract_id}", response_model=schemas.ContractResponse)
 def update_contract(contract_id: int, contract: schemas.ContractBase, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     db_contract = crud.update_contract(db, contract_id=contract_id, contract_update=contract)
     if db_contract is None:
         raise HTTPException(status_code=404, detail="Contract not found")
     return db_contract
+
+@app.delete("/contracts/{contract_id}")
+def delete_contract(contract_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_contract = crud.get_contract(db, contract_id=contract_id)
+    if not db_contract:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    db.delete(db_contract)
+    db.commit()
+    return {"message": "Contract deleted successfully"}
 
 # --- Vaults API ---
 @app.post("/vaults/", response_model=schemas.VaultResponse)

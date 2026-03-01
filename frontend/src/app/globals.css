@@ -1,36 +1,83 @@
 @import "tailwindcss";
 
 @theme {
-  --color-crm-50: #f0f9ff;
-  --color-crm-100: #e0f2fe;
-  --color-crm-200: #bae6fd;
-  --color-crm-300: #7dd3fc;
-  --color-crm-400: #38bdf8;
-  --color-crm-500: #0ea5e9;
-  --color-crm-600: #0284c7;
-  --color-crm-700: #0369a1;
-  --color-crm-800: #075985;
-  --color-crm-900: #0c4a6e;
+  /* Brand accent: indigo → blue gradient */
+  --color-crm-50: #eef2ff;
+  --color-crm-100: #e0e7ff;
+  --color-crm-200: #c7d2fe;
+  --color-crm-300: #a5b4fc;
+  --color-crm-400: #818cf8;
+  --color-crm-500: #6366f1;
+  --color-crm-600: #4f46e5;
+  --color-crm-700: #4338ca;
+  --color-crm-800: #3730a3;
+  --color-crm-900: #312e81;
 }
 
+/* ── Base ─────────────────────────────────── */
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+    @apply bg-[#0d1117] text-slate-100 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Make selects readable on dark backgrounds */
+  select option {
+    background-color: #1e2433;
+    color: #e2e8f0;
   }
 }
 
-/* Custom scrollbar for a premium feel */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
+/* ── Custom Scrollbar ─────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
+  background: #334155;
+  border-radius: 99px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+/* ── Utility: gradient text ───────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #818cf8 0%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
+
+/* ── Utility: glass card ──────────────────── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* ── Utility: gradient border top ────────── */
+.gradient-border-t {
+  border-top: 2px solid transparent;
+  background-clip: padding-box;
+  position: relative;
+}
+.gradient-border-t::before {
+  content: '';
+  position: absolute;
+  top: -2px; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, #6366f1, #3b82f6);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ── Keyframes ────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+}
+.animate-float   { animation: float 4s ease-in-out infinite; }
+.animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }

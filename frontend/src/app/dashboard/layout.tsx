@@ -24,18 +24,21 @@ export default function DashboardLayout({
 
     if (!isAuthed) {
         return (
-            <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-                <div className="w-8 h-8 border-4 border-crm-600 border-t-transparent rounded-full animate-spin" />
+            <div className="min-h-screen flex items-center justify-center" style={{ background: '#0d1117' }}>
+                <div className="relative w-10 h-10">
+                    <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20" />
+                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-500 animate-spin" />
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="flex h-screen bg-slate-50 overflow-hidden">
+        <div className="flex h-screen overflow-hidden" style={{ background: '#0d1117' }}>
             <Sidebar />
             <div className="flex-1 flex flex-col h-screen overflow-hidden">
                 <TopBar />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-6">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto p-6" style={{ background: '#0d1117' }}>
                     {children}
                 </main>
             </div>

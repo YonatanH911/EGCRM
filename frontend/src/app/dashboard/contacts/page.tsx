@@ -6,6 +6,9 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Users2, Plus, Search, User } from 'lucide-react';
 
+const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
+const tdCls = "px-6 py-4 whitespace-nowrap";
+
 export default function ContactsPage() {
     const router = useRouter();
     const [contacts, setContacts] = useState<any[]>([]);
@@ -31,119 +34,101 @@ export default function ContactsPage() {
         const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.toLowerCase();
         const matchesSearch = fullName.includes(searchQuery.toLowerCase()) ||
             (contact.email && contact.email.toLowerCase().includes(searchQuery.toLowerCase()));
-
         let matchesFilter = true;
         if (filterContact === 'has_email') matchesFilter = !!contact.email;
         if (filterContact === 'has_phone') matchesFilter = !!contact.phone;
-
         return matchesSearch && matchesFilter;
     });
+
+    const inputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
+    const focusBorder = '1px solid rgba(99,102,241,0.5)';
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg">
-                        <Users2 className="w-6 h-6" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
+                        <Users2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-slate-900">Contacts</h1>
-                        <p className="text-sm text-slate-500">Manage individual people and key decision makers.</p>
+                        <h1 className="text-2xl font-bold text-white">Contacts</h1>
+                        <p className="text-xs text-slate-500">Manage individual people and key decision makers.</p>
                     </div>
                 </div>
-
-                <Link
-                    href="/dashboard/contacts/new"
-                    className="inline-flex items-center justify-center px-4 py-2 border border-transparent font-medium rounded-lg text-white bg-crm-600 hover:bg-crm-700 shadow-sm transition-colors text-sm"
-                >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Contact
+                <Link href="/dashboard/contacts/new"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg"
+                    style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
+                    <Plus className="w-4 h-4" /> Add Contact
                 </Link>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-                <div className="p-4 border-b border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <div className="relative max-w-sm w-full">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Search className="h-4 w-4 text-slate-400" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Search names or email..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-crm-500 focus:border-crm-500 sm:text-sm transition-all"
-                        />
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-white/5">
+                    <div className="relative flex-1 max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                        <input type="text" placeholder="Search names or email…"
+                            value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
+                            style={inputStyle}
+                            onFocus={(e) => { e.currentTarget.style.border = focusBorder; }}
+                            onBlur={(e) => { e.currentTarget.style.border = inputStyle.border; }} />
                     </div>
-
-                    <div className="w-full sm:w-auto min-w-[200px]">
-                        <select
-                            value={filterContact}
-                            onChange={(e) => setFilterContact(e.target.value)}
-                            className="bg-white block w-full pl-3 pr-10 py-2 text-base border border-slate-200 hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-crm-500 focus:border-crm-500 sm:text-sm rounded-lg transition-all"
-                        >
-                            <option value="">All Contacts</option>
-                            <option value="has_email">Has Email</option>
-                            <option value="has_phone">Has Phone Number</option>
-                        </select>
-                    </div>
+                    <select value={filterContact} onChange={(e) => setFilterContact(e.target.value)}
+                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none sm:w-44"
+                        style={inputStyle}>
+                        <option value="">All Contacts</option>
+                        <option value="has_email">Has Email</option>
+                        <option value="has_phone">Has Phone Number</option>
+                    </select>
                 </div>
 
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-8 text-center text-slate-500">Loading contacts...</div>
+                        <div className="p-12 text-center text-slate-500 text-sm">Loading contacts…</div>
                     ) : filteredContacts.length === 0 ? (
-                        <div className="p-12 text-center flex flex-col items-center justify-center">
-                            <User className="w-12 h-12 text-slate-300 mb-4" />
-                            <h3 className="text-lg font-medium text-slate-900">No contacts found</h3>
-                            <p className="text-slate-500 mt-1 max-w-sm">Build your network by adding people you interact with.</p>
-                            <Link href="/dashboard/contacts/new" className="mt-6 text-crm-600 font-medium hover:underline">
-                                Create Contact &rarr;
+                        <div className="p-16 flex flex-col items-center justify-center">
+                            <User className="w-10 h-10 text-slate-700 mb-3" />
+                            <h3 className="text-base font-semibold text-slate-400">No contacts found</h3>
+                            <p className="text-slate-600 mt-1 text-sm">Build your network by adding people you interact with.</p>
+                            <Link href="/dashboard/contacts/new" className="mt-5 text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors">
+                                Create Contact →
                             </Link>
                         </div>
                     ) : (
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
-                                <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Job Title</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Phone</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Account</th>
-                                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Created</th>
+                        <table className="min-w-full">
+                            <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                                    {['Name', 'Job Title', 'Email', 'Phone', 'Account', 'Created'].map(h => (
+                                        <th key={h} scope="col" className={thCls}>{h}</th>
+                                    ))}
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-200">
+                            <tbody>
                                 {filteredContacts.map((contact) => (
-                                    <tr
-                                        key={contact.id}
-                                        className="hover:bg-slate-50 transition-colors cursor-pointer group"
+                                    <tr key={contact.id}
+                                        className="cursor-pointer transition-all duration-150"
+                                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                                         onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
-                                    >
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex items-center">
-                                                <div className="h-8 w-8 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center font-bold text-xs uppercase border border-slate-200 group-hover:border-indigo-300 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                                                    {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
+                                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.07)'; }}
+                                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                                        <td className={tdCls}>
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs uppercase shadow"
+                                                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
+                                                    {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
                                                 </div>
-                                                <div className="ml-3">
-                                                    <div className="text-sm font-medium text-slate-900">{contact.first_name} {contact.last_name}</div>
-                                                    {contact.company_name && <div className="text-xs text-slate-400">{contact.company_name}</div>}
+                                                <div>
+                                                    <div className="text-sm font-medium text-slate-200">{contact.first_name} {contact.last_name}</div>
+                                                    {contact.company_name && <div className="text-xs text-slate-500">{contact.company_name}</div>}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-600">{contact.job_title || <span className="text-slate-300">—</span>}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{contact.email || '—'}</div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {contact.phone || '—'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                                            {contact.account?.name || <span className="text-slate-300">—</span>}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-500">
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.job_title || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.email || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.phone || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.account?.name || '—'}</span></td>
+                                        <td className={`${tdCls} text-right text-sm text-slate-500`}>
                                             {new Date(contact.created_at).toLocaleDateString()}
                                         </td>
                                     </tr>
