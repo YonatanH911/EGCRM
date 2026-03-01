@@ -1,19 +1,45 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ---- CONFIG (edit these) ----
-MYSQLD_BIN="/usr/sbin/mysqld"          # or: /usr/bin/mysqld, or mysqld if in PATH
-MYSQL_DATADIR="$HOME/projects/CRM_Dynamics/backend/mysql_data"
+# ==============================================================================
+# PRODUCTION MODE (Detected if running on the Raspberry Pi)
+# ==============================================================================
+if [ -d "/var/www/egcrm" ]; then
+    echo "?? Detected Production Environment (/var/www/egcrm)."
+    echo "Starting background services..."
+    
+    # 1. Ensure MariaDB (Database) is running
+    sudo systemctl start mariadb || true
+    
+    # 2. Start PM2 background processes (Frontend & Backend)
+    cd "/var/www/egcrm"
+    pm2 start ecosystem.config.js || pm2 restart all
+    
+    # 3. Ensure Nginx reverse proxy is running
+    sudo systemctl start nginx || true
+    
+    echo ""
+    echo "? All Production Servers are officially RUNNING!"
+    echo "?? Website URL: http://$(hostname -I | awk '{print $1}')"
+    echo ""
+    pm2 status
+    exit 0
+fi
 
-BACKEND_DIR="$HOME/projects/CRM_Dynamics/backend"
-BACKEND_VENV="$BACKEND_DIR/venv"
-BACKEND_MODULE="main:app"              # uvicorn app path
+# ==============================================================================
+# LOCAL DEVELOPMENT MODE (Windows / WSL / Mac)
+# ==============================================================================
+# Detect absolute directory of this script to avoid path errors
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+MYSQLD_BIN="/usr/sbin/mysqld"
+MYSQL_DATADIR="$DIR/backend/mysql_data"
+BACKEND_DIR="$DIR/backend"
+BACKEND_MODULE="main:app"
 BACKEND_PORT=8000
-
-FRONTEND_DIR="$HOME/projects/CRM_Dynamics/frontend"
+FRONTEND_DIR="$DIR/frontend"
 FRONTEND_DEV_CMD="npm run dev"
 FRONTEND_PORT=3000
-# ------------------------------
 
 echo "Starting MySQL Database Server..."
 "$MYSQLD_BIN" --datadir="$MYSQL_DATADIR" >/tmp/mysql.log 2>&1 &
@@ -25,9 +51,7 @@ sleep 5
 echo "Starting Backend Server..."
 (
   cd "$BACKEND_DIR"
-  # activate venv
-  # shellcheck source=/dev/null
-  source "$BACKEND_VENV/bin/activate"
+  source "$BACKEND_DIR/venv/bin/activate" 2>/dev/null || source "$BACKEND_DIR/venv/Scripts/activate" 2>/dev/null
   uvicorn "$BACKEND_MODULE" --reload --port "$BACKEND_PORT"
 ) >/tmp/backend.log 2>&1 &
 BACKEND_PID=$!
@@ -39,7 +63,7 @@ echo "Starting Frontend Server..."
 ) >/tmp/frontend.log 2>&1 &
 FRONTEND_PID=$!
 
-echo "All servers are starting up!"
+echo "All development servers are starting up!"
 echo "- Backend:  http://localhost:${BACKEND_PORT}"
 echo "- Frontend: http://localhost:${FRONTEND_PORT}"
 echo "- MySQL is running in the background."
@@ -55,6 +79,4 @@ cleanup() {
 }
 
 trap cleanup INT TERM
-
-# Keep script running until one of the processes exits
 wait
