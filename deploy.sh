@@ -52,12 +52,13 @@ sudo apt-get install -y curl git build-essential software-properties-common \
     python3-pip python3-venv python3-dev nginx ufw openssl
 
 # =============================================================================
-section "2. Node.js 18 (via NodeSource)"
+# =============================================================================
+section "2. Node.js 20 (via NodeSource)"
 # =============================================================================
 
-if ! command -v node &>/dev/null || [[ $(node -v | cut -d. -f1 | tr -d 'v') -lt 18 ]]; then
-    info "Installing Node.js 18..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+if ! command -v node &>/dev/null || [[ $(node -v | cut -d. -f1 | tr -d 'v') -lt 20 ]]; then
+    info "Installing Node.js 20..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
     sudo apt-get install -y nodejs
 else
     info "Node.js $(node -v) already installed."
