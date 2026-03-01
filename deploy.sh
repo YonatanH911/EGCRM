@@ -21,8 +21,8 @@ SERVER_IP=$(hostname -I | awk '{print $1}')   # auto-detected
 
 DB_NAME="egcrm"
 DB_USER="egcrm_user"
-DB_PASS="***"          # ← FILL IN: your database password
-ROOT_PASS="***"        # ← FILL IN: your MySQL root password (set during mysql_secure_installation)
+DB_PASS=""          # ← FILL IN: your database password
+ROOT_PASS=""        # ← FILL IN: your MySQL root password (set during mysql_secure_installation)
 
 SECRET_KEY=$(openssl rand -hex 32)  # auto-generated JWT key
 
