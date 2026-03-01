@@ -86,7 +86,7 @@ if ! command -v mysql &>/dev/null; then
 
     info "Securing MySQL installation..."
     sudo mysql -u root <<MYSQL_SECURE
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${ROOT_PASS}';
+ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PASS}';
 DELETE FROM mysql.user WHERE User='';
 DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
 DROP DATABASE IF EXISTS test;
