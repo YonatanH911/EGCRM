@@ -190,6 +190,13 @@ A convenience script is included. Run from the project root:
 ```bat
 start_servers.bat
 ```
+## 🐧 Quick Start (Linux)
+
+A convenience script is included. Run from the project root:
+
+```sh
+start_servers.sh
+```
 
 This opens both the backend and frontend in separate terminal windows.
 
