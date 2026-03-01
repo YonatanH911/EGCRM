@@ -21,8 +21,8 @@ SERVER_IP=$(hostname -I | awk '{print $1}')   # auto-detected
 
 DB_NAME="egcrm"
 DB_USER="egcrm_user"
-DB_PASS=""          # ← FILL IN: your database password
-ROOT_PASS=""        # ← FILL IN: your MySQL root password (set during mysql_secure_installation)
+DB_PASS="goldcard123"          # ← FILL IN: your database password
+ROOT_PASS="goldcard123"        # ← FILL IN: your MySQL root password (set during mysql_secure_installation)
 
 SECRET_KEY=$(openssl rand -hex 32)  # auto-generated JWT key
 
@@ -162,7 +162,7 @@ npm install
 
 info "Writing frontend .env.local file..."
 cat > .env.local <<ENV
-NEXT_PUBLIC_API_URL=http://${SERVER_IP}:${BACKEND_PORT}
+NEXT_PUBLIC_API_URL=http://${SERVER_IP}/api
 ENV
 
 info "Building Next.js for production..."
