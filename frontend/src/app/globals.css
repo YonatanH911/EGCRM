@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-crm-50: #f0f9ff;
+  --color-crm-100: #e0f2fe;
+  --color-crm-200: #bae6fd;
+  --color-crm-300: #7dd3fc;
+  --color-crm-400: #38bdf8;
+  --color-crm-500: #0ea5e9;
+  --color-crm-600: #0284c7;
+  --color-crm-700: #0369a1;
+  --color-crm-800: #075985;
+  --color-crm-900: #0c4a6e;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased;
+  }
+}
+
+/* Custom scrollbar for a premium feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
