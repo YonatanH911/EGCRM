@@ -5,17 +5,16 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Building2, ArrowLeft, Loader2, Check, Trash2, MapPin } from 'lucide-react';
+import { usePreferences } from '@/components/PreferencesProvider';
 
-const labelCls = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none transition-all";
-const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' };
-const focusStyle = { border: '1px solid rgba(99,102,241,0.5)', boxShadow: '0 0 0 3px rgba(99,102,241,0.1)' };
-const blurStyle = { border: '1px solid rgba(255,255,255,0.09)', boxShadow: 'none' };
+const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 export default function EditAccountPage() {
     const router = useRouter();
     const params = useParams();
     const accountId = params.id;
+    const { isRTL } = usePreferences();
 
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
@@ -74,10 +73,7 @@ export default function EditAccountPage() {
     if (initialLoading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="relative w-10 h-10">
-                    <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20" />
-                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-500 animate-spin" />
-                </div>
+                <Loader2 className="w-8 h-8 animate-spin text-crm-500" />
             </div>
         );
     }
@@ -89,9 +85,7 @@ export default function EditAccountPage() {
             <label className={labelCls}>{label}</label>
             <input type={type} value={formData[field]} placeholder={placeholder}
                 onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                className={inputCls} style={inputStyle}
-                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                className={inputCls} />
         </div>
     );
 
@@ -100,35 +94,31 @@ export default function EditAccountPage() {
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/accounts"
-                    className="p-2 rounded-xl text-slate-500 hover:text-slate-200 transition-colors"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <ArrowLeft className="w-5 h-5" />
+                    className="p-2.5 rounded-xl text-muted-text hover:text-foreground hover:bg-background-subtle transition-all">
+                    <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/20">
                         <Building2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Edit Account</h1>
-                        <p className="text-xs text-slate-500">Update an existing organizational record</p>
+                        <h1 className="text-2xl font-bold text-foreground">Edit Account</h1>
+                        <p className="text-xs text-muted-text">Update an existing organizational record.</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="p-3.5 text-sm text-red-400 rounded-xl"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
                     {error}
                 </div>
             )}
 
             {/* Main Info Card */}
-            <div className="rounded-2xl overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-blue-400" />
-                    <h2 className="text-sm font-semibold text-slate-300">Account Details</h2>
+            <div className="rounded-2xl overflow-hidden glass-card">
+                <div className="px-6 py-4 border-b border-border-subtle bg-background-subtle/30 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-crm-500" />
+                    <h2 className="text-[11px] font-bold text-foreground uppercase tracking-widest">Account Details</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -139,10 +129,10 @@ export default function EditAccountPage() {
                     </div>
 
                     {/* Address Section */}
-                    <div className="pt-5 border-t border-white/5">
-                        <div className="flex items-center gap-2 mb-4">
-                            <MapPin className="w-4 h-4 text-slate-600" />
-                            <h3 className="text-sm font-semibold text-slate-400">Address Information</h3>
+                    <div className="pt-6 border-t border-border-subtle">
+                        <div className="flex items-center gap-2 mb-5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
+                            <h3 className="text-[11px] font-bold text-muted-text uppercase tracking-widest">Address Information</h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <Field label="Street" field="street" placeholder="123 Main St" colSpan2 />
@@ -154,21 +144,18 @@ export default function EditAccountPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-between items-center gap-3 pt-4 border-t border-white/5">
+                    <div className="flex justify-between items-center gap-3 pt-8 border-t border-border-subtle">
                         <button type="button" onClick={handleDelete} disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-400 rounded-xl transition-all disabled:opacity-50"
-                            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
                             <Trash2 className="w-4 h-4" /> Delete Account
                         </button>
                         <div className="flex gap-3">
                             <Link href="/dashboard/accounts"
-                                className="px-5 py-2.5 text-sm font-semibold text-slate-400 rounded-xl"
-                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
                                 Cancel
                             </Link>
                             <button type="submit" disabled={loading}
-                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50"
-                                style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
+                                className="flex items-center gap-2 px-8 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                                 Update Account
                             </button>

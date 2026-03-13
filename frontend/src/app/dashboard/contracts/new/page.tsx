@@ -76,47 +76,47 @@ export default function NewContractPage() {
         }
     };
 
-    const inputClass = "shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border";
-    const labelClass = "block text-sm font-medium text-slate-700";
+    const inputClass = "shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm rounded-md py-2 px-3 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground";
+    const labelClass = "block text-sm font-medium text-foreground";
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
                 <Link
                     href="/dashboard/contracts"
-                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                    className="p-2 text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                         <FileText className="w-6 h-6 text-crm-600" />
                         New Contract
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">Add a formal agreement directly to an account.</p>
+                    <p className="text-sm text-muted-text mt-1">Add a formal agreement directly to an account.</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <form onSubmit={handleSubmit} className="glass-card shadow-sm rounded-xl border border-border-subtle overflow-hidden">
                 <div className="p-6 sm:p-8 space-y-8">
                     {error && (
-                        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
 
                     {/* ── Contract Details ── */}
                     <div>
-                        <h3 className="text-lg font-medium leading-6 text-slate-900 border-b border-slate-200 pb-2 mb-5">Contract Details</h3>
+                        <h3 className="text-lg font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-5">Contract Details</h3>
                         <div className="grid grid-cols-1 gap-y-5 gap-x-4 sm:grid-cols-2">
                             <div className="sm:col-span-2">
                                 <label htmlFor="title" className={labelClass}>Contract Title *</label>
-                                <input type="text" id="title" required value={formData.title} onChange={set('title')} className={`mt-1 ${inputClass}`} />
+                                <input type="text" id="title" required value={formData.title} onChange={set('title')} className={`mt-1 ${inputClass} placeholder-muted-text`} />
                             </div>
 
                             <div className="sm:col-span-2">
                                 <label htmlFor="account_id" className={labelClass}>Related Account</label>
-                                <select id="account_id" value={formData.account_id} onChange={set('account_id')} className={`mt-1 ${inputClass} bg-white`}>
+                                <select id="account_id" value={formData.account_id} onChange={set('account_id')} className={`mt-1 ${inputClass} *:bg-background *:text-foreground`}>
                                     <option value="">Select an account</option>
                                     {accounts.map(acc => (
                                         <option key={acc.id} value={acc.id}>{acc.name}</option>
@@ -126,7 +126,7 @@ export default function NewContractPage() {
 
                             <div>
                                 <label htmlFor="status" className={labelClass}>Status</label>
-                                <select id="status" value={formData.status} onChange={set('status')} className={`mt-1 ${inputClass} bg-white`}>
+                                <select id="status" value={formData.status} onChange={set('status')} className={`mt-1 ${inputClass} *:bg-background *:text-foreground`}>
                                     <option value="Draft">Draft</option>
                                     <option value="Active">Active</option>
                                     <option value="Expired">Expired</option>
@@ -136,12 +136,12 @@ export default function NewContractPage() {
 
                             <div>
                                 <label htmlFor="beneficiary" className={labelClass}>Beneficiary</label>
-                                <input type="text" id="beneficiary" value={formData.beneficiary} onChange={set('beneficiary')} className={`mt-1 ${inputClass}`} placeholder="e.g. Acme Corp" />
+                                <input type="text" id="beneficiary" value={formData.beneficiary} onChange={set('beneficiary')} className={`mt-1 ${inputClass} placeholder-muted-text`} placeholder="e.g. Acme Corp" />
                             </div>
 
                             <div>
                                 <label htmlFor="supplier" className={labelClass}>Supplier</label>
-                                <input type="text" id="supplier" value={formData.supplier} onChange={set('supplier')} className={`mt-1 ${inputClass}`} placeholder="e.g. Vendor Ltd" />
+                                <input type="text" id="supplier" value={formData.supplier} onChange={set('supplier')} className={`mt-1 ${inputClass} placeholder-muted-text`} placeholder="e.g. Vendor Ltd" />
                             </div>
 
                             <div>
@@ -158,32 +158,32 @@ export default function NewContractPage() {
 
                     {/* ── Contacts ── */}
                     <div>
-                        <h3 className="text-lg font-medium leading-6 text-slate-900 border-b border-slate-200 pb-2 mb-5">Contacts</h3>
+                        <h3 className="text-lg font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-5">Contacts</h3>
                         <div className="grid grid-cols-1 gap-y-5 gap-x-4 sm:grid-cols-2">
                             <div>
                                 <label htmlFor="management_contact" className={labelClass}>Management Contact</label>
-                                <input type="text" id="management_contact" value={formData.management_contact} onChange={set('management_contact')} className={`mt-1 ${inputClass}`} placeholder="Full name" />
+                                <input type="text" id="management_contact" value={formData.management_contact} onChange={set('management_contact')} className={`mt-1 ${inputClass} placeholder-muted-text`} placeholder="Full name" />
                             </div>
 
                             <div>
                                 <label htmlFor="technical_contact" className={labelClass}>Technical Contact</label>
-                                <input type="text" id="technical_contact" value={formData.technical_contact} onChange={set('technical_contact')} className={`mt-1 ${inputClass}`} placeholder="Full name" />
+                                <input type="text" id="technical_contact" value={formData.technical_contact} onChange={set('technical_contact')} className={`mt-1 ${inputClass} placeholder-muted-text`} placeholder="Full name" />
                             </div>
 
                             <div>
                                 <label htmlFor="financial_contact" className={labelClass}>Financial Contact</label>
-                                <input type="text" id="financial_contact" value={formData.financial_contact} onChange={set('financial_contact')} className={`mt-1 ${inputClass}`} placeholder="Full name" />
+                                <input type="text" id="financial_contact" value={formData.financial_contact} onChange={set('financial_contact')} className={`mt-1 ${inputClass} placeholder-muted-text`} placeholder="Full name" />
                             </div>
                         </div>
                     </div>
 
                     {/* ── Billing ── */}
                     <div>
-                        <h3 className="text-lg font-medium leading-6 text-slate-900 border-b border-slate-200 pb-2 mb-5">Billing Information</h3>
+                        <h3 className="text-lg font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-5">Billing Information</h3>
                         <div className="grid grid-cols-1 gap-y-5 gap-x-4 sm:grid-cols-2">
                             <div>
                                 <label htmlFor="currency" className={labelClass}>Currency</label>
-                                <select id="currency" value={formData.currency} onChange={set('currency')} className={`mt-1 ${inputClass} bg-white`}>
+                                <select id="currency" value={formData.currency} onChange={set('currency')} className={`mt-1 ${inputClass} *:bg-background *:text-foreground`}>
                                     <option value="USD">USD — US Dollar</option>
                                     <option value="EUR">EUR — Euro</option>
                                     <option value="GBP">GBP — British Pound</option>
@@ -198,7 +198,7 @@ export default function NewContractPage() {
                             <div>
                                 <label htmlFor="value" className={labelClass}>Annual Fee</label>
                                 <div className="mt-1 flex rounded-md shadow-sm">
-                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-slate-300 bg-slate-50 text-slate-500 sm:text-sm">
+                                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-border-subtle bg-black/5 dark:bg-white/5 text-muted-text sm:text-sm">
                                         {formData.currency}
                                     </span>
                                     <input
@@ -208,7 +208,7 @@ export default function NewContractPage() {
                                         step="0.01"
                                         value={formData.value}
                                         onChange={(e) => setFormData(prev => ({ ...prev, value: parseFloat(e.target.value) || 0 }))}
-                                        className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-crm-500 focus:border-crm-500 sm:text-sm border-slate-300 border"
+                                        className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-crm-500 focus:border-crm-500 sm:text-sm border-border-subtle border bg-black/5 dark:bg-white/5 text-foreground"
                                     />
                                 </div>
                             </div>
@@ -216,10 +216,10 @@ export default function NewContractPage() {
                     </div>
                 </div>
 
-                <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 sm:px-8">
+                <div className="bg-black/5 dark:bg-white/5 md:bg-transparent px-6 py-4 border-t border-border-subtle flex items-center justify-end gap-3 sm:px-8">
                     <Link
                         href="/dashboard/contracts"
-                        className="px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors"
+                        className="px-4 py-2 border border-border-subtle shadow-sm text-sm font-medium rounded-md text-foreground bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors"
                     >
                         Cancel
                     </Link>

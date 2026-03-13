@@ -8,7 +8,7 @@ import api from '@/lib/api';
 
 interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; }
 
-const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
+const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
 const getStatusStyle = (status: string) => {
@@ -50,36 +50,33 @@ export default function VaultsPage() {
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-indigo-700 shadow-lg">
                         <Shield className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Vaults</h1>
-                        <p className="text-xs text-slate-500">Manage secure storage and asset repositories.</p>
+                        <h1 className="text-2xl font-bold text-foreground">Vaults</h1>
+                        <p className="text-xs text-muted-text">Manage secure storage and asset repositories.</p>
                     </div>
                 </div>
                 <Link href="/dashboard/vaults/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg transition-transform hover:-translate-y-0.5 duration-200"
                     style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                     <Plus className="w-4 h-4" /> New Vault
                 </Link>
             </div>
 
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-white/5">
+            <div className="rounded-2xl overflow-hidden glass-card">
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                        <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
                         <input type="text" placeholder="Search vaults by name or location…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
-                            style={filterInputStyle}
-                            onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(99,102,241,0.5)'; }}
-                            onBlur={(e) => { e.currentTarget.style.border = filterInputStyle.border; }} />
+                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                        />
                     </div>
                     <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none sm:w-44"
-                        style={filterInputStyle}>
+                        className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none sm:w-44 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                    >
                         <option value="">All Statuses</option>
                         {uniqueStatuses.map(status => (<option key={status as string} value={status as string}>{status as string}</option>))}
                     </select>
@@ -87,39 +84,37 @@ export default function VaultsPage() {
 
                 <div className="overflow-x-auto">
                     <table className="min-w-full">
-                        <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                            <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                        <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
+                            <tr>
                                 {['Name', 'Status', 'Location', 'Capacity', 'Created At'].map(h => (
                                     <th key={h} scope="col" className={thCls}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={5} className="px-6 py-12 text-center text-slate-500 text-sm">Loading vaults…</td></tr>
+                                <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-text text-sm">Loading vaults…</td></tr>
                             ) : filteredVaults.length === 0 ? (
                                 <tr><td colSpan={5} className="px-6 py-16 text-center">
-                                    <div className="flex flex-col items-center">
-                                        <Shield className="h-10 w-10 text-slate-700 mb-3" />
-                                        <p className="text-slate-500 text-sm">No vaults found.</p>
+                                    <div className="flex flex-col items-center opacity-50">
+                                        <Shield className="h-10 w-10 text-muted-text mb-3" />
+                                        <p className="text-foreground text-sm font-semibold">No vaults found.</p>
                                     </div>
                                 </td></tr>
                             ) : (
                                 filteredVaults.map((vault) => {
                                     const st = getStatusStyle(vault.status);
                                     return (
-                                        <tr key={vault.id} className="cursor-pointer transition-all duration-150 group"
-                                            style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+                                        <tr key={vault.id} className="cursor-pointer transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5"
                                             onClick={() => router.push(`/dashboard/vaults/${vault.id}`)}
-                                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.07)'; }}
-                                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                                        >
                                             <td className={tdCls}>
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-9 h-9 rounded-lg flex items-center justify-center"
                                                         style={{ background: 'rgba(99,102,241,0.12)' }}>
-                                                        <Shield className="h-4 w-4 text-indigo-400" />
+                                                        <Shield className="h-4 w-4 text-indigo-500" />
                                                     </div>
-                                                    <span className="text-sm font-medium text-slate-200">{vault.name}</span>
+                                                    <span className="text-sm font-medium text-foreground">{vault.name}</span>
                                                 </div>
                                             </td>
                                             <td className={tdCls}>
@@ -129,16 +124,16 @@ export default function VaultsPage() {
                                                 </span>
                                             </td>
                                             <td className={tdCls}>
-                                                <div className="flex items-center text-sm text-slate-400">
-                                                    <MapPin className="mr-1.5 h-3.5 w-3.5 text-slate-600" />{vault.location || '—'}
+                                                <div className="flex items-center text-sm text-muted-text">
+                                                    <MapPin className="mr-1.5 h-3.5 w-3.5 text-muted-text" />{vault.location || '—'}
                                                 </div>
                                             </td>
                                             <td className={tdCls}>
-                                                <div className="flex items-center text-sm text-slate-400">
-                                                    <Database className="mr-1.5 h-3.5 w-3.5 text-slate-600" />{vault.capacity || '—'}
+                                                <div className="flex items-center text-sm text-muted-text">
+                                                    <Database className="mr-1.5 h-3.5 w-3.5 text-muted-text" />{vault.capacity || '—'}
                                                 </div>
                                             </td>
-                                            <td className={`${tdCls} text-sm text-slate-500`}>
+                                            <td className={`${tdCls} text-sm text-muted-text`}>
                                                 {new Date(vault.created_at).toLocaleDateString()}
                                             </td>
                                         </tr>

@@ -6,11 +6,8 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Users2, ArrowLeft, Loader2, Check, Trash2 } from 'lucide-react';
 
-const labelCls = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none transition-all";
-const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' };
-const focusStyle = { border: '1px solid rgba(99,102,241,0.5)', boxShadow: '0 0 0 3px rgba(99,102,241,0.1)' };
-const blurStyle = { border: '1px solid rgba(255,255,255,0.09)', boxShadow: 'none' };
+const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 export default function EditContactPage() {
     const router = useRouter();
@@ -97,9 +94,7 @@ export default function EditContactPage() {
             <label className={labelCls}>{label}</label>
             <input type={type} value={formData[field]} placeholder={placeholder}
                 onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                className={inputCls} style={inputStyle}
-                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                className={inputCls} />
         </div>
     );
 
@@ -108,35 +103,35 @@ export default function EditContactPage() {
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/contacts"
-                    className="p-2 rounded-xl text-slate-500 hover:text-slate-200 transition-colors"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <ArrowLeft className="w-5 h-5" />
+                    className="p-2 rounded-xl text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition-colors bg-black/5 dark:bg-white/5"
+                >
+                    <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg"
+                    >
                         <Users2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Edit Contact</h1>
-                        <p className="text-xs text-slate-500">Update detailed contact information</p>
+                        <h1 className="text-2xl font-bold text-foreground">Edit Contact</h1>
+                        <p className="text-xs text-muted-text">Update detailed contact information</p>
                     </div>
                 </div>
             </div>
 
             {/* Card */}
-            <div className="rounded-2xl overflow-hidden"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle"
+            >
                 {/* Card header */}
-                <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
-                    <Users2 className="w-4.5 h-4.5 text-indigo-400" />
-                    <h2 className="text-sm font-semibold text-slate-300">Contact Details</h2>
+                <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                    <Users2 className="w-4.5 h-4.5 text-indigo-500" />
+                    <h2 className="text-sm font-semibold text-foreground">Contact Details</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
-                        <div className="p-3.5 text-sm text-red-400 rounded-xl"
-                            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                        <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
+                        >
                             {error}
                         </div>
                     )}
@@ -153,9 +148,7 @@ export default function EditContactPage() {
                             <label className={labelCls}>Associated Account</label>
                             <select value={formData.account_id}
                                 onChange={e => setFormData({ ...formData, account_id: e.target.value })}
-                                className={inputCls} style={inputStyle}
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)}>
+                                className={`${inputCls} *:bg-background *:text-foreground`} >
                                 <option value="">— No Account —</option>
                                 {accounts.map(acc => (
                                     <option key={acc.id} value={acc.id}>{acc.name}</option>
@@ -169,30 +162,29 @@ export default function EditContactPage() {
                             <label className={labelCls}>Description / Notes</label>
                             <textarea value={formData.description} rows={4}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                className={`${inputCls} resize-none`} style={inputStyle}
+                                className={`${inputCls} resize-none`}
                                 placeholder="Write detailed notes about this contact…"
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                            />
                         </div>
                     </div>
 
-                    <div className="flex justify-between items-center gap-3 pt-4 border-t border-white/5">
+                    <div className="flex justify-between items-center gap-3 pt-4 border-t border-border-subtle">
                         <button type="button" onClick={handleDelete} disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-400 rounded-xl transition-all disabled:opacity-50"
-                            style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                            <Trash2 className="w-4 h-4" /> Delete Contact
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
+                        >
+                            <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contact</span>
                         </button>
                         <div className="flex gap-3">
                             <Link href="/dashboard/contacts"
-                                className="px-5 py-2.5 text-sm font-semibold text-slate-400 rounded-xl"
-                                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
+                            >
                                 Cancel
                             </Link>
                             <button type="submit" disabled={loading}
-                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50"
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-lg"
                                 style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                                Update Contact
+                                Update <span className="hidden sm:inline">Contact</span>
                             </button>
                         </div>
                     </div>

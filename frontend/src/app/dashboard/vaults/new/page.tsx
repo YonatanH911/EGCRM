@@ -37,33 +37,33 @@ export default function NewVaultPage() {
             <div className="flex items-center gap-4">
                 <Link
                     href="/dashboard/vaults"
-                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+                    className="p-2 text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors bg-black/5 dark:bg-white/5"
                 >
-                    <ArrowLeft className="w-5 h-5" />
+                    <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
                         <Shield className="w-6 h-6 text-crm-600" />
                         New Vault
                     </h1>
-                    <p className="text-sm text-slate-500 mt-1">Create a new secure storage repository.</p>
+                    <p className="text-sm text-muted-text mt-1">Create a new secure storage repository.</p>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
+            <form onSubmit={handleSubmit} className="glass-card shadow-sm rounded-xl border border-border-subtle overflow-hidden">
                 <div className="p-6 sm:p-8 space-y-8">
                     {error && (
-                        <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-sm">
                             {error}
                         </div>
                     )}
 
                     <div className="space-y-6">
                         <div>
-                            <h3 className="text-lg font-medium leading-6 text-slate-900 border-b border-slate-200 pb-2 mb-4">Vault Information</h3>
+                            <h3 className="text-lg font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Vault Information</h3>
                             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
-                                    <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="name" className="block text-sm font-medium text-foreground">
                                         Vault Name *
                                     </label>
                                     <div className="mt-1">
@@ -74,14 +74,14 @@ export default function NewVaultPage() {
                                             required
                                             value={formData.name}
                                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
                                             placeholder="e.g. Primary Deposit Box"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label htmlFor="location" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="location" className="block text-sm font-medium text-foreground">
                                         Location
                                     </label>
                                     <div className="mt-1">
@@ -91,13 +91,13 @@ export default function NewVaultPage() {
                                             id="location"
                                             value={formData.location}
                                             onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label htmlFor="capacity" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="capacity" className="block text-sm font-medium text-foreground">
                                         Capacity
                                     </label>
                                     <div className="mt-1">
@@ -107,14 +107,14 @@ export default function NewVaultPage() {
                                             id="capacity"
                                             value={formData.capacity}
                                             onChange={(e) => setFormData({ ...formData, capacity: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
                                             placeholder="e.g. 500 lbs, 10 slots"
                                         />
                                     </div>
                                 </div>
 
                                 <div>
-                                    <label htmlFor="status" className="block text-sm font-medium text-slate-700">
+                                    <label htmlFor="status" className="block text-sm font-medium text-foreground">
                                         Status
                                     </label>
                                     <div className="mt-1">
@@ -123,7 +123,7 @@ export default function NewVaultPage() {
                                             name="status"
                                             value={formData.status}
                                             onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-slate-300 rounded-md py-2 px-3 border bg-white"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
                                         >
                                             <option value="Open">Open</option>
                                             <option value="Locked">Locked</option>
@@ -136,10 +136,10 @@ export default function NewVaultPage() {
                     </div>
                 </div>
 
-                <div className="bg-slate-50 px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 sm:px-8">
+                <div className="bg-black/5 dark:bg-white/5 md:bg-transparent px-6 py-4 border-t border-border-subtle flex items-center justify-end gap-3 sm:px-8">
                     <Link
                         href="/dashboard/vaults"
-                        className="px-4 py-2 border border-slate-300 shadow-sm text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors"
+                        className="px-4 py-2 border border-border-subtle shadow-sm text-sm font-medium rounded-md text-foreground bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors"
                     >
                         Cancel
                     </Link>

@@ -14,6 +14,7 @@ interface PreferencesContextType {
     fontSize: FontSize;
     setFontSize: (size: FontSize) => void;
     isLoaded: boolean;
+    isRTL: boolean;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -74,7 +75,8 @@ export function PreferencesProvider({ children }: { children: React.ReactNode })
             theme, setTheme: setThemeState,
             direction, setDirection: setDirectionState,
             fontSize, setFontSize: setFontSizeState,
-            isLoaded
+            isLoaded,
+            isRTL: direction === 'rtl'
         }}>
             {children}
         </PreferencesContext.Provider>

@@ -11,11 +11,8 @@ interface Account { id: number; name: string; }
 const CONTRACT_STATUSES = ['Draft', 'Active', 'Expired', 'Terminated'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'ILS', 'JPY', 'CAD', 'AUD', 'CHF'];
 
-const labelCls = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none transition-all";
-const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' };
-const focusStyle = { border: '1px solid rgba(99,102,241,0.5)', boxShadow: '0 0 0 3px rgba(99,102,241,0.1)' };
-const blurStyle = { border: '1px solid rgba(255,255,255,0.09)', boxShadow: 'none' };
+const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 export default function EditContractPage() {
     const router = useRouter();
@@ -120,11 +117,10 @@ export default function EditContractPage() {
     }
 
     const Section = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
-        <div className="rounded-2xl overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-            <div className="px-6 py-4 border-b border-white/5 flex items-center gap-2">
-                <span className="text-indigo-400">{icon}</span>
-                <h2 className="text-sm font-semibold text-slate-300">{title}</h2>
+        <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+            <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                <span className="text-indigo-500">{icon}</span>
+                <h2 className="text-sm font-semibold text-foreground">{title}</h2>
             </div>
             <div className="p-6">{children}</div>
         </div>
@@ -136,9 +132,7 @@ export default function EditContractPage() {
         <div className={colSpan2 ? 'col-span-1 sm:col-span-2' : ''}>
             <label className={labelCls}>{label}</label>
             <input type={type} value={form[field]} placeholder={placeholder} onChange={set(field)}
-                className={inputCls} style={inputStyle}
-                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                className={inputCls} />
         </div>
     );
 
@@ -147,25 +141,25 @@ export default function EditContractPage() {
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/contracts"
-                    className="p-2 rounded-xl text-slate-500 hover:text-slate-200 transition-colors"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <ArrowLeft className="w-5 h-5" />
+                    className="p-2 rounded-xl text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 bg-black/5 dark:bg-white/5 transition-colors"
+                >
+                    <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg"
+                    >
                         <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Edit Contract</h1>
-                        <p className="text-xs text-slate-500">{form.title || 'Update contract details below'}</p>
+                        <h1 className="text-2xl font-bold text-foreground">Edit Contract</h1>
+                        <p className="text-xs text-muted-text">{form.title || 'Update contract details below'}</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="p-3.5 text-sm text-red-400 rounded-xl"
-                    style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
+                >
                     {error}
                 </div>
             )}
@@ -179,9 +173,7 @@ export default function EditContractPage() {
                         <div>
                             <label className={labelCls}>Related Account</label>
                             <select value={form.account_id} onChange={set('account_id')}
-                                className={inputCls} style={inputStyle}
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)}>
+                                className={`${inputCls} *:bg-background *:text-foreground`} >
                                 <option value="">— Select an account —</option>
                                 {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
                             </select>
@@ -190,9 +182,7 @@ export default function EditContractPage() {
                         <div>
                             <label className={labelCls}>Status</label>
                             <select value={form.status} onChange={set('status')}
-                                className={inputCls} style={inputStyle}
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)}>
+                                className={`${inputCls} *:bg-background *:text-foreground`} >
                                 {CONTRACT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
@@ -219,9 +209,7 @@ export default function EditContractPage() {
                         <div>
                             <label className={labelCls}>Currency</label>
                             <select value={form.currency} onChange={set('currency')}
-                                className={inputCls} style={inputStyle}
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)}>
+                                className={`${inputCls} *:bg-background *:text-foreground`} >
                                 <option value="USD">USD — US Dollar</option>
                                 <option value="EUR">EUR — Euro</option>
                                 <option value="GBP">GBP — British Pound</option>
@@ -234,17 +222,16 @@ export default function EditContractPage() {
                         </div>
                         <div>
                             <label className={labelCls}>Annual Fee</label>
-                            <div className="flex rounded-xl overflow-hidden"
-                                style={{ border: '1px solid rgba(255,255,255,0.09)' }}>
-                                <span className="flex items-center px-3 text-xs font-semibold text-slate-500"
-                                    style={{ background: 'rgba(255,255,255,0.04)', borderRight: '1px solid rgba(255,255,255,0.09)' }}>
+                            <div className="flex rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 focus-within:border-crm-500 focus-within:ring-4 focus-within:ring-crm-500/10 transition-all"
+                            >
+                                <span className="flex items-center px-3 text-xs font-semibold text-muted-text border-x border-border-subtle ltr:border-l-0 rtl:border-r-0 bg-black/5 dark:bg-white/5"
+                                >
                                     {form.currency}
                                 </span>
                                 <input type="number" min="0" step="0.01" value={form.value}
                                     onChange={e => setForm(prev => ({ ...prev, value: e.target.value }))}
-                                    className="flex-1 px-4 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none bg-transparent"
-                                    onFocus={e => { e.currentTarget.parentElement!.style.border = '1px solid rgba(99,102,241,0.5)'; e.currentTarget.parentElement!.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.1)'; }}
-                                    onBlur={e => { e.currentTarget.parentElement!.style.border = '1px solid rgba(255,255,255,0.09)'; e.currentTarget.parentElement!.style.boxShadow = 'none'; }} />
+                                    className="flex-1 px-4 py-2.5 text-sm text-foreground placeholder-muted-text focus:outline-none bg-transparent"
+                                />
                             </div>
                         </div>
                     </div>
@@ -253,21 +240,21 @@ export default function EditContractPage() {
                 {/* Actions */}
                 <div className="flex justify-between items-center gap-3 pt-2">
                     <button type="button" onClick={handleDelete} disabled={loading || saving}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-400 rounded-xl disabled:opacity-50"
-                        style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                        <Trash2 className="w-4 h-4" /> Delete Contract
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
+                    >
+                        <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contract</span>
                     </button>
                     <div className="flex gap-3">
                         <Link href="/dashboard/contracts"
-                            className="px-5 py-2.5 text-sm font-semibold text-slate-400 rounded-xl"
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
+                        >
                             Cancel
                         </Link>
                         <button type="submit" disabled={saving || loading}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50"
+                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
                             style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                            Save Changes
+                            Update <span className="hidden sm:inline">Contract</span>
                         </button>
                     </div>
                 </div>

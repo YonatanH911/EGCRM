@@ -4,9 +4,8 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Users2, Plus, Search, User } from 'lucide-react';
-
-const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
+import { Users, Plus, Search } from 'lucide-react'; /* ── shared dark-table helpers ── */
+const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
 export default function ContactsPage() {
@@ -47,36 +46,32 @@ export default function ContactsPage() {
         <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
-                        <Users2 className="w-5 h-5 text-white" />
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg">
+                        <Users className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Contacts</h1>
-                        <p className="text-xs text-slate-500">Manage individual people and key decision makers.</p>
+                        <h1 className="text-2xl font-bold text-foreground">Contacts</h1>
+                        <p className="text-xs text-muted-text">Manage all your customer relationships.</p>
                     </div>
                 </div>
                 <Link href="/dashboard/contacts/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg transition-transform hover:-translate-y-0.5 duration-200"
                     style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                     <Plus className="w-4 h-4" /> Add Contact
                 </Link>
             </div>
 
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-white/5">
+            <div className="rounded-2xl overflow-hidden glass-card">
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
-                        <input type="text" placeholder="Search names or email…"
+                        <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
+                        <input type="text" placeholder="Search contacts…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
-                            style={inputStyle}
-                            onFocus={(e) => { e.currentTarget.style.border = focusBorder; }}
-                            onBlur={(e) => { e.currentTarget.style.border = inputStyle.border; }} />
+                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                        />
                     </div>
                     <select value={filterContact} onChange={(e) => setFilterContact(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none sm:w-44"
-                        style={inputStyle}>
+                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none sm:w-44 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10">
                         <option value="">All Contacts</option>
                         <option value="has_email">Has Email</option>
                         <option value="has_phone">Has Phone Number</option>
@@ -85,50 +80,45 @@ export default function ContactsPage() {
 
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-12 text-center text-slate-500 text-sm">Loading contacts…</div>
+                        <div className="p-12 text-center text-muted-text text-sm">Loading contacts…</div>
                     ) : filteredContacts.length === 0 ? (
                         <div className="p-16 flex flex-col items-center justify-center">
-                            <User className="w-10 h-10 text-slate-700 mb-3" />
-                            <h3 className="text-base font-semibold text-slate-400">No contacts found</h3>
-                            <p className="text-slate-600 mt-1 text-sm">Build your network by adding people you interact with.</p>
-                            <Link href="/dashboard/contacts/new" className="mt-5 text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors">
+                            <Users className="w-10 h-10 text-muted-text mb-3 opacity-50" />
+                            <h3 className="text-base font-semibold text-foreground">No contacts found</h3>
+                            <p className="text-muted-text mt-1 text-sm">Start building your network.</p>
+                            <Link href="/dashboard/contacts/new" className="mt-5 text-indigo-500 font-medium text-sm hover:text-indigo-400 transition-colors">
                                 Create Contact →
                             </Link>
                         </div>
                     ) : (
                         <table className="min-w-full">
-                            <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                                    {['Name', 'Job Title', 'Email', 'Phone', 'Account', 'Created'].map(h => (
+                            <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
+                                <tr>
+                                    {['Name', 'Email', 'Phone', 'Created'].map(h => (
                                         <th key={h} scope="col" className={thCls}>{h}</th>
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border-subtle">
                                 {filteredContacts.map((contact) => (
                                     <tr key={contact.id}
-                                        className="cursor-pointer transition-all duration-150"
-                                        style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
                                         onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
-                                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(139,92,246,0.07)'; }}
-                                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                                        className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                                    >
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs uppercase shadow"
-                                                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #6366f1)' }}>
-                                                    {contact.first_name?.charAt(0)}{contact.last_name?.charAt(0)}
+                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm bg-gradient-to-br from-indigo-500 to-purple-500">
+                                                    {contact.first_name.charAt(0)}{contact.last_name.charAt(0)}
                                                 </div>
-                                                <div>
-                                                    <div className="text-sm font-medium text-slate-200">{contact.first_name} {contact.last_name}</div>
-                                                    {contact.company_name && <div className="text-xs text-slate-500">{contact.company_name}</div>}
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-medium text-foreground">{contact.first_name} {contact.last_name}</span>
+                                                    {contact.job_title && <span className="text-xs text-muted-text">{contact.job_title}</span>}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.job_title || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.email || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.phone || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{contact.account?.name || '—'}</span></td>
-                                        <td className={`${tdCls} text-right text-sm text-slate-500`}>
+                                        <td className={tdCls}><span className="text-sm text-muted-text">{contact.email || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-foreground">{contact.phone || '—'}</span></td>
+                                        <td className={`${tdCls} ltr:text-right rtl:text-left text-sm text-muted-text`}>
                                             {new Date(contact.created_at).toLocaleDateString()}
                                         </td>
                                     </tr>

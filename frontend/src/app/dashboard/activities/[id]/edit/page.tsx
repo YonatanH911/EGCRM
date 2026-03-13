@@ -4,31 +4,31 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Activity, ArrowLeft, Loader2, Check } from 'lucide-react';
+import { Activity, ArrowLeft, Loader2, Check, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
+import { usePreferences } from '@/components/PreferencesProvider';
 
-const ACTIVITY_TYPES = ['Task', 'Email', 'Appointment', 'Phone Call'];
+const ACTIVITY_TYPES = ['Task', 'Email', 'Appointment', 'Phone Call'] as const;
+type ActivityType = typeof ACTIVITY_TYPES[number];
 
 function toDateInput(iso: string | null) {
     if (!iso) return '';
     return iso.slice(0, 10);
 }
 
-const labelCls = "block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none transition-all";
-const inputStyle = { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)' };
-const focusStyle = { border: '1px solid rgba(99,102,241,0.5)', boxShadow: '0 0 0 3px rgba(99,102,241,0.1)' };
-const blurStyle = { border: '1px solid rgba(255,255,255,0.09)', boxShadow: 'none' };
+const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 export default function EditActivityPage() {
     const router = useRouter();
     const params = useParams();
     const id = params.id as string;
+    const { isRTL } = usePreferences();
 
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [form, setForm] = useState({
-        activity_type: 'Task', subject: '', regarding: '',
+        activity_type: 'Task' as ActivityType, subject: '', regarding: '',
         start_date: '', due_date: '', notes: '',
     });
 
@@ -77,60 +77,59 @@ export default function EditActivityPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="relative w-10 h-10">
-                    <div className="absolute inset-0 rounded-full border-2 border-indigo-500/20" />
-                    <div className="absolute inset-0 rounded-full border-2 border-transparent border-t-indigo-500 animate-spin" />
-                </div>
+                <Loader2 className="w-8 h-8 animate-spin text-crm-500" />
             </div>
         );
     }
 
-    const TYPE_COLORS: Record<string, string> = {
-        'Task': '#818cf8', 'Email': '#60a5fa', 'Appointment': '#34d399', 'Phone Call': '#fbbf24',
+    const icons: Record<ActivityType, React.ReactNode> = {
+        'Task': <CheckSquare className="w-3.5 h-3.5" />,
+        'Email': <Mail className="w-3.5 h-3.5" />,
+        'Appointment': <Calendar className="w-3.5 h-3.5" />,
+        'Phone Call': <Phone className="w-3.5 h-3.5" />,
     };
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
-            {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/activities"
-                    className="p-2 rounded-xl transition-colors text-slate-500 hover:text-slate-200"
-                    style={{ background: 'rgba(255,255,255,0.05)' }}>
-                    <ArrowLeft className="w-5 h-5" />
+                    className="p-2.5 rounded-xl text-muted-text hover:text-foreground hover:bg-background-subtle transition-all">
+                    <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                        style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/20">
                         <Activity className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Edit Activity</h1>
-                        <p className="text-xs text-slate-500">Update the activity details below</p>
+                        <h1 className="text-2xl font-bold text-foreground">Edit Activity</h1>
+                        <p className="text-xs text-muted-text">Update the activity details below.</p>
                     </div>
                 </div>
             </div>
 
-            {/* Card */}
-            <div className="rounded-2xl p-6 space-y-5"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                {error && (
-                    <div className="p-3.5 text-sm text-red-400 rounded-xl"
-                        style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
-                        {error}
-                    </div>
-                )}
-                <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="rounded-2xl overflow-hidden glass-card">
+                <div className="px-6 py-4 border-b border-border-subtle bg-background-subtle/30 flex items-center gap-2">
+                    <Activity className="w-4 h-4 text-crm-500" />
+                    <h2 className="text-[11px] font-bold text-foreground uppercase tracking-widest">Activity Details</h2>
+                </div>
+                <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                    {error && (
+                        <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
+                            {error}
+                        </div>
+                    )}
+
                     {/* Activity Type */}
                     <div>
-                        <label className={labelCls}>Activity Type <span className="text-red-400">*</span></label>
+                        <label className={labelCls}>Activity Type *</label>
                         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
                             {ACTIVITY_TYPES.map(t => (
                                 <button key={t} type="button" onClick={() => set('activity_type', t)}
-                                    className="py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-200"
-                                    style={form.activity_type === t
-                                        ? { background: 'linear-gradient(135deg, #6366f1, #3b82f6)', color: '#fff', border: '1px solid transparent' }
-                                        : { background: 'rgba(255,255,255,0.05)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.08)' }}>
-                                    {t}
+                                    className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 border ${form.activity_type === t
+                                        ? 'bg-crm-500 border-crm-500 text-white shadow-lg shadow-crm-500/20'
+                                        : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'
+                                        }`}>
+                                    {icons[t]}{t}
                                 </button>
                             ))}
                         </div>
@@ -138,37 +137,29 @@ export default function EditActivityPage() {
 
                     {/* Subject */}
                     <div>
-                        <label className={labelCls}>Subject <span className="text-red-400">*</span></label>
+                        <label className={labelCls}>Subject *</label>
                         <input required type="text" value={form.subject} onChange={e => set('subject', e.target.value)}
-                            className={inputCls} style={inputStyle} placeholder="e.g. Follow-up call with client"
-                            onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                            onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                            className={inputCls} placeholder="e.g. Follow-up call with client" />
                     </div>
 
                     {/* Regarding */}
                     <div>
                         <label className={labelCls}>Regarding</label>
                         <input type="text" value={form.regarding} onChange={e => set('regarding', e.target.value)}
-                            className={inputCls} style={inputStyle} placeholder="e.g. Account name or opportunity"
-                            onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                            onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                            className={inputCls} placeholder="e.g. Account name or opportunity" />
                     </div>
 
                     {/* Dates */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label className={labelCls}>Start Date</label>
                             <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)}
-                                className={inputCls} style={inputStyle}
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                                className={inputCls} />
                         </div>
                         <div>
                             <label className={labelCls}>Due Date</label>
                             <input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)}
-                                className={inputCls} style={inputStyle}
-                                onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                                onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                                className={inputCls} />
                         </div>
                     </div>
 
@@ -176,25 +167,20 @@ export default function EditActivityPage() {
                     <div>
                         <label className={labelCls}>Notes</label>
                         <textarea rows={4} value={form.notes} onChange={e => set('notes', e.target.value)}
-                            className={`${inputCls} resize-none`} style={inputStyle}
-                            placeholder="Additional details about this activity…"
-                            onFocus={e => Object.assign(e.currentTarget.style, focusStyle)}
-                            onBlur={e => Object.assign(e.currentTarget.style, blurStyle)} />
+                            className={`${inputCls} resize-none`} placeholder="Additional details about this activity…" />
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 pt-2 border-t border-white/5">
-                        <button type="submit" disabled={saving}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-all"
-                            style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                            Save Changes
-                        </button>
+                    <div className="flex justify-end gap-3 pt-8 border-t border-border-subtle">
                         <Link href="/dashboard/activities"
-                            className="px-5 py-2.5 text-sm font-semibold text-slate-400 rounded-xl transition-all"
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                            className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
                             Cancel
                         </Link>
+                        <button type="submit" disabled={saving}
+                            className="flex items-center gap-2 px-8 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                            Update Activity
+                        </button>
                     </div>
                 </form>
             </div>
