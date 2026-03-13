@@ -28,7 +28,7 @@ export default function NewContactPage() {
         // Fetch accounts to populate the dropdown
         const fetchAccounts = async () => {
             try {
-                const response = await api.get('/accounts/');
+                const response = await api.get('/accounts');
                 setAccounts(response.data);
             } catch (err) {
                 console.error("Failed to fetch accounts", err);
@@ -48,7 +48,7 @@ export default function NewContactPage() {
         };
 
         try {
-            await api.post('/contacts/', payload);
+            await api.post('/contacts', payload);
             router.push('/dashboard/contacts');
             router.refresh();
         } catch (err: any) {

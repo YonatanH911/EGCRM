@@ -36,7 +36,7 @@ export default function ActivitiesPage() {
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
     const fetchActivities = async () => {
-        try { const res = await api.get('/activities/'); setActivities(res.data); }
+        try { const res = await api.get('/activities'); setActivities(res.data); }
         catch (err) { console.error(err); }
         finally { setLoading(false); }
     };

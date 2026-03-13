@@ -23,7 +23,7 @@ export default function NewVaultPage() {
         setError('');
 
         try {
-            await api.post('/vaults/', formData);
+            await api.post('/vaults', formData);
             router.push('/dashboard/vaults');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to create vault');

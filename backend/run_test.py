@@ -1,14 +1,21 @@
-from fastapi.testclient import TestClient
-from main import app
+import requests
+import os
+import json
 
-client = TestClient(app)
-try:
-    response = client.post("/users/", json={"name": "test", "email":"test@test.com", "password":"pass", "role":"Sales"})
-    print("Status:", response.status_code)
-    try:
-        print("Response:", response.json())
-    except:
-        print("Response Body:", response.text)
-except Exception as e:
-    import traceback
-    traceback.print_exc()
+base_url = "http://localhost:8000"
+
+# 1. Register or Login
+data = {"username": "test3@test.com", "password": "password"}
+r = requests.post(f"{base_url}/token", data=data)
+if r.status_code != 200:
+    print("Login failed!", r.text)
+    exit(1)
+
+token = r.json()["access_token"]
+print("Got token:", token)
+
+# 2. Try fetching accounts using the token
+headers = {"Authorization": f"Bearer {token}"}
+r2 = requests.get(f"{base_url}/accounts/", headers=headers)
+print("Accounts API response stat:", r2.status_code)
+print("Accounts API response:", r2.text)

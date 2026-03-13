@@ -22,7 +22,7 @@ export default function LeadsKanbanPage() {
 
     const fetchLeads = async () => {
         try {
-            const response = await api.get('/leads/');
+            const response = await api.get('/leads');
             setLeads(response.data);
         } catch (error) {
             console.error("Failed to fetch leads", error);

@@ -57,23 +57,23 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@app.post("/users/", response_model=schemas.UserResponse)
+@app.post("/users", response_model=schemas.UserResponse)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user = crud.get_user_by_email(db, email=user.email)
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     return crud.create_user(db=db, user=user)
 
-@app.get("/users/me/", response_model=schemas.UserResponse)
+@app.get("/users/me", response_model=schemas.UserResponse)
 def read_users_me(current_user: models.User = Depends(get_current_user)):
     return current_user
 
 # --- Accounts API ---
-@app.post("/accounts/", response_model=schemas.AccountResponse)
+@app.post("/accounts", response_model=schemas.AccountResponse)
 def create_account(account: schemas.AccountCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_account(db=db, account=account)
 
-@app.get("/accounts/", response_model=List[schemas.AccountResponse])
+@app.get("/accounts", response_model=List[schemas.AccountResponse])
 def read_accounts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_accounts(db, skip=skip, limit=limit)
 

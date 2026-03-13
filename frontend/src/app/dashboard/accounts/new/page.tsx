@@ -29,7 +29,7 @@ export default function NewAccountPage() {
         setError('');
 
         try {
-            await api.post('/accounts/', formData);
+            await api.post('/accounts', formData);
             router.push('/dashboard/accounts');
             router.refresh();
         } catch (err: any) {

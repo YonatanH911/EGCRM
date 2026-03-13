@@ -40,7 +40,7 @@ export default function EditContractPage() {
             try {
                 const [contractRes, accountsRes] = await Promise.all([
                     api.get(`/contracts/${id}`),
-                    api.get('/accounts/'),
+                    api.get('/accounts'),
                 ]);
                 const c = contractRes.data;
                 setForm({

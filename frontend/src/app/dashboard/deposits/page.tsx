@@ -24,7 +24,7 @@ export default function DepositsPage() {
 
     useEffect(() => {
         const fetchDeposits = async () => {
-            try { const response = await api.get('/deposits/'); setDeposits(response.data); }
+            try { const response = await api.get('/deposits'); setDeposits(response.data); }
             catch (error) { console.error("Failed to load deposits:", error); }
             finally { setLoading(false); }
         };

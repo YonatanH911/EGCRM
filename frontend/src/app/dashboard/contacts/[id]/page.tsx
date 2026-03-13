@@ -32,7 +32,7 @@ export default function EditContactPage() {
             try {
                 const [contactRes, accountsRes] = await Promise.all([
                     api.get(`/contacts/${contactId}`),
-                    api.get('/accounts/'),
+                    api.get('/accounts'),
                 ]);
                 const data = contactRes.data;
                 setFormData({

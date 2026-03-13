@@ -19,7 +19,7 @@ export default function ContactsPage() {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const response = await api.get('/contacts/');
+                const response = await api.get('/contacts');
                 setContacts(response.data);
             } catch (error) {
                 console.error("Failed to fetch contacts", error);

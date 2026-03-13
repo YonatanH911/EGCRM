@@ -35,7 +35,7 @@ export default function NewContractPage() {
     useEffect(() => {
         const fetchAccounts = async () => {
             try {
-                const response = await api.get('/accounts/');
+                const response = await api.get('/accounts');
                 setAccounts(response.data);
             } catch (err) {
                 console.error("Failed to load accounts", err);
@@ -67,7 +67,7 @@ export default function NewContractPage() {
                 currency: formData.currency || 'USD',
             };
 
-            await api.post('/contracts/', payload);
+            await api.post('/contracts', payload);
             router.push('/dashboard/contracts');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to create contract');

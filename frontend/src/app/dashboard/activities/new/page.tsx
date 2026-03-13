@@ -37,7 +37,7 @@ export default function NewActivityPage() {
                 start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
                 due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
             };
-            await api.post('/activities/', payload);
+            await api.post('/activities', payload);
             router.push('/dashboard/activities');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to create activity');

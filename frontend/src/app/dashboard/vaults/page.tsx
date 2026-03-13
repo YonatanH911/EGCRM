@@ -29,7 +29,7 @@ export default function VaultsPage() {
 
     useEffect(() => {
         const fetchVaults = async () => {
-            try { const response = await api.get('/vaults/'); setVaults(response.data); }
+            try { const response = await api.get('/vaults'); setVaults(response.data); }
             catch (error) { console.error("Failed to load vaults:", error); }
             finally { setLoading(false); }
         };

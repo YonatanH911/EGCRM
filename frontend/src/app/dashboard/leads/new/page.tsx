@@ -22,7 +22,7 @@ export default function NewLeadPage() {
     useEffect(() => {
         const fetchContacts = async () => {
             try {
-                const response = await api.get('/contacts/');
+                const response = await api.get('/contacts');
                 setContacts(response.data);
             } catch (err) {
                 console.error("Failed to fetch contacts", err);
@@ -43,7 +43,7 @@ export default function NewLeadPage() {
         };
 
         try {
-            await api.post('/leads/', payload);
+            await api.post('/leads', payload);
             router.push('/dashboard/leads');
             router.refresh();
         } catch (err: any) {

@@ -45,7 +45,7 @@ export default function ContractsPage() {
     useEffect(() => {
         const fetchAll = async () => {
             try {
-                const res = await api.get('/contracts/');
+                const res = await api.get('/contracts');
                 setContracts(res.data);
             } catch (error) { console.error('Failed to load contracts:', error); }
             finally { setLoading(false); }

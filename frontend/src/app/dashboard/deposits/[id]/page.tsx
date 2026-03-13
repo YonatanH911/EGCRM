@@ -36,7 +36,7 @@ export default function EditDepositPage() {
             try {
                 const [depositRes, vaultsRes] = await Promise.all([
                     api.get(`/deposits/${id}`),
-                    api.get('/vaults/'),
+                    api.get('/vaults'),
                 ]);
                 const d = depositRes.data;
                 setForm({

@@ -38,9 +38,9 @@ export default function NewDepositPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const accountsRes = await api.get('/accounts/');
+                const accountsRes = await api.get('/accounts');
                 setAccounts(accountsRes.data);
-                const vaultsRes = await api.get('/vaults/');
+                const vaultsRes = await api.get('/vaults');
                 setVaults(vaultsRes.data);
             } catch (err) {
                 console.error("Failed to load initial form data", err);
@@ -63,7 +63,7 @@ export default function NewDepositPage() {
                 date: formData.date ? new Date(formData.date).toISOString() : null
             };
 
-            await api.post('/deposits/', payload);
+            await api.post('/deposits', payload);
             router.push('/dashboard/deposits');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to record deposit');

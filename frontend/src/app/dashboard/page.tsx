@@ -21,9 +21,9 @@ export default function DashboardOverview() {
         const fetchDashboardData = async () => {
             try {
                 const [accRes, conRes, leadRes] = await Promise.all([
-                    api.get('/accounts/'),
-                    api.get('/contacts/'),
-                    api.get('/leads/')
+                    api.get('/accounts'),
+                    api.get('/contacts'),
+                    api.get('/leads')
                 ]);
                 const leads = leadRes.data;
                 const pipelineValue = leads.reduce((acc: number, lead: any) => acc + (lead.value || 0), 0);
@@ -54,8 +54,8 @@ export default function DashboardOverview() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Dashboard <span className="gradient-text">Overview</span></h1>
-                    <p className="text-sm text-slate-500 mt-0.5">Welcome back. Here's what's happening with your pipeline today.</p>
+                    <h1 className="text-2xl font-bold text-foreground">Dashboard <span className="gradient-text">Overview</span></h1>
+                    <p className="text-sm text-muted-text mt-0.5">Welcome back. Here's what's happening with your pipeline today.</p>
                 </div>
                 <div className="flex gap-3">
                     <Link href="/dashboard/leads"
@@ -71,18 +71,14 @@ export default function DashboardOverview() {
                 {STAT_CARDS.map(({ key, label, icon: Icon, gradient, glow, isCurrency }) => {
                     const val = stats[key as keyof typeof stats];
                     return (
-                        <div key={key} className="rounded-2xl p-5 relative overflow-hidden transition-transform duration-200 hover:-translate-y-0.5"
-                            style={{
-                                background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.07)',
-                            }}>
+                        <div key={key} className="glass-card rounded-2xl p-5 relative overflow-hidden transition-transform duration-200 hover:-translate-y-0.5">
                             {/* glow blob */}
-                            <div className="absolute -bottom-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-40 pointer-events-none"
+                            <div className="absolute -bottom-4 ltr:-right-4 rtl:-left-4 w-24 h-24 rounded-full blur-2xl opacity-40 pointer-events-none"
                                 style={{ background: glow }} />
                             <div className="flex justify-between items-start relative z-10">
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{label}</p>
-                                    <h3 className="text-2xl font-bold text-white mt-1.5">
+                                    <p className="text-xs font-semibold text-muted-text uppercase tracking-wider">{label}</p>
+                                    <h3 className="text-2xl font-bold text-foreground mt-1.5">
                                         {isCurrency ? `$${val.toLocaleString()}` : val}
                                     </h3>
                                 </div>
@@ -98,19 +94,17 @@ export default function DashboardOverview() {
             {/* Bottom Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 {/* Chart placeholder */}
-                <div className="lg:col-span-2 rounded-2xl flex flex-col items-center justify-center min-h-[280px] relative overflow-hidden"
-                    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                <div className="lg:col-span-2 rounded-2xl flex flex-col items-center justify-center min-h-[280px] relative overflow-hidden glass-card">
                     <TrendingUp className="w-12 h-12 text-indigo-500/20 mb-3" />
-                    <p className="text-slate-500 font-medium text-sm">Pipeline Chart coming soon</p>
-                    <p className="text-xs text-slate-600 mt-1">Requires additional charting library setup.</p>
+                    <p className="text-muted-text font-medium text-sm">Pipeline Chart coming soon</p>
+                    <p className="text-xs text-muted-text mt-1">Requires additional charting library setup.</p>
                 </div>
 
                 {/* Recent Leads */}
-                <div className="rounded-2xl overflow-hidden flex flex-col"
-                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
-                        <h3 className="font-semibold text-white text-sm">Recent Leads</h3>
-                        <Link href="/dashboard/leads" className="text-xs text-indigo-400 hover:text-indigo-300 font-medium transition-colors">
+                <div className="rounded-2xl overflow-hidden flex flex-col glass-card">
+                    <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between">
+                        <h3 className="font-semibold text-foreground text-sm">Recent Leads</h3>
+                        <Link href="/dashboard/leads" className="text-xs text-indigo-500 hover:text-indigo-400 font-medium transition-colors">
                             View all →
                         </Link>
                     </div>
@@ -118,10 +112,10 @@ export default function DashboardOverview() {
                         {recentLeads.length > 0 ? (
                             <div className="space-y-3">
                                 {recentLeads.map((lead) => (
-                                    <div key={lead.id} className="flex justify-between items-center py-2.5 border-b border-white/5 last:border-0 last:pb-0">
+                                    <div key={lead.id} className="flex justify-between items-center py-2.5 border-b border-border-subtle last:border-0 last:pb-0">
                                         <div>
-                                            <p className="text-sm font-medium text-slate-200">{lead.title}</p>
-                                            <p className="text-xs text-slate-500 mt-0.5">{lead.status} · ${lead.value?.toLocaleString()}</p>
+                                            <p className="text-sm font-medium text-foreground">{lead.title}</p>
+                                            <p className="text-xs text-muted-text mt-0.5">{lead.status} · ${lead.value?.toLocaleString()}</p>
                                         </div>
                                         <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                                             style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.25)' }}>
@@ -132,8 +126,8 @@ export default function DashboardOverview() {
                             </div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-center py-8">
-                                <p className="text-sm text-slate-500">No recent leads found.</p>
-                                <Link href="/dashboard/leads" className="text-sm text-indigo-400 font-medium mt-2 hover:text-indigo-300 transition-colors">
+                                <p className="text-sm text-muted-text">No recent leads found.</p>
+                                <Link href="/dashboard/leads" className="text-sm text-indigo-500 font-medium mt-2 hover:text-indigo-400 transition-colors">
                                     Create your first lead
                                 </Link>
                             </div>
