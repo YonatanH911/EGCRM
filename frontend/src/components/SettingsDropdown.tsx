@@ -33,11 +33,11 @@ export default function SettingsDropdown() {
 
             {isOpen && (
                 <div className="absolute ltr:right-0 rtl:left-0 mt-2 w-64 rounded-xl shadow-xl overflow-hidden glass-card z-50">
-                    <div className="p-4 border-b border-border-subtle bg-[#f8fafc] dark:bg-[#111827]">
+                    <div className="p-4 border-b border-border-subtle bg-background-subtle/50">
                         <h3 className="text-sm font-bold text-foreground">Preferences</h3>
                     </div>
 
-                    <div className="p-2 space-y-1 bg-[#ffffff] dark:bg-[#111827]">
+                    <div className="p-2 space-y-1 bg-surface">
                         {/* Theme */}
                         <div className="px-3 py-2">
                             <label className="text-[10px] font-bold text-muted-text uppercase tracking-wider block mb-2">Theme</label>

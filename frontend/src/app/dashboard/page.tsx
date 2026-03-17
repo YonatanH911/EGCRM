@@ -117,8 +117,7 @@ export default function DashboardOverview() {
                                             <p className="text-sm font-medium text-foreground">{lead.title}</p>
                                             <p className="text-xs text-muted-text mt-0.5">{lead.status} · ${lead.value?.toLocaleString()}</p>
                                         </div>
-                                        <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                                            style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.25)' }}>
+                                        <span className="text-xs px-2 py-0.5 rounded-full font-medium text-crm-600 dark:text-crm-300 bg-crm-500/15 border border-crm-500/25">
                                             {lead.status}
                                         </span>
                                     </div>

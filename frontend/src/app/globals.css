@@ -14,6 +14,7 @@
   --color-crm-900: #312e81;
 
   --color-background-main: var(--bg-main);
+  --color-background-subtle: var(--bg-panel-hover);
   --color-surface: var(--bg-panel);
   --color-surface-hover: var(--bg-panel-hover);
   --color-foreground: var(--text-main);
