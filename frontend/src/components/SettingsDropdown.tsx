@@ -19,8 +19,6 @@ export default function SettingsDropdown() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    if (!isLoaded) return null;
-
     return (
         <div className="relative" ref={dropdownRef}>
             <button
