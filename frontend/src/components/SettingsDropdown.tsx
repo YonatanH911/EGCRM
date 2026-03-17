@@ -5,7 +5,7 @@ import { Settings, Moon, Sun, Type } from 'lucide-react';
 import { usePreferences } from './PreferencesProvider';
 
 export default function SettingsDropdown() {
-    const { theme, setTheme, direction, setDirection, fontSize, setFontSize, isLoaded } = usePreferences();
+    const { theme, setTheme, fontSize, setFontSize } = usePreferences();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -55,24 +55,6 @@ export default function SettingsDropdown() {
                             </div>
                         </div>
 
-                        {/* Language / Direction */}
-                        <div className="px-3 py-2 border-t border-border-subtle">
-                            <label className="text-[10px] font-bold text-muted-text uppercase tracking-wider block mb-2">Language</label>
-                            <div className="flex bg-black/5 dark:bg-white/5 rounded-lg p-1">
-                                <button
-                                    onClick={() => setDirection('ltr')}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-md transition-all ${direction === 'ltr' ? 'bg-white text-slate-900 dark:bg-slate-800 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
-                                >
-                                    English
-                                </button>
-                                <button
-                                    onClick={() => setDirection('rtl')}
-                                    className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-xs font-medium rounded-md transition-all ${direction === 'rtl' ? 'bg-white text-slate-900 dark:bg-slate-800 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'}`}
-                                >
-                                    עברית
-                                </button>
-                            </div>
-                        </div>
 
                         {/* Font Size */}
                         <div className="px-3 py-2 border-t border-border-subtle">
