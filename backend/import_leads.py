@@ -13,7 +13,7 @@ load_dotenv()
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-EXCEL_PATH = r'c:\projects\CRM_Dynamics\excel_exports\My Open Leads 26-Feb-26 4-36-09 PM.xlsx'
+EXCEL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'excel_exports', 'My Open Leads 26-Feb-26 4-36-09 PM.xlsx')
 
 # Map Dynamics status values -> our LeadStatus enum values
 STATUS_MAP = {

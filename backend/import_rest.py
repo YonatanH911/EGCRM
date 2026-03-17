@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 import models
 
-EXPORTS_DIR = r'c:\projects\CRM_Dynamics\excel_exports'
+EXPORTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'excel_exports')
 
 def parse_date(val):
     if val is None:
