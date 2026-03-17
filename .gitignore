@@ -18,8 +18,7 @@ frontend/.next/
 frontend/out/
 frontend/.env*
 
-# Excel exports (optional — remove this line if you want them tracked)
-excel_exports/
+
 
 # OS
 .DS_Store
