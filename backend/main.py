@@ -102,11 +102,11 @@ def delete_account(account_id: int, db: Session = Depends(get_db), current_user:
         raise HTTPException(status_code=400, detail="Cannot delete account that is linked to existing records.")
 
 # --- Contacts API ---
-@app.post("/contacts/", response_model=schemas.ContactResponse)
+@app.post("/contacts", response_model=schemas.ContactResponse)
 def create_contact(contact: schemas.ContactCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_contact(db=db, contact=contact)
 
-@app.get("/contacts/", response_model=List[schemas.ContactResponse])
+@app.get("/contacts", response_model=List[schemas.ContactResponse])
 def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_contacts(db, skip=skip, limit=limit)
 
@@ -135,11 +135,11 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db), current_user:
         raise HTTPException(status_code=400, detail="Cannot delete contact that is linked to existing records.")
 
 # --- Leads API ---
-@app.post("/leads/", response_model=schemas.LeadResponse)
+@app.post("/leads", response_model=schemas.LeadResponse)
 def create_lead(lead: schemas.LeadCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_lead(db=db, lead=lead)
 
-@app.get("/leads/", response_model=List[schemas.LeadResponse])
+@app.get("/leads", response_model=List[schemas.LeadResponse])
 def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_leads(db, skip=skip, limit=limit)
 
@@ -151,11 +151,11 @@ def update_lead_status(lead_id: int, status: models.LeadStatus, db: Session = De
     return lead
 
 # --- Contracts API ---
-@app.post("/contracts/", response_model=schemas.ContractResponse)
+@app.post("/contracts", response_model=schemas.ContractResponse)
 def create_contract(contract: schemas.ContractCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_contract(db=db, contract=contract)
 
-@app.get("/contracts/", response_model=List[schemas.ContractResponse])
+@app.get("/contracts", response_model=List[schemas.ContractResponse])
 def read_contracts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_contracts(db, skip=skip, limit=limit)
 
@@ -183,11 +183,11 @@ def delete_contract(contract_id: int, db: Session = Depends(get_db), current_use
     return {"message": "Contract deleted successfully"}
 
 # --- Vaults API ---
-@app.post("/vaults/", response_model=schemas.VaultResponse)
+@app.post("/vaults", response_model=schemas.VaultResponse)
 def create_vault(vault: schemas.VaultCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_vault(db=db, vault=vault)
 
-@app.get("/vaults/", response_model=List[schemas.VaultResponse])
+@app.get("/vaults", response_model=List[schemas.VaultResponse])
 def read_vaults(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_vaults(db, skip=skip, limit=limit)
 
@@ -206,11 +206,11 @@ def update_vault(vault_id: int, vault: schemas.VaultUpdate, db: Session = Depend
     return db_vault
 
 # --- Deposits API ---
-@app.post("/deposits/", response_model=schemas.DepositResponse)
+@app.post("/deposits", response_model=schemas.DepositResponse)
 def create_deposit(deposit: schemas.DepositCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_deposit(db=db, deposit=deposit)
 
-@app.get("/deposits/", response_model=List[schemas.DepositResponse])
+@app.get("/deposits", response_model=List[schemas.DepositResponse])
 def read_deposits(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_deposits(db, skip=skip, limit=limit)
 
@@ -229,11 +229,11 @@ def update_deposit(deposit_id: int, deposit: schemas.DepositUpdate, db: Session 
     return db_deposit
 
 # --- Activities API ---
-@app.get("/activities/", response_model=List[schemas.ActivityResponse])
+@app.get("/activities", response_model=List[schemas.ActivityResponse])
 def read_activities(skip: int = 0, limit: int = 500, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_activities(db, skip=skip, limit=limit)
 
-@app.post("/activities/", response_model=schemas.ActivityResponse)
+@app.post("/activities", response_model=schemas.ActivityResponse)
 def create_activity(activity: schemas.ActivityCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.create_activity(db=db, activity=activity)
 
