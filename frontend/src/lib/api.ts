@@ -1,16 +1,7 @@
 import axios from 'axios';
 
-// Determine the base URL. If NEXT_PUBLIC_API_URL is set (e.g., http://192.168.2.122), 
-// we must ensure it ends with '/api' so it hits the Nginx proxy correctly.
-let baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-if (baseUrl && !baseUrl.endsWith('/api')) {
-    baseUrl = baseUrl.endsWith('/') ? `${baseUrl}api` : `${baseUrl}/api`;
-} else if (!baseUrl) {
-    baseUrl = '/api';
-}
-
 const api = axios.create({
-    baseURL: baseUrl,
+    baseURL: '/api',
 });
 
 // Attach JWT token to every request
