@@ -13,9 +13,8 @@ def main():
     
     try:
         with engine.connect() as conn:
-            # 1. Alter Database
-            print("Altering database to utf8mb4...")
-            conn.execute(text("ALTER DATABASE crm_db CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci;"))
+            # 1. Skip Alter Database (requires root privileges on many systems)
+            print("Skipping database-level alter, focusing on tables...")
             
             # 2. Get all tables
             result = conn.execute(text("SHOW TABLES;"))
