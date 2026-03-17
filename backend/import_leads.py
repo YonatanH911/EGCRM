@@ -27,6 +27,10 @@ STATUS_MAP = {
 }
 
 DATABASE_URL = os.getenv("DATABASE_URL", "mysql+pymysql://root@localhost:3306/crm_db")
+if "mysql" in DATABASE_URL and "charset=" not in DATABASE_URL:
+    joiner = "&" if "?" in DATABASE_URL else "?"
+    DATABASE_URL += f"{joiner}charset=utf8mb4"
+    
 engine = create_engine(DATABASE_URL)
 
 wb = openpyxl.load_workbook(EXCEL_PATH)
