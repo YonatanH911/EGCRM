@@ -16,7 +16,7 @@ section() { echo -e "\n${BOLD}═══ $1 ═══${NC}"; }
 
 # ── Config — EDIT THESE ───────────────────────────────────────────────────────
 REPO_URL="https://github.com/YonatanH911/EGCRM.git"
-APP_DIR="/var/www/egcrm"
+APP_DIR="/home/egcrm"
 SERVER_IP=$(hostname -I | awk '{print $1}')   # auto-detected
 
 DB_NAME="crm_db"
