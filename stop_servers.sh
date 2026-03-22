@@ -4,7 +4,7 @@ set -e
 # ==============================================================================
 # PRODUCTION MODE (Detected if running in /var/www/egcrm)
 # ==============================================================================
-if [ -d "/var/www/egcrm" ] || [ "$(pwd)" == "/var/www/egcrm" ]; then
+if [ -d "/home/egcrm" ] || [ -d "/var/www/egcrm" ] || [ "$(pwd)" == "/home/egcrm" ] || [ "$(pwd)" == "/var/www/egcrm" ]; then
     echo "🌍 Detected Production Environment."
     echo "Stopping background services..."
     
