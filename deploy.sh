@@ -120,9 +120,11 @@ section "5. Clone / Update Repository"
 # =============================================================================
 
 if [ -d "$APP_DIR" ]; then
-    warn "Directory $APP_DIR already exists. Pulling latest changes..."
+    warn "Directory $APP_DIR already exists. Syncing with latest from GitHub..."
     sudo chown -R "$USER":"$USER" "$APP_DIR"
-    cd "$APP_DIR" && git pull origin master
+    cd "$APP_DIR"
+    git fetch origin
+    git reset --hard origin/master
 else
     info "Cloning repository to $APP_DIR..."
     sudo mkdir -p "$APP_DIR"
