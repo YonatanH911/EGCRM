@@ -1,7 +1,7 @@
 #!/bin/bash
 # =============================================================================
 # EGCRM Server Deployment Script
-# Ubuntu 20.04 | MySQL | Nginx | PM2
+# Ubuntu 22.04 | MariaDB | Nginx | PM2
 # Run as a non-root user with sudo privileges
 # Usage: bash deploy.sh
 # =============================================================================
@@ -19,10 +19,9 @@ REPO_URL="https://github.com/YonatanH911/EGCRM.git"
 APP_DIR="/var/www/egcrm"
 SERVER_IP=$(hostname -I | awk '{print $1}')   # auto-detected
 
-DB_NAME="egcrm"
+DB_NAME="crm_db"
 DB_USER="egcrm_user"
-DB_PASS=""          # ← FILL IN: your database password
-ROOT_PASS=""        # ← FILL IN: your MySQL root password (set during mysql_secure_installation)
+DB_PASS=""          # ← FILL IN: choose a password for the database user
 
 SECRET_KEY=$(openssl rand -hex 32)  # auto-generated JWT key
 
@@ -30,8 +29,8 @@ BACKEND_PORT=8000
 FRONTEND_PORT=3000
 
 # ── Pre-flight check ──────────────────────────────────────────────────────────
-if [[ -z "$DB_PASS" || -z "$ROOT_PASS" ]]; then
-    echo -e "${RED}[ERROR]${NC} Please edit deploy.sh and fill in DB_PASS and ROOT_PASS before running."
+if [[ -z "$DB_PASS" ]]; then
+    echo -e "${RED}[ERROR]${NC} Please edit deploy.sh and fill in DB_PASS before running."
     exit 1
 fi
 
@@ -76,7 +75,7 @@ sudo apt-get install -y python3-venv python3-dev
 info "Using $(python3 --version)"
 
 # =============================================================================
-section "4. MySQL 8"
+section "4. MariaDB"
 # =============================================================================
 
 if ! command -v mysql &>/dev/null; then
@@ -84,21 +83,13 @@ if ! command -v mysql &>/dev/null; then
     sudo apt-get install -y mariadb-server
     sudo systemctl start mariadb
     sudo systemctl enable mariadb
-
-    info "Securing MySQL installation..."
-    sudo mysql -u root <<MYSQL_SECURE
-ALTER USER 'root'@'localhost' IDENTIFIED BY '${ROOT_PASS}';
-DELETE FROM mysql.user WHERE User='';
-DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');
-DROP DATABASE IF EXISTS test;
-DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';
-FLUSH PRIVILEGES;
-MYSQL_SECURE
-    info "MySQL secured."
+    info "MariaDB installed and started."
 else
-    info "MySQL already installed."
+    info "MariaDB already installed."
+    sudo systemctl start mariadb || true
 fi
 
+# On Ubuntu 22.04, MariaDB root uses unix_socket auth — sudo mysql works without password
 info "Creating database and user..."
 sudo mysql <<MYSQL_SETUP
 CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
