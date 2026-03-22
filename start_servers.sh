@@ -5,13 +5,17 @@ set -euo pipefail
 # PRODUCTION MODE (Detected if running on the Raspberry Pi)
 # ==============================================================================
 if [ -d "/home/egcrm" ] || [ -d "/var/www/egcrm" ]; then
-    APP_DIR="/home/egcrm"
-    [ -d "/var/www/egcrm" ] && APP_DIR="/var/www/egcrm"
+    # Prefer /home/egcrm; fall back to /var/www/egcrm for legacy deployments
+    if [ -d "/home/egcrm" ]; then
+        APP_DIR="/home/egcrm"
+    else
+        APP_DIR="/var/www/egcrm"
+    fi
     echo "🌍 Detected Production Environment ($APP_DIR)."
     echo "Starting background services..."
     
     # 1. Ensure MariaDB (Database) is running
-    sudo systemctl start mariadb || true
+    sudo systemctl start mariadb || sudo systemctl start mysql || true
     
     # 2. Start PM2 background processes (Frontend & Backend)
     cd "$APP_DIR"
