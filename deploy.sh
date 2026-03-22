@@ -75,22 +75,37 @@ sudo apt-get install -y python3-venv python3-dev
 info "Using $(python3 --version)"
 
 # =============================================================================
-section "4. MariaDB"
+section "4. Database (MySQL / MariaDB)"
 # =============================================================================
 
+# Install MariaDB if neither mysql nor mariadb are present
 if ! command -v mysql &>/dev/null; then
     info "Installing MariaDB Server..."
     sudo apt-get install -y mariadb-server
-    sudo systemctl start mariadb
-    sudo systemctl enable mariadb
-    info "MariaDB installed and started."
-else
-    info "MariaDB already installed."
-    sudo systemctl start mariadb || true
 fi
 
-# On Ubuntu 22.04, MariaDB root uses unix_socket auth — sudo mysql works without password
+# Start whichever service exists
+if sudo systemctl start mariadb 2>/dev/null; then
+    sudo systemctl enable mariadb
+    DB_SERVICE="mariadb"
+    info "MariaDB started."
+elif sudo systemctl start mysql 2>/dev/null; then
+    sudo systemctl enable mysql
+    DB_SERVICE="mysql"
+    info "MySQL started."
+else
+    echo -e "${RED}[ERROR]${NC} Could not start MariaDB or MySQL service. Please install one manually."
+    exit 1
+fi
+
+# On Ubuntu 22.04, root uses unix_socket auth — 'sudo mysql' works without a password
 info "Creating database and user..."
+if ! sudo mysql -e "SELECT 1;" &>/dev/null; then
+    echo -e "${RED}[ERROR]${NC} Cannot connect to MySQL as root via socket."
+    echo "Try: sudo mysql_secure_installation  (then re-run this script)"
+    exit 1
+fi
+
 sudo mysql <<MYSQL_SETUP
 CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
@@ -98,6 +113,7 @@ GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';
 FLUSH PRIVILEGES;
 MYSQL_SETUP
 info "Database '${DB_NAME}' and user '${DB_USER}' ready."
+
 
 # =============================================================================
 section "5. Clone / Update Repository"
