@@ -100,10 +100,8 @@ export default function EditAccountPage() {
     const [contactsOpen, setContactsOpen] = useState(false);
     const [depositsOpen, setDepositsOpen] = useState(false);
     
-    const [contactSearch, setContactSearch] = useState('');
-    const [depositSearch, setDepositSearch] = useState('');
-    const [contactSearchOpen, setContactSearchOpen] = useState(false);
-    const [depositSearchOpen, setDepositSearchOpen] = useState(false);
+    const [selectedContactId, setSelectedContactId] = useState('');
+    const [selectedDepositId, setSelectedDepositId] = useState('');
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -131,15 +129,7 @@ export default function EditAccountPage() {
         if (accountId) fetchAll();
     }, [accountId]);
 
-    // Handle outside clicks to close dropdowns
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            setContactSearchOpen(false);
-            setDepositSearchOpen(false);
-        };
-        document.addEventListener('click', handleClickOutside);
-        return () => document.removeEventListener('click', handleClickOutside);
-    }, []);
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -218,16 +208,10 @@ export default function EditAccountPage() {
     }
 
     const linkedContacts = allContacts.filter(c => c.account_id === Number(accountId));
-    const unlinkedContactsSearch = allContacts.filter(c => 
-        c.account_id !== Number(accountId) && 
-        (`${c.first_name} ${c.last_name} ${c.email || ''}`).toLowerCase().includes(contactSearch.toLowerCase())
-    ).slice(0, 10);
+    const unlinkedContactsList = allContacts.filter(c => c.account_id !== Number(accountId));
 
     const linkedDeposits = allDeposits.filter(d => d.account_id === Number(accountId));
-    const unlinkedDepositsSearch = allDeposits.filter(d => 
-        d.account_id !== Number(accountId) && 
-        (`${d.reference_number} ${d.product_name || ''}`).toLowerCase().includes(depositSearch.toLowerCase())
-    ).slice(0, 10);
+    const unlinkedDepositsList = allDeposits.filter(d => d.account_id !== Number(accountId));
 
     const Field = ({ label, field, type = 'text', placeholder, colSpan2 = false }: {
         label: string; field: keyof typeof formData; type?: string; placeholder?: string; colSpan2?: boolean;
@@ -352,42 +336,35 @@ export default function EditAccountPage() {
                     </div>
                 )}
                 {/* Add new link block */}
-                <div className="p-4 bg-background-subtle/30 border-t border-border-subtle relative" onClick={e => e.stopPropagation()}>
-                    <div className="relative">
-                        <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-text`} />
-                        <input
-                            type="text"
-                            value={contactSearch}
-                            onChange={(e) => {
-                                setContactSearch(e.target.value);
-                                setContactSearchOpen(true);
+                <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
+                    <div className="flex gap-3">
+                        <select
+                            value={selectedContactId}
+                            onChange={e => setSelectedContactId(e.target.value)}
+                            className={inputCls}
+                        >
+                            <option value="">-- Select an existing contact to link --</option>
+                            {unlinkedContactsList.map(c => (
+                                <option key={c.id} value={c.id}>
+                                    {c.first_name} {c.last_name} {c.email ? `(${c.email})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            disabled={!selectedContactId}
+                            onClick={() => {
+                                const c = allContacts.find(x => x.id.toString() === selectedContactId);
+                                if (c) {
+                                    handleLinkContact(c);
+                                    setSelectedContactId('');
+                                }
                             }}
-                            onFocus={() => setContactSearchOpen(true)}
-                            placeholder="Search to add an existing contact..."
-                            className={`w-full py-2.5 text-sm rounded-xl bg-background border border-border-subtle focus:border-crm-500 ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'} text-foreground placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-crm-500/20`}
-                        />
+                            className="px-6 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 transition-all disabled:opacity-50 shrink-0"
+                        >
+                            Link
+                        </button>
                     </div>
-                    {contactSearchOpen && contactSearch && (
-                        <div className="absolute left-4 right-4 top-full mt-2 bg-background border border-border-subtle rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto divide-y divide-border-subtle">
-                            {unlinkedContactsSearch.length === 0 ? (
-                                <div className="p-4 text-sm text-muted-text text-center">No matching unlinked contacts found.</div>
-                            ) : (
-                                unlinkedContactsSearch.map(c => (
-                                    <button key={c.id} type="button"
-                                        onClick={() => { handleLinkContact(c); setContactSearch(''); setContactSearchOpen(false); }}
-                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-background-subtle transition-colors text-left">
-                                        <div>
-                                            <p className="text-sm font-semibold text-foreground">{c.first_name} {c.last_name}</p>
-                                            <p className="text-xs text-muted-text">{c.email}</p>
-                                        </div>
-                                        <div className="px-3 py-1 bg-crm-500/10 text-crm-500 text-xs font-bold rounded-lg hover:bg-crm-500 hover:text-white transition-colors">
-                                            Link
-                                        </div>
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                    )}
                 </div>
             </RelatedSection>
 
@@ -435,42 +412,35 @@ export default function EditAccountPage() {
                     </div>
                 )}
                 {/* Add new link block */}
-                <div className="p-4 bg-background-subtle/30 border-t border-border-subtle relative" onClick={e => e.stopPropagation()}>
-                    <div className="relative">
-                        <Search className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 -translate-y-1/2 w-4 h-4 text-muted-text`} />
-                        <input
-                            type="text"
-                            value={depositSearch}
-                            onChange={(e) => {
-                                setDepositSearch(e.target.value);
-                                setDepositSearchOpen(true);
+                <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
+                    <div className="flex gap-3">
+                        <select
+                            value={selectedDepositId}
+                            onChange={e => setSelectedDepositId(e.target.value)}
+                            className={inputCls.replace('focus:border-crm-500/50 focus:ring-crm-500/10', 'focus:border-emerald-500/50 focus:ring-emerald-500/10')}
+                        >
+                            <option value="">-- Select an existing deposit to link --</option>
+                            {unlinkedDepositsList.map(d => (
+                                <option key={d.id} value={d.id}>
+                                    {d.reference_number} - {d.product_name || `Deposit #${d.id}`}
+                                </option>
+                            ))}
+                        </select>
+                        <button
+                            type="button"
+                            disabled={!selectedDepositId}
+                            onClick={() => {
+                                const d = allDeposits.find(x => x.id.toString() === selectedDepositId);
+                                if (d) {
+                                    handleLinkDeposit(d);
+                                    setSelectedDepositId('');
+                                }
                             }}
-                            onFocus={() => setDepositSearchOpen(true)}
-                            placeholder="Search to add an existing deposit..."
-                            className={`w-full py-2.5 text-sm rounded-xl bg-background border border-border-subtle focus:border-emerald-500/50 ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'} text-foreground placeholder-muted-text focus:outline-none focus:ring-2 focus:ring-emerald-500/20`}
-                        />
+                            className="px-6 py-2.5 text-sm font-bold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition-all disabled:opacity-50 shrink-0"
+                        >
+                            Link
+                        </button>
                     </div>
-                    {depositSearchOpen && depositSearch && (
-                        <div className="absolute left-4 right-4 top-full mt-2 bg-background border border-border-subtle rounded-xl shadow-2xl z-20 max-h-60 overflow-y-auto divide-y divide-border-subtle">
-                            {unlinkedDepositsSearch.length === 0 ? (
-                                <div className="p-4 text-sm text-muted-text text-center">No matching unlinked deposits found.</div>
-                            ) : (
-                                unlinkedDepositsSearch.map(d => (
-                                    <button key={d.id} type="button"
-                                        onClick={() => { handleLinkDeposit(d); setDepositSearch(''); setDepositSearchOpen(false); }}
-                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-background-subtle transition-colors text-left">
-                                        <div>
-                                            <p className="text-sm font-semibold text-foreground">{d.product_name || `Deposit #${d.id}`}</p>
-                                            <p className="text-xs text-muted-text">Ref: {d.reference_number}</p>
-                                        </div>
-                                        <div className="px-3 py-1 bg-emerald-500/10 text-emerald-500 text-xs font-bold rounded-lg hover:bg-emerald-500 hover:text-white transition-colors">
-                                            Link
-                                        </div>
-                                    </button>
-                                ))
-                            )}
-                        </div>
-                    )}
                 </div>
             </RelatedSection>
         </div>
