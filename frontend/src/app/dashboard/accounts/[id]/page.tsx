@@ -4,11 +4,78 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Building2, ArrowLeft, Loader2, Check, Trash2, MapPin } from 'lucide-react';
+import {
+    Building2, ArrowLeft, Loader2, Check, Trash2,
+    ChevronDown, ChevronUp, User, Package, Mail, Phone, Banknote
+} from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 
 const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
+
+interface Contact {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email?: string;
+    phone?: string;
+    job_title?: string;
+}
+
+interface Deposit {
+    id: number;
+    reference_number: string;
+    amount: number;
+    status: string;
+    product_name?: string;
+    date?: string;
+}
+
+function RelatedSection({
+    title, icon: Icon, count, open, onToggle, children, color = 'crm'
+}: {
+    title: string;
+    icon: React.ElementType;
+    count: number;
+    open: boolean;
+    onToggle: () => void;
+    children: React.ReactNode;
+    color?: string;
+}) {
+    const colorMap: Record<string, string> = {
+        crm: 'text-crm-500 bg-crm-500/10',
+        emerald: 'text-emerald-500 bg-emerald-500/10',
+    };
+    const cls = colorMap[color] || colorMap.crm;
+
+    return (
+        <div className="rounded-2xl overflow-hidden glass-card">
+            <button
+                type="button"
+                onClick={onToggle}
+                className="w-full px-6 py-4 flex items-center justify-between hover:bg-background-subtle/30 transition-colors"
+            >
+                <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cls}`}>
+                        <Icon className="w-4 h-4" />
+                    </div>
+                    <span className="text-[11px] font-bold text-foreground uppercase tracking-widest">{title}</span>
+                    <span className="text-xs font-medium text-muted-text bg-background-subtle px-2 py-0.5 rounded-full">{count}</span>
+                </div>
+                {open
+                    ? <ChevronUp className="w-4 h-4 text-muted-text" />
+                    : <ChevronDown className="w-4 h-4 text-muted-text" />
+                }
+            </button>
+
+            {open && (
+                <div className="border-t border-border-subtle">
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function EditAccountPage() {
     const router = useRouter();
@@ -21,27 +88,42 @@ export default function EditAccountPage() {
     const [error, setError] = useState('');
 
     const [formData, setFormData] = useState({
-        name: '', industry: '', website: '', phone: '',
+        name: '', website: '', phone: '',
         street: '', city: '', state_or_province: '', zip_code: '', country: '',
     });
 
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [deposits, setDeposits] = useState<Deposit[]>([]);
+    const [contactsOpen, setContactsOpen] = useState(false);
+    const [depositsOpen, setDepositsOpen] = useState(false);
+    const [relatedLoading, setRelatedLoading] = useState(false);
+
     useEffect(() => {
-        const fetchAccount = async () => {
+        const fetchAll = async () => {
             try {
-                const res = await api.get(`/accounts/${accountId}`);
-                const d = res.data;
+                const [accRes, contactsRes, depositsRes] = await Promise.all([
+                    api.get(`/accounts/${accountId}`),
+                    api.get(`/contacts`),
+                    api.get(`/deposits`),
+                ]);
+                const d = accRes.data;
                 setFormData({
-                    name: d.name || '', industry: d.industry || '', website: d.website || '',
+                    name: d.name || '', website: d.website || '',
                     phone: d.phone || '', street: d.street || '', city: d.city || '',
                     state_or_province: d.state_or_province || '', zip_code: d.zip_code || '', country: d.country || '',
                 });
+
+                // Filter to only those linked to this account
+                const id = Number(accountId);
+                setContacts(contactsRes.data.filter((c: any) => c.account_id === id));
+                setDeposits(depositsRes.data.filter((dep: any) => dep.account_id === id));
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to fetch account details');
             } finally {
                 setInitialLoading(false);
             }
         };
-        if (accountId) fetchAccount();
+        if (accountId) fetchAll();
     }, [accountId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -102,8 +184,8 @@ export default function EditAccountPage() {
                         <Building2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Edit Account</h1>
-                        <p className="text-xs text-muted-text">Update an existing organizational record.</p>
+                        <h1 className="text-2xl font-bold text-foreground">{formData.name || 'Edit Account'}</h1>
+                        <p className="text-xs text-muted-text">Update this organizational record.</p>
                     </div>
                 </div>
             </div>
@@ -123,9 +205,8 @@ export default function EditAccountPage() {
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <Field label="Account Name *" field="name" placeholder="e.g. Acme Corporation" colSpan2 />
-                        <Field label="Industry" field="industry" placeholder="e.g. Technology" />
                         <Field label="Phone Number" field="phone" placeholder="+1 (555) 000-0000" />
-                        <Field label="Website" field="website" type="url" placeholder="https://www.example.com" colSpan2 />
+                        <Field label="Website" field="website" type="url" placeholder="https://www.example.com" />
                     </div>
 
                     {/* Address Section */}
@@ -163,6 +244,81 @@ export default function EditAccountPage() {
                     </div>
                 </form>
             </div>
+
+            {/* Related Contacts */}
+            <RelatedSection
+                title="Related Contacts"
+                icon={User}
+                count={contacts.length}
+                open={contactsOpen}
+                onToggle={() => setContactsOpen(v => !v)}
+                color="crm"
+            >
+                {contacts.length === 0 ? (
+                    <p className="px-6 py-5 text-sm text-muted-text">No contacts linked to this account.</p>
+                ) : (
+                    <div className="divide-y divide-border-subtle">
+                        {contacts.map(c => (
+                            <Link key={c.id} href={`/dashboard/contacts/${c.id}`}
+                                className="flex items-center gap-4 px-6 py-4 hover:bg-background-subtle/40 transition-colors group">
+                                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-crm-500/10 text-crm-500 text-sm font-bold shrink-0">
+                                    {c.first_name?.[0]}{c.last_name?.[0]}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-foreground group-hover:text-crm-500 transition-colors">
+                                        {c.first_name} {c.last_name}
+                                    </p>
+                                    {c.job_title && <p className="text-xs text-muted-text">{c.job_title}</p>}
+                                </div>
+                                <div className="flex items-center gap-4 text-xs text-muted-text shrink-0">
+                                    {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>}
+                                    {c.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{c.phone}</span>}
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </RelatedSection>
+
+            {/* Related Deposits */}
+            <RelatedSection
+                title="Related Deposits"
+                icon={Package}
+                count={deposits.length}
+                open={depositsOpen}
+                onToggle={() => setDepositsOpen(v => !v)}
+                color="emerald"
+            >
+                {deposits.length === 0 ? (
+                    <p className="px-6 py-5 text-sm text-muted-text">No deposits linked to this account.</p>
+                ) : (
+                    <div className="divide-y divide-border-subtle">
+                        {deposits.map(d => (
+                            <Link key={d.id} href={`/dashboard/deposits/${d.id}`}
+                                className="flex items-center gap-4 px-6 py-4 hover:bg-background-subtle/40 transition-colors group">
+                                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500 text-sm font-bold shrink-0">
+                                    <Banknote className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-semibold text-foreground group-hover:text-emerald-500 transition-colors">
+                                        {d.product_name || d.reference_number}
+                                    </p>
+                                    <p className="text-xs text-muted-text">Ref: {d.reference_number}</p>
+                                </div>
+                                <div className="flex items-center gap-3 shrink-0">
+                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+                                        d.status === 'Cleared' ? 'bg-emerald-500/10 text-emerald-500' :
+                                        d.status === 'Pending' ? 'bg-amber-500/10 text-amber-500' :
+                                        'bg-red-500/10 text-red-500'
+                                    }`}>
+                                        {d.status}
+                                    </span>
+                                </div>
+                            </Link>
+                        ))}
+                    </div>
+                )}
+            </RelatedSection>
         </div>
     );
 }
