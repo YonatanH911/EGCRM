@@ -16,7 +16,6 @@ export default function AccountsPage() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterIndustry, setFilterIndustry] = useState('');
     const { isRTL } = usePreferences();
 
     useEffect(() => {
@@ -33,13 +32,8 @@ export default function AccountsPage() {
         fetchAccounts();
     }, []);
 
-    const uniqueIndustries = Array.from(new Set(accounts.map(a => a.industry).filter(Boolean)));
-
     const filteredAccounts = accounts.filter(account => {
-        const matchesSearch = account.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (account.industry && account.industry.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesFilter = filterIndustry ? account.industry === filterIndustry : true;
-        return matchesSearch && matchesFilter;
+        return account.name.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     return (
@@ -67,18 +61,11 @@ export default function AccountsPage() {
                 <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
                     <div className="relative flex-1 max-w-sm">
                         <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text`} />
-                        <input type="text" placeholder="Search names or industries…"
+                        <input type="text" placeholder="Search names…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                             className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10`}
                         />
                     </div>
-                    <select value={filterIndustry} onChange={(e) => setFilterIndustry(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none transition-all sm:w-48 bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10">
-                        <option value="">All Industries…</option>
-                        {uniqueIndustries.map(ind => (
-                            <option key={ind as string} value={ind as string}>{ind as string}</option>
-                        ))}
-                    </select>
                 </div>
 
                 {/* Table */}
@@ -102,7 +89,7 @@ export default function AccountsPage() {
                         <table className="min-w-full">
                             <thead className="border-b border-border-subtle bg-background-subtle/30">
                                 <tr>
-                                    {['Account Name', 'Industry', 'Street', 'City', 'State / Prov', 'ZIP', 'Country', 'Phone / Website', 'Created'].map(h => (
+                                    {['Account Name', 'Street', 'City', 'State / Prov', 'ZIP', 'Country', 'Phone / Website', 'Created'].map(h => (
                                         <th key={h} scope="col" className={thCls}>{h}</th>
                                     ))}
                                 </tr>
@@ -121,7 +108,6 @@ export default function AccountsPage() {
                                                 <span className="text-sm font-medium text-foreground group-hover:text-crm-500 transition-colors">{account.name}</span>
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-sm text-foreground">{account.industry || '—'}</span></td>
                                         <td className={tdCls}><span className="text-sm text-muted-text">{account.street || '—'}</span></td>
                                         <td className={tdCls}><span className="text-sm text-muted-text">{account.city || '—'}</span></td>
                                         <td className={tdCls}><span className="text-sm text-muted-text">{account.state_or_province || '—'}</span></td>
