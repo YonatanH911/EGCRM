@@ -1,6 +1,6 @@
 # About EGCRM
 
-EGCRM (Enterprise Grade Customer Relationship Management) is a modern, full-stack system designed to help teams elegantly track accounts, leads, contracts, contacts, and secure physical storage (vaults & deposits).
+EGCRM (Escrow Global Customer Relationship Management) is a modern, full-stack system designed to help teams elegantly track accounts, leads, contracts, contacts, and secure physical storage (vaults & deposits).
 
 ## Architecture
 - **Frontend**: Next.js (React) application styled with Tailwind CSS. Features a premium glassmorphic visual language, smooth frontend micro-animations, and support for dark/light logical themes.
