@@ -26,11 +26,15 @@ class DepositStatus(str, enum.Enum):
     CLEARED = "Cleared"
     FAILED = "Failed"
 
-class ActivityType(str, enum.Enum):
-    TASK = "Task"
-    EMAIL = "Email"
-    APPOINTMENT = "Appointment"
-    PHONE_CALL = "Phone Call"
+class TaskType(Base):
+    __tablename__ = "task_types"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), nullable=False, unique=True)
+    color = Column(String(20), nullable=False, default="#6366f1")
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    activities = relationship("Activity", back_populates="task_type")
 
 class UserRole(str, enum.Enum):
     ADMIN = "Admin"
@@ -167,10 +171,12 @@ class Activity(Base):
     __tablename__ = "activities"
 
     id = Column(Integer, primary_key=True, index=True)
-    activity_type = Column(Enum(ActivityType), nullable=False, default=ActivityType.TASK)
+    task_type_id = Column(Integer, ForeignKey("task_types.id"), nullable=True)
     subject = Column(String(255), nullable=False)
     regarding = Column(String(255), nullable=True)
     start_date = Column(DateTime, nullable=True)
     due_date = Column(DateTime, nullable=True)
     notes = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    task_type = relationship("TaskType", back_populates="activities")

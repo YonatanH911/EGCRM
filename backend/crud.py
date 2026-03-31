@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 import models, schemas, auth
 
 # --- Users ---
@@ -173,10 +173,10 @@ def update_deposit(db: Session, deposit_id: int, deposit_update: schemas.Deposit
 
 # --- Activities ---
 def get_activity(db: Session, activity_id: int):
-    return db.query(models.Activity).filter(models.Activity.id == activity_id).first()
+    return db.query(models.Activity).options(joinedload(models.Activity.task_type)).filter(models.Activity.id == activity_id).first()
 
 def get_activities(db: Session, skip: int = 0, limit: int = 500):
-    return db.query(models.Activity).order_by(models.Activity.created_at.desc()).offset(skip).limit(limit).all()
+    return db.query(models.Activity).options(joinedload(models.Activity.task_type)).order_by(models.Activity.created_at.desc()).offset(skip).limit(limit).all()
 
 def create_activity(db: Session, activity: schemas.ActivityCreate):
     db_activity = models.Activity(**activity.model_dump())
@@ -202,3 +202,35 @@ def delete_activity(db: Session, activity_id: int):
         db.commit()
     return db_activity
 
+# --- Task Types ---
+def get_task_types(db: Session):
+    return db.query(models.TaskType).order_by(models.TaskType.name).all()
+
+def create_task_type(db: Session, task_type: schemas.TaskTypeCreate):
+    db_obj = models.TaskType(**task_type.model_dump())
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+def update_task_type(db: Session, task_type_id: int, task_type: schemas.TaskTypeBase):
+    db_obj = db.query(models.TaskType).filter(models.TaskType.id == task_type_id).first()
+    if db_obj:
+        for key, value in task_type.model_dump(exclude_unset=True).items():
+            setattr(db_obj, key, value)
+        db.commit()
+        db.refresh(db_obj)
+    return db_obj
+
+def delete_task_type(db: Session, task_type_id: int):
+    db_obj = db.query(models.TaskType).filter(models.TaskType.id == task_type_id).first()
+    if db_obj:
+        # Before deleting, nullify any associated activities or let the DB handle it if cascading
+        # Currently the FK is nullable=True, so when task_type is deleted, relationships will
+        # either block or set null depending on DB. We manually set to null to be safe:
+        db.query(models.Activity).filter(models.Activity.task_type_id == task_type_id).update({
+            models.Activity.task_type_id: None
+        })
+        db.delete(db_obj)
+        db.commit()
+    return db_obj
