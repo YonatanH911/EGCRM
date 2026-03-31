@@ -3,61 +3,85 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Check, FileText, Trash2, Users, CreditCard } from 'lucide-react';
+import { ArrowLeft, Loader2, Check, FileText, Trash2, User, CreditCard } from 'lucide-react';
 import api from '@/lib/api';
 
-interface Account { id: number; name: string; }
-interface Contact { id: number; first_name: string; last_name: string; }
+interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
 
 const CONTRACT_STATUSES = ['Draft', 'Active', 'Expired', 'Terminated'];
-const CURRENCIES = ['USD', 'EUR', 'GBP', 'ILS', 'JPY', 'CAD', 'AUD', 'CHF'];
 
 const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+
+type FormField =
+    'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' |
+    'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
+    'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
+
+const CUBES = [
+    {
+        key: 'beneficiary',
+        label: 'Beneficiary',
+        gradient: 'from-purple-500 to-indigo-500',
+        fields: [
+            { field: 'beneficiary_management_contact' as FormField, label: 'Management Contact' },
+            { field: 'beneficiary_technical_contact'  as FormField, label: 'Technical Contact' },
+            { field: 'beneficiary_financial_contact'  as FormField, label: 'Financial Contact' },
+        ],
+    },
+    {
+        key: 'supplier',
+        label: 'Supplier',
+        gradient: 'from-emerald-500 to-teal-500',
+        fields: [
+            { field: 'supplier_management_contact' as FormField, label: 'Management Contact' },
+            { field: 'supplier_technical_contact'  as FormField, label: 'Technical Contact' },
+            { field: 'supplier_financial_contact'  as FormField, label: 'Financial Contact' },
+        ],
+    },
+];
+
+const emptyForm: Record<FormField, string> = {
+    title: '', status: 'Draft', value: '0', currency: 'USD',
+    start_date: '', end_date: '',
+    beneficiary_management_contact: '', beneficiary_technical_contact: '', beneficiary_financial_contact: '',
+    supplier_management_contact: '',   supplier_technical_contact: '',   supplier_financial_contact: '',
+};
 
 export default function EditContractPage() {
     const router = useRouter();
     const params = useParams();
     const id = params.id as string;
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading]               = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
-    const [error, setError] = useState('');
-    const [accounts, setAccounts] = useState<Account[]>([]);
-    const [contacts, setContacts] = useState<Contact[]>([]);
-
-    const [form, setForm] = useState({
-        title: '', status: 'Draft', value: '0', currency: 'USD',
-        start_date: '', end_date: '', account_id: '',
-        beneficiary: '', management_contact: '', technical_contact: '',
-        financial_contact: '', supplier: '',
-    });
+    const [saving, setSaving]                 = useState(false);
+    const [error, setError]                   = useState('');
+    const [contacts, setContacts]             = useState<Contact[]>([]);
+    const [form, setForm]                     = useState<Record<FormField, string>>(emptyForm);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [contractRes, accountsRes, contactsRes] = await Promise.all([
+                const [contractRes, contactsRes] = await Promise.all([
                     api.get(`/contracts/${id}`),
-                    api.get('/accounts'),
                     api.get('/contacts'),
                 ]);
                 const c = contractRes.data;
                 setForm({
-                    title: c.title || '',
-                    status: c.status || 'Draft',
-                    value: c.value != null ? String(c.value) : '0',
+                    title:    c.title    || '',
+                    status:   c.status   || 'Draft',
+                    value:    c.value != null ? String(c.value) : '0',
                     currency: c.currency || 'USD',
                     start_date: c.start_date ? c.start_date.slice(0, 10) : '',
-                    end_date: c.end_date ? c.end_date.slice(0, 10) : '',
-                    account_id: c.account_id ? String(c.account_id) : '',
-                    beneficiary: c.beneficiary || '',
-                    management_contact: c.management_contact || '',
-                    technical_contact: c.technical_contact || '',
-                    financial_contact: c.financial_contact || '',
-                    supplier: c.supplier || '',
+                    end_date:   c.end_date   ? c.end_date.slice(0, 10)   : '',
+                    beneficiary_management_contact: c.beneficiary_management_contact || '',
+                    beneficiary_technical_contact:  c.beneficiary_technical_contact  || '',
+                    beneficiary_financial_contact:  c.beneficiary_financial_contact  || '',
+                    supplier_management_contact:    c.supplier_management_contact    || '',
+                    supplier_technical_contact:     c.supplier_technical_contact     || '',
+                    supplier_financial_contact:     c.supplier_financial_contact     || '',
                 });
-                setAccounts(accountsRes.data);
                 setContacts(contactsRes.data);
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to load contract');
@@ -68,7 +92,7 @@ export default function EditContractPage() {
         fetchData();
     }, [id]);
 
-    const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    const set = (field: FormField) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
         setForm(prev => ({ ...prev, [field]: e.target.value }));
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -78,15 +102,16 @@ export default function EditContractPage() {
         try {
             await api.put(`/contracts/${id}`, {
                 ...form,
-                value: Number(form.value) || 0,
-                account_id: form.account_id ? Number(form.account_id) : null,
+                value:      Number(form.value) || 0,
+                account_id: null,
                 start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
-                end_date: form.end_date ? new Date(form.end_date).toISOString() : null,
-                beneficiary: form.beneficiary || null,
-                management_contact: form.management_contact || null,
-                technical_contact: form.technical_contact || null,
-                financial_contact: form.financial_contact || null,
-                supplier: form.supplier || null,
+                end_date:   form.end_date   ? new Date(form.end_date).toISOString()   : null,
+                beneficiary_management_contact: form.beneficiary_management_contact || null,
+                beneficiary_technical_contact:  form.beneficiary_technical_contact  || null,
+                beneficiary_financial_contact:  form.beneficiary_financial_contact  || null,
+                supplier_management_contact:    form.supplier_management_contact    || null,
+                supplier_technical_contact:     form.supplier_technical_contact     || null,
+                supplier_financial_contact:     form.supplier_financial_contact     || null,
             });
             router.push('/dashboard/contracts');
         } catch (err: any) {
@@ -120,24 +145,16 @@ export default function EditContractPage() {
         );
     }
 
-    const Section = ({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) => (
-        <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
-            <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
-                <span className="text-indigo-500">{icon}</span>
-                <h2 className="text-sm font-semibold text-foreground">{title}</h2>
-            </div>
-            <div className="p-6">{children}</div>
-        </div>
-    );
-
-    const Field = ({ label, field, type = 'text', placeholder, colSpan2 = false }: {
-        label: string; field: keyof typeof form; type?: string; placeholder?: string; colSpan2?: boolean;
-    }) => (
-        <div className={colSpan2 ? 'col-span-1 sm:col-span-2' : ''}>
-            <label className={labelCls}>{label}</label>
-            <input type={type} value={form[field]} placeholder={placeholder} onChange={set(field)}
-                className={inputCls} />
-        </div>
+    const ContactDropdown = ({ field }: { field: FormField }) => (
+        <select value={form[field]} onChange={set(field)}
+            className={`${inputCls} *:bg-background *:text-foreground`}>
+            <option value="">— None —</option>
+            {contacts.map(c => (
+                <option key={c.id} value={`${c.first_name} ${c.last_name}`}>
+                    {c.first_name} {c.last_name}{c.job_title ? ` · ${c.job_title}` : ''}
+                </option>
+            ))}
+        </select>
     );
 
     return (
@@ -145,13 +162,11 @@ export default function EditContractPage() {
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/contracts"
-                    className="p-2 rounded-xl text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 bg-black/5 dark:bg-white/5 transition-colors"
-                >
-                    <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
+                    className="p-2 rounded-xl text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 bg-black/5 dark:bg-white/5 transition-colors">
+                    <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg"
-                    >
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg">
                         <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -162,80 +177,74 @@ export default function EditContractPage() {
             </div>
 
             {error && (
-                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
-                >
-                    {error}
-                </div>
+                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">{error}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Contract Details */}
-                <Section icon={<FileText className="w-4 h-4" />} title="Contract Details">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <Field label="Contract Title *" field="title" placeholder="e.g. Annual Software License" colSpan2 />
-
-                        <div>
-                            <label className={labelCls}>Related Account</label>
-                            <select value={form.account_id} onChange={set('account_id')}
-                                className={`${inputCls} *:bg-background *:text-foreground`} >
-                                <option value="">— Select an account —</option>
-                                {accounts.map(acc => <option key={acc.id} value={acc.id}>{acc.name}</option>)}
-                            </select>
+                <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+                    <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-indigo-500" />
+                        <h2 className="text-sm font-semibold text-foreground">Contract Details</h2>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div className="col-span-1 sm:col-span-2">
+                            <label className={labelCls}>Contract Title *</label>
+                            <input type="text" value={form.title} onChange={set('title')}
+                                placeholder="e.g. Annual Software License" className={inputCls} />
                         </div>
-
                         <div>
                             <label className={labelCls}>Status</label>
                             <select value={form.status} onChange={set('status')}
-                                className={`${inputCls} *:bg-background *:text-foreground`} >
+                                className={`${inputCls} *:bg-background *:text-foreground`}>
                                 {CONTRACT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
-
+                        <div />
                         <div>
-                            <label className={labelCls}>Beneficiary</label>
-                            <select value={form.beneficiary} onChange={set('beneficiary')}
-                                className={`${inputCls} *:bg-background *:text-foreground`}>
-                                <option value="">— Select a contact —</option>
-                                {contacts.map(c => (
-                                    <option key={c.id} value={`${c.first_name} ${c.last_name}`}>
-                                        {c.first_name} {c.last_name}
-                                    </option>
-                                ))}
-                            </select>
+                            <label className={labelCls}>Date Contract Signed</label>
+                            <input type="date" value={form.start_date} onChange={set('start_date')} className={inputCls} />
                         </div>
                         <div>
-                            <label className={labelCls}>Supplier</label>
-                            <select value={form.supplier} onChange={set('supplier')}
-                                className={`${inputCls} *:bg-background *:text-foreground`}>
-                                <option value="">— Select a contact —</option>
-                                {contacts.map(c => (
-                                    <option key={c.id} value={`${c.first_name} ${c.last_name}`}>
-                                        {c.first_name} {c.last_name}
-                                    </option>
-                                ))}
-                            </select>
+                            <label className={labelCls}>Date Contract Ends</label>
+                            <input type="date" value={form.end_date} onChange={set('end_date')} className={inputCls} />
                         </div>
-                        <Field label="Date Contract Signed" field="start_date" type="date" />
-                        <Field label="Date Contract Ends" field="end_date" type="date" />
                     </div>
-                </Section>
+                </div>
 
-                {/* Contacts */}
-                <Section icon={<Users className="w-4 h-4" />} title="Contacts">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <Field label="Management Contact" field="management_contact" placeholder="Full name" />
-                        <Field label="Technical Contact" field="technical_contact" placeholder="Full name" />
-                        <Field label="Financial Contact" field="financial_contact" placeholder="Full name" />
-                    </div>
-                </Section>
+                {/* Beneficiary + Supplier cubes side by side */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {CUBES.map(cube => (
+                        <div key={cube.key} className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+                            <div className="px-5 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${cube.gradient}`}>
+                                    <User className="w-3.5 h-3.5 text-white" />
+                                </div>
+                                <h2 className="text-sm font-semibold text-foreground">{cube.label}</h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                {cube.fields.map(({ field, label }) => (
+                                    <div key={field}>
+                                        <label className={labelCls}>{label}</label>
+                                        <ContactDropdown field={field} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
 
                 {/* Billing */}
-                <Section icon={<CreditCard className="w-4 h-4" />} title="Billing Information">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+                    <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                        <CreditCard className="w-4 h-4 text-indigo-500" />
+                        <h2 className="text-sm font-semibold text-foreground">Billing Information</h2>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label className={labelCls}>Currency</label>
                             <select value={form.currency} onChange={set('currency')}
-                                className={`${inputCls} *:bg-background *:text-foreground`} >
+                                className={`${inputCls} *:bg-background *:text-foreground`}>
                                 <option value="USD">USD — US Dollar</option>
                                 <option value="EUR">EUR — Euro</option>
                                 <option value="GBP">GBP — British Pound</option>
@@ -248,32 +257,27 @@ export default function EditContractPage() {
                         </div>
                         <div>
                             <label className={labelCls}>Annual Fee</label>
-                            <div className="flex rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 focus-within:border-crm-500 focus-within:ring-4 focus-within:ring-crm-500/10 transition-all"
-                            >
-                                <span className="flex items-center px-3 text-xs font-semibold text-muted-text border-x border-border-subtle ltr:border-l-0 rtl:border-r-0 bg-black/5 dark:bg-white/5"
-                                >
+                            <div className="flex rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 focus-within:border-crm-500 focus-within:ring-4 focus-within:ring-crm-500/10 transition-all">
+                                <span className="flex items-center px-3 text-xs font-semibold text-muted-text border-r border-border-subtle bg-black/5 dark:bg-white/5">
                                     {form.currency}
                                 </span>
                                 <input type="number" min="0" step="0.01" value={form.value}
                                     onChange={e => setForm(prev => ({ ...prev, value: e.target.value }))}
-                                    className="flex-1 px-4 py-2.5 text-sm text-foreground placeholder-muted-text focus:outline-none bg-transparent"
-                                />
+                                    className="flex-1 px-4 py-2.5 text-sm text-foreground focus:outline-none bg-transparent" />
                             </div>
                         </div>
                     </div>
-                </Section>
+                </div>
 
                 {/* Actions */}
                 <div className="flex justify-between items-center gap-3 pt-2">
                     <button type="button" onClick={handleDelete} disabled={loading || saving}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
-                    >
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
                         <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contract</span>
                     </button>
                     <div className="flex gap-3">
                         <Link href="/dashboard/contracts"
-                            className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
-                        >
+                            className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl">
                             Cancel
                         </Link>
                         <button type="submit" disabled={saving || loading}

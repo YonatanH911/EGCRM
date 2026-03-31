@@ -116,11 +116,13 @@ class Contract(Base):
     value = Column(Float, default=0.0)
     currency = Column(String(10), nullable=True, default="USD")
 
-    beneficiary = Column(String(255), nullable=True)
-    management_contact = Column(String(255), nullable=True)
-    technical_contact = Column(String(255), nullable=True)
-    financial_contact = Column(String(255), nullable=True)
-    supplier = Column(String(255), nullable=True)
+    beneficiary_management_contact = Column(String(255), nullable=True)
+    beneficiary_technical_contact   = Column(String(255), nullable=True)
+    beneficiary_financial_contact   = Column(String(255), nullable=True)
+
+    supplier_management_contact = Column(String(255), nullable=True)
+    supplier_technical_contact  = Column(String(255), nullable=True)
+    supplier_financial_contact  = Column(String(255), nullable=True)
 
     account_id = Column(Integer, ForeignKey("accounts.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
