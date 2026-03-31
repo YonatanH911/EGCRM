@@ -7,6 +7,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 
 interface Vault { id: number; name: string; }
+interface Account { id: number; name: string; }
 interface DepositForm {
     product_name: string; version: string; supplier: string; date: string;
     vault_id: string; box: string; reference_number: string; received_by: string;
@@ -24,6 +25,7 @@ export default function EditDepositPage() {
         vault_id: '', box: '', reference_number: '', received_by: '',
     });
     const [vaults, setVaults] = useState<Vault[]>([]);
+    const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
@@ -31,9 +33,10 @@ export default function EditDepositPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [depositRes, vaultsRes] = await Promise.all([
+                const [depositRes, vaultsRes, accountsRes] = await Promise.all([
                     api.get(`/deposits/${id}`),
                     api.get('/vaults'),
+                    api.get('/accounts'),
                 ]);
                 const d = depositRes.data;
                 setForm({
@@ -43,6 +46,7 @@ export default function EditDepositPage() {
                     reference_number: d.reference_number || '', received_by: d.received_by || '',
                 });
                 setVaults(vaultsRes.data);
+                setAccounts(accountsRes.data);
             } catch {
                 setError('Failed to load deposit.');
             } finally {
@@ -126,7 +130,22 @@ export default function EditDepositPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <Field label="Product Name" name="product_name" placeholder="e.g. 4370-8001-00 MW QCL kit" />
                     <Field label="Version" name="version" placeholder="e.g. Rev. B" />
-                    <Field label="Supplier" name="supplier" placeholder="e.g. Alpes Lasers SA" />
+                    
+                    <div>
+                        <label className={labelCls}>Supplier</label>
+                        <select
+                            name="supplier"
+                            value={form.supplier}
+                            onChange={handleChange}
+                            className={`${inputCls} *:bg-background`}
+                        >
+                            <option value="">— Select Supplier —</option>
+                            {accounts.map(acc => (
+                                <option key={acc.id} value={acc.name}>{acc.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
                     <Field label="Date Received" name="date" type="date" />
 
                     <div>
