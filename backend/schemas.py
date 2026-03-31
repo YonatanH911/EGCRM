@@ -114,6 +114,7 @@ class ContractBase(BaseModel):
     supplier_management_contact: Optional[str] = None
     supplier_technical_contact: Optional[str] = None
     supplier_financial_contact: Optional[str] = None
+    paid_by: Optional[str] = None
     account_id: Optional[int] = None
 
 class ContractCreate(ContractBase):

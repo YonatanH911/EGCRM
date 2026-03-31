@@ -123,6 +123,7 @@ class Contract(Base):
     supplier_management_contact = Column(String(255), nullable=True)
     supplier_technical_contact  = Column(String(255), nullable=True)
     supplier_financial_contact  = Column(String(255), nullable=True)
+    paid_by                     = Column(String(255), nullable=True)
 
     account_id = Column(Integer, ForeignKey("accounts.id"))
     created_at = Column(DateTime, default=datetime.utcnow)

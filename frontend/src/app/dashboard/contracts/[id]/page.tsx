@@ -14,7 +14,7 @@ const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wid
 const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
-    'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' |
+    'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
     'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
 
@@ -43,7 +43,7 @@ const CUBES = [
 
 const emptyForm: Record<FormField, string> = {
     title: '', status: 'Draft', value: '0', currency: 'USD',
-    start_date: '', end_date: '',
+    start_date: '', end_date: '', paid_by: '',
     beneficiary_management_contact: '', beneficiary_technical_contact: '', beneficiary_financial_contact: '',
     supplier_management_contact: '',   supplier_technical_contact: '',   supplier_financial_contact: '',
 };
@@ -81,6 +81,7 @@ export default function EditContractPage() {
                     supplier_management_contact:    c.supplier_management_contact    || '',
                     supplier_technical_contact:     c.supplier_technical_contact     || '',
                     supplier_financial_contact:     c.supplier_financial_contact     || '',
+                    paid_by:                        c.paid_by                        || '',
                 });
                 setContacts(contactsRes.data);
             } catch (err: any) {
@@ -112,6 +113,7 @@ export default function EditContractPage() {
                 supplier_management_contact:    form.supplier_management_contact    || null,
                 supplier_technical_contact:     form.supplier_technical_contact     || null,
                 supplier_financial_contact:     form.supplier_financial_contact     || null,
+                paid_by:                        form.paid_by                        || null,
             });
             router.push('/dashboard/contracts');
         } catch (err: any) {
@@ -265,6 +267,10 @@ export default function EditContractPage() {
                                     onChange={e => setForm(prev => ({ ...prev, value: e.target.value }))}
                                     className="flex-1 px-4 py-2.5 text-sm text-foreground focus:outline-none bg-transparent" />
                             </div>
+                        </div>
+                        <div className="col-span-1 sm:col-span-2">
+                            <label className={labelCls}>Paid By</label>
+                            <ContactDropdown field="paid_by" />
                         </div>
                     </div>
                 </div>
