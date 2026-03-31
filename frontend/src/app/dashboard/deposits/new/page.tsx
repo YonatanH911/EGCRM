@@ -32,7 +32,12 @@ export default function NewDepositPage() {
         status: 'Pending',
         date: new Date().toISOString().split('T')[0],
         account_id: '',
-        vault_id: ''
+        vault_id: '',
+        supplier: '',
+        product_name: '',
+        version: '',
+        box: '',
+        received_by: ''
     });
 
     useEffect(() => {
@@ -139,6 +144,63 @@ export default function NewDepositPage() {
                                     </div>
                                 </div>
 
+                                <div>
+                                    <label htmlFor="supplier" className="block text-sm font-medium text-foreground">Supplier</label>
+                                    <div className="mt-1">
+                                        <select
+                                            id="supplier"
+                                            name="supplier"
+                                            value={formData.supplier}
+                                            onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
+                                        >
+                                            <option value="">— Select Supplier —</option>
+                                            {accounts.map(acc => (
+                                                <option key={acc.id} value={acc.name}>{acc.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="product_name" className="block text-sm font-medium text-foreground">Product Name</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="product_name"
+                                            value={formData.product_name}
+                                            onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="version" className="block text-sm font-medium text-foreground">Version</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="version"
+                                            value={formData.version}
+                                            onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="box" className="block text-sm font-medium text-foreground">Box</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="box"
+                                            value={formData.box}
+                                            onChange={(e) => setFormData({ ...formData, box: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        />
+                                    </div>
+                                </div>
+
                                 <div className="sm:col-span-2">
                                     <label htmlFor="vault_id" className="block text-sm font-medium text-foreground flex items-center gap-1">
                                         <Shield className="w-4 h-4 text-muted-text" />
@@ -213,6 +275,20 @@ export default function NewDepositPage() {
                                             value={formData.date}
                                             onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="received_by" className="block text-sm font-medium text-foreground">Received By</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="received_by"
+                                            value={formData.received_by}
+                                            onChange={(e) => setFormData({ ...formData, received_by: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                            placeholder="e.g. Delivery"
                                         />
                                     </div>
                                 </div>
