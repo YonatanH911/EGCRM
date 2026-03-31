@@ -108,11 +108,12 @@ class ContractBase(BaseModel):
     currency: Optional[str] = "USD"
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
-    beneficiary: Optional[str] = None
-    management_contact: Optional[str] = None
-    technical_contact: Optional[str] = None
-    financial_contact: Optional[str] = None
-    supplier: Optional[str] = None
+    beneficiary_management_contact: Optional[str] = None
+    beneficiary_technical_contact: Optional[str] = None
+    beneficiary_financial_contact: Optional[str] = None
+    supplier_management_contact: Optional[str] = None
+    supplier_technical_contact: Optional[str] = None
+    supplier_financial_contact: Optional[str] = None
     account_id: Optional[int] = None
 
 class ContractCreate(ContractBase):
