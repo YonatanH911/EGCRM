@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List
 from datetime import datetime
-from models import LeadStatus, UserRole, ContractStatus, VaultStatus, DepositStatus, ActivityType
+from models import LeadStatus, UserRole, ContractStatus, VaultStatus, DepositStatus
 
 # ----------------- User Schemas -----------------
 class UserBase(BaseModel):
