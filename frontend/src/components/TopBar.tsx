@@ -2,6 +2,7 @@
 
 import { Search, Bell, Menu } from 'lucide-react';
 import SettingsDropdown from './SettingsDropdown';
+import ReleaseNotesDropdown from './ReleaseNotesDropdown';
 
 export default function TopBar() {
     return (
@@ -30,11 +31,7 @@ export default function TopBar() {
 
             <div className="flex items-center gap-3">
                 <SettingsDropdown />
-                {/* Bell */}
-                <button className="relative p-2 text-muted-text hover:text-foreground transition-colors rounded-xl hover:bg-black/5 dark:bg-white/5">
-                    <Bell className="w-4.5 h-4.5" />
-                    <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse-glow" />
-                </button>
+                <ReleaseNotesDropdown />
             </div>
         </header>
     );
