@@ -69,7 +69,8 @@ def import_accounts(db: Session):
     account_map = {}  # name -> id, returned so contacts can use it
 
     for row in ws.iter_rows(min_row=2, values_only=True):
-        name = str_val(row[col.get('Account Name', col.get('Name', 0))])
+        name_idx = col.get('Account Name', col.get('Name', col.get('Comapny Name', 0)))
+        name = str_val(row[name_idx])
         if not name:
             skipped += 1
             continue

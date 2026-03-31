@@ -49,7 +49,8 @@ def run():
         skipped = 0
 
         for row_num, row in enumerate(ws.iter_rows(min_row=2, values_only=True), start=2):
-            company_name = row[col_idx.get('Comapny Name', 3)]  # typo in their header
+            name_idx = col_idx.get('Comapny Name', col_idx.get('Account Name', 3))
+            company_name = row[name_idx]
             if not company_name:
                 skipped += 1
                 continue
