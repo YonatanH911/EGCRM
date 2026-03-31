@@ -60,8 +60,8 @@ export default function ReleaseNotesDropdown() {
             </button>
 
             {isOpen && (
-                <div className="absolute ltr:right-0 rtl:left-0 mt-3 w-80 sm:w-96 glass-card rounded-2xl shadow-2xl border border-border-subtle overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="px-5 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center justify-between">
+                <div className="absolute ltr:right-0 rtl:left-0 mt-3 w-80 sm:w-96 bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl border border-border-subtle overflow-hidden z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="px-5 py-4 border-b border-border-subtle bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-indigo-500" />
                             <h3 className="text-sm font-bold text-foreground">What's New</h3>
@@ -71,7 +71,7 @@ export default function ReleaseNotesDropdown() {
                         </button>
                     </div>
                     
-                    <div className="max-h-[70vh] overflow-y-auto p-5 space-y-6">
+                    <div className="max-h-[70vh] overflow-y-auto p-5 space-y-6 bg-white dark:bg-zinc-900">
                         {notes.map((note, i) => (
                             <div key={i} className="flex gap-4 group">
                                 <div className={`flex-shrink-0 w-10 h-10 rounded-xl ${note.bg} flex items-center justify-center transition-transform group-hover:scale-110`}>
@@ -90,7 +90,7 @@ export default function ReleaseNotesDropdown() {
                         ))}
                     </div>
 
-                    <div className="p-4 bg-black/5 dark:bg-white/5 border-t border-border-subtle text-center">
+                    <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border-t border-border-subtle text-center">
                         <button 
                             onClick={() => setIsOpen(false)}
                             className="text-[10px] font-bold uppercase tracking-widest text-muted-text hover:text-foreground transition-colors"
