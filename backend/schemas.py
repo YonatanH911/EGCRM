@@ -192,7 +192,7 @@ class DepositResponse(DepositBase):
 
 # ----------------- Activity Schemas -----------------
 class ActivityBase(BaseModel):
-    activity_type: ActivityType = ActivityType.TASK
+    task_type_id: Optional[int] = None
     subject: str
     regarding: Optional[str] = None
     start_date: Optional[datetime] = None
@@ -203,7 +203,7 @@ class ActivityCreate(ActivityBase):
     pass
 
 class ActivityUpdate(BaseModel):
-    activity_type: Optional[ActivityType] = None
+    task_type_id: Optional[int] = None
     subject: Optional[str] = None
     regarding: Optional[str] = None
     start_date: Optional[datetime] = None
@@ -211,6 +211,22 @@ class ActivityUpdate(BaseModel):
     notes: Optional[str] = None
 
 class ActivityResponse(ActivityBase):
+    id: int
+    created_at: datetime
+    task_type: Optional["TaskTypeResponse"] = None
+
+    class Config:
+        from_attributes = True
+
+# ----------------- TaskType Schemas -----------------
+class TaskTypeBase(BaseModel):
+    name: str
+    color: str = "#6366f1"
+
+class TaskTypeCreate(TaskTypeBase):
+    pass
+
+class TaskTypeResponse(TaskTypeBase):
     id: int
     created_at: datetime
 

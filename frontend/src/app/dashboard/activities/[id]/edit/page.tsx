@@ -7,8 +7,7 @@ import api from '@/lib/api';
 import { Activity, ArrowLeft, Loader2, Check, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 
-const ACTIVITY_TYPES = ['Task', 'Email', 'Appointment', 'Phone Call'] as const;
-type ActivityType = typeof ACTIVITY_TYPES[number];
+interface TaskType { id: number; name: string; color: string; }
 
 function toDateInput(iso: string | null) {
     if (!iso) return '';
@@ -27,28 +26,37 @@ export default function EditActivityPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
+    const [fetchingTypes, setFetchingTypes] = useState(true);
     const [form, setForm] = useState({
-        activity_type: 'Task' as ActivityType, subject: '', regarding: '',
+        task_type_id: '' as number | '', subject: '', regarding: '',
         start_date: '', due_date: '', notes: '',
     });
 
-    const set = (field: string, value: string) =>
+    const set = (field: string, value: string | number) =>
         setForm(prev => ({ ...prev, [field]: value }));
 
     useEffect(() => {
         const fetch = async () => {
             try {
-                const res = await api.get(`/activities/${id}`);
-                const a = res.data;
+                const [actRes, typesRes] = await Promise.all([
+                    api.get(`/activities/${id}`),
+                    api.get('/task-types')
+                ]);
+                const a = actRes.data;
+                setTaskTypes(typesRes.data);
+                
                 setForm({
-                    activity_type: a.activity_type, subject: a.subject || '',
+                    task_type_id: a.task_type_id || (typesRes.data.length > 0 ? typesRes.data[0].id : ''), 
+                    subject: a.subject || '',
                     regarding: a.regarding || '', start_date: toDateInput(a.start_date),
                     due_date: toDateInput(a.due_date), notes: a.notes || '',
                 });
             } catch (err) {
-                setError('Could not load activity');
+                setError('Could not load activity or task types');
             } finally {
                 setLoading(false);
+                setFetchingTypes(false);
             }
         };
         fetch();
@@ -60,7 +68,7 @@ export default function EditActivityPage() {
         setError('');
         try {
             await api.put(`/activities/${id}`, {
-                activity_type: form.activity_type, subject: form.subject,
+                task_type_id: form.task_type_id || null, subject: form.subject,
                 regarding: form.regarding || null, notes: form.notes || null,
                 start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
                 due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
@@ -82,12 +90,7 @@ export default function EditActivityPage() {
         );
     }
 
-    const icons: Record<ActivityType, React.ReactNode> = {
-        'Task': <CheckSquare className="w-3.5 h-3.5" />,
-        'Email': <Mail className="w-3.5 h-3.5" />,
-        'Appointment': <Calendar className="w-3.5 h-3.5" />,
-        'Phone Call': <Phone className="w-3.5 h-3.5" />,
-    };
+
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -122,17 +125,39 @@ export default function EditActivityPage() {
                     {/* Activity Type */}
                     <div>
                         <label className={labelCls}>Activity Type *</label>
-                        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                            {ACTIVITY_TYPES.map(t => (
-                                <button key={t} type="button" onClick={() => set('activity_type', t)}
-                                    className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 border ${form.activity_type === t
-                                        ? 'bg-crm-500 border-crm-500 text-white shadow-lg shadow-crm-500/20'
-                                        : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'
-                                        }`}>
-                                    {icons[t]}{t}
-                                </button>
-                            ))}
-                        </div>
+                        {fetchingTypes ? (
+                            <div className="h-10 flex items-center gap-2 text-sm text-muted-text">
+                                <Loader2 className="w-4 h-4 animate-spin" /> Loading types...
+                            </div>
+                        ) : taskTypes.length === 0 ? (
+                            <div className="text-sm text-red-500 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+                                No task types configured. Please create one in the Activities dashboard first.
+                            </div>
+                        ) : (
+                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                                {taskTypes.map(t => {
+                                    const isSelected = form.task_type_id === t.id;
+                                    return (
+                                        <button
+                                            key={t.id}
+                                            type="button"
+                                            onClick={() => set('task_type_id', t.id)}
+                                            style={{
+                                                backgroundColor: isSelected ? t.color : 'transparent',
+                                                borderColor: isSelected ? t.color : '',
+                                                color: isSelected ? '#fff' : '',
+                                            }}
+                                            className={`flex justify-center items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 border ${isSelected
+                                                ? 'shadow-lg'
+                                                : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'
+                                                }`}
+                                        >
+                                            {t.name}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
 
                     {/* Subject */}

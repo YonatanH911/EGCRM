@@ -258,3 +258,29 @@ def delete_activity(activity_id: int, db: Session = Depends(get_db), current_use
         raise HTTPException(status_code=404, detail="Activity not found")
     return {"message": "Activity deleted successfully"}
 
+# --- Task Types API ---
+@app.get("/task-types", response_model=List[schemas.TaskTypeResponse])
+def read_task_types(db: Session = Depends(get_db)):
+    return crud.get_task_types(db)
+
+@app.post("/task-types", response_model=schemas.TaskTypeResponse)
+def create_task_type(task_type: schemas.TaskTypeCreate, db: Session = Depends(get_db)):
+    # Simple duplicate check
+    existing = db.query(models.TaskType).filter(models.TaskType.name == task_type.name).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="Task type with this name already exists")
+    return crud.create_task_type(db=db, task_type=task_type)
+
+@app.put("/task-types/{task_type_id}", response_model=schemas.TaskTypeResponse)
+def update_task_type(task_type_id: int, task_type: schemas.TaskTypeBase, db: Session = Depends(get_db)):
+    db_obj = crud.update_task_type(db, task_type_id=task_type_id, task_type=task_type)
+    if db_obj is None:
+        raise HTTPException(status_code=404, detail="Task type not found")
+    return db_obj
+
+@app.delete("/task-types/{task_type_id}")
+def delete_task_type(task_type_id: int, db: Session = Depends(get_db)):
+    db_obj = crud.delete_task_type(db, task_type_id=task_type_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Task type not found")
+    return {"message": "Task type deleted successfully"}
