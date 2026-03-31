@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Check, FileText, Trash2, Users, CreditCard } from '
 import api from '@/lib/api';
 
 interface Account { id: number; name: string; }
+interface Contact { id: number; first_name: string; last_name: string; }
 
 const CONTRACT_STATUSES = ['Draft', 'Active', 'Expired', 'Terminated'];
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'ILS', 'JPY', 'CAD', 'AUD', 'CHF'];
@@ -24,6 +25,7 @@ export default function EditContractPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [contacts, setContacts] = useState<Contact[]>([]);
 
     const [form, setForm] = useState({
         title: '', status: 'Draft', value: '0', currency: 'USD',
@@ -35,9 +37,10 @@ export default function EditContractPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [contractRes, accountsRes] = await Promise.all([
+                const [contractRes, accountsRes, contactsRes] = await Promise.all([
                     api.get(`/contracts/${id}`),
                     api.get('/accounts'),
+                    api.get('/contacts'),
                 ]);
                 const c = contractRes.data;
                 setForm({
@@ -55,6 +58,7 @@ export default function EditContractPage() {
                     supplier: c.supplier || '',
                 });
                 setAccounts(accountsRes.data);
+                setContacts(contactsRes.data);
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to load contract');
             } finally {
@@ -187,8 +191,30 @@ export default function EditContractPage() {
                             </select>
                         </div>
 
-                        <Field label="Beneficiary" field="beneficiary" placeholder="e.g. Acme Corp" />
-                        <Field label="Supplier" field="supplier" placeholder="e.g. Vendor Ltd" />
+                        <div>
+                            <label className={labelCls}>Beneficiary</label>
+                            <select value={form.beneficiary} onChange={set('beneficiary')}
+                                className={`${inputCls} *:bg-background *:text-foreground`}>
+                                <option value="">— Select a contact —</option>
+                                {contacts.map(c => (
+                                    <option key={c.id} value={`${c.first_name} ${c.last_name}`}>
+                                        {c.first_name} {c.last_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                        <div>
+                            <label className={labelCls}>Supplier</label>
+                            <select value={form.supplier} onChange={set('supplier')}
+                                className={`${inputCls} *:bg-background *:text-foreground`}>
+                                <option value="">— Select a contact —</option>
+                                {contacts.map(c => (
+                                    <option key={c.id} value={`${c.first_name} ${c.last_name}`}>
+                                        {c.first_name} {c.last_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                         <Field label="Date Contract Signed" field="start_date" type="date" />
                         <Field label="Date Contract Ends" field="end_date" type="date" />
                     </div>
