@@ -232,7 +232,7 @@ export default function EditAccountPage() {
     const unlinkedDepositsList = allDeposits.filter(d => d.account_id !== Number(accountId));
 
     const Field = ({ label, field, type = 'text', placeholder, colSpan2 = false }: {
-        label: string; field: keyof typeof formData; type?: string; placeholder?: string; colSpan2?: boolean;
+        label: string; field: Exclude<keyof typeof formData, 'is_active'>; type?: string; placeholder?: string; colSpan2?: boolean;
     }) => (
         <div className={colSpan2 ? 'col-span-1 md:col-span-2' : ''}>
             <label className={labelCls}>{label}</label>
