@@ -110,10 +110,7 @@ export default function LoginPage() {
                     <div className="mb-8">
                         <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
                         <p className="mt-1 text-sm text-muted-text">
-                            Sign in to your account or{' '}
-                            <Link href="/register" className="text-indigo-500 hover:text-indigo-400 font-medium transition-colors">
-                                create a new one
-                            </Link>
+                            Sign in to your account
                         </p>
                     </div>
 
