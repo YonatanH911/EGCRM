@@ -67,7 +67,7 @@ def create_account(account: schemas.AccountCreate, db: Session = Depends(get_db)
     return crud.create_account(db=db, account=account)
 
 @app.get("/accounts", response_model=List[schemas.AccountResponse])
-def read_accounts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def read_accounts(skip: int = 0, limit: int = 10000, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_accounts(db, skip=skip, limit=limit)
 
 @app.get("/accounts/{account_id}", response_model=schemas.AccountResponse)
@@ -100,7 +100,7 @@ def create_contact(contact: schemas.ContactCreate, db: Session = Depends(get_db)
     return crud.create_contact(db=db, contact=contact)
 
 @app.get("/contacts", response_model=List[schemas.ContactResponse])
-def read_contacts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def read_contacts(skip: int = 0, limit: int = 10000, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_contacts(db, skip=skip, limit=limit)
 
 @app.get("/contacts/{contact_id}", response_model=schemas.ContactResponse)
@@ -133,7 +133,7 @@ def create_lead(lead: schemas.LeadCreate, db: Session = Depends(get_db), current
     return crud.create_lead(db=db, lead=lead)
 
 @app.get("/leads", response_model=List[schemas.LeadResponse])
-def read_leads(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def read_leads(skip: int = 0, limit: int = 10000, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_leads(db, skip=skip, limit=limit)
 
 @app.patch("/leads/{lead_id}/status", response_model=schemas.LeadResponse)
@@ -149,7 +149,7 @@ def create_contract(contract: schemas.ContractCreate, db: Session = Depends(get_
     return crud.create_contract(db=db, contract=contract)
 
 @app.get("/contracts", response_model=List[schemas.ContractResponse])
-def read_contracts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def read_contracts(skip: int = 0, limit: int = 10000, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_contracts(db, skip=skip, limit=limit)
 
 @app.get("/contracts/{contract_id}", response_model=schemas.ContractResponse)
@@ -181,7 +181,7 @@ def create_vault(vault: schemas.VaultCreate, db: Session = Depends(get_db), curr
     return crud.create_vault(db=db, vault=vault)
 
 @app.get("/vaults", response_model=List[schemas.VaultResponse])
-def read_vaults(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def read_vaults(skip: int = 0, limit: int = 10000, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_vaults(db, skip=skip, limit=limit)
 
 @app.get("/vaults/{vault_id}", response_model=schemas.VaultResponse)
@@ -204,7 +204,7 @@ def create_deposit(deposit: schemas.DepositCreate, db: Session = Depends(get_db)
     return crud.create_deposit(db=db, deposit=deposit)
 
 @app.get("/deposits", response_model=List[schemas.DepositResponse])
-def read_deposits(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+def read_deposits(skip: int = 0, limit: int = 10000, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
     return crud.get_deposits(db, skip=skip, limit=limit)
 
 @app.get("/deposits/{deposit_id}", response_model=schemas.DepositResponse)

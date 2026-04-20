@@ -22,7 +22,7 @@ def create_user(db: Session, user: schemas.UserCreate):
 def get_account(db: Session, account_id: int):
     return db.query(models.Account).filter(models.Account.id == account_id).first()
 
-def get_accounts(db: Session, skip: int = 0, limit: int = 100):
+def get_accounts(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Account).offset(skip).limit(limit).all()
 
 def create_account(db: Session, account: schemas.AccountCreate):
@@ -53,7 +53,7 @@ def delete_account(db: Session, account_id: int):
 def get_contact(db: Session, contact_id: int):
     return db.query(models.Contact).filter(models.Contact.id == contact_id).first()
 
-def get_contacts(db: Session, skip: int = 0, limit: int = 100):
+def get_contacts(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Contact).offset(skip).limit(limit).all()
 
 def create_contact(db: Session, contact: schemas.ContactCreate):
@@ -81,7 +81,7 @@ def delete_contact(db: Session, contact_id: int):
     return db_contact
 
 # --- Leads ---
-def get_leads(db: Session, skip: int = 0, limit: int = 100):
+def get_leads(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Lead).offset(skip).limit(limit).all()
 
 def create_lead(db: Session, lead: schemas.LeadCreate):
@@ -103,7 +103,7 @@ def update_lead_status(db: Session, lead_id: int, status: models.LeadStatus):
 def get_contract(db: Session, contract_id: int):
     return db.query(models.Contract).filter(models.Contract.id == contract_id).first()
 
-def get_contracts(db: Session, skip: int = 0, limit: int = 100):
+def get_contracts(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Contract).offset(skip).limit(limit).all()
 
 def create_contract(db: Session, contract: schemas.ContractCreate):
@@ -127,7 +127,7 @@ def update_contract(db: Session, contract_id: int, contract_update: schemas.Cont
 def get_vault(db: Session, vault_id: int):
     return db.query(models.Vault).filter(models.Vault.id == vault_id).first()
 
-def get_vaults(db: Session, skip: int = 0, limit: int = 100):
+def get_vaults(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Vault).offset(skip).limit(limit).all()
 
 def create_vault(db: Session, vault: schemas.VaultCreate):
@@ -151,7 +151,7 @@ def update_vault(db: Session, vault_id: int, vault_update: schemas.VaultUpdate):
 def get_deposit(db: Session, deposit_id: int):
     return db.query(models.Deposit).filter(models.Deposit.id == deposit_id).first()
 
-def get_deposits(db: Session, skip: int = 0, limit: int = 100):
+def get_deposits(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Deposit).offset(skip).limit(limit).all()
 
 def create_deposit(db: Session, deposit: schemas.DepositCreate):
