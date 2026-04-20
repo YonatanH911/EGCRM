@@ -19,7 +19,6 @@ export default function NewContactPage() {
         email: '',
         phone: '',
         company_name: '',
-        supplier: '',
         description: '',
         account_id: ''
     });
@@ -164,16 +163,6 @@ export default function NewContactPage() {
                             </select>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">Supplier</label>
-                            <input
-                                type="text"
-                                value={formData.supplier}
-                                placeholder="e.g. Parts Supplier LLC"
-                                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm placeholder-muted-text"
-                            />
-                        </div>
 
                         <div className="col-span-1 md:col-span-2">
                             <label className="block text-sm font-medium text-foreground mb-1">Description / Notes</label>
