@@ -92,6 +92,7 @@ export default function EditAccountPage() {
     const [formData, setFormData] = useState({
         name: '', website: '', phone: '',
         street: '', city: '', state_or_province: '', zip_code: '', country: '',
+        is_active: true,
     });
 
     const [allContacts, setAllContacts] = useState<Contact[]>([]);
