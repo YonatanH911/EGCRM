@@ -98,14 +98,9 @@ export default function NewContractPage() {
                 paid_by:                        form.paid_by                        || null,
             });
             router.push('/dashboard/contracts');
-            router.refresh();
         } catch (err: any) {
             const detail = err.response?.data?.detail;
-            setError(
-                Array.isArray(detail) 
-                    ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ') 
-                    : (detail || 'Failed to create contract')
-            );
+            setError(Array.isArray(detail) ? detail.map((d: any) => d.msg || String(d)).join(', ') : detail || 'Failed to create contract');
         } finally {
             setLoading(false);
         }

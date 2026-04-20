@@ -21,7 +21,7 @@ export default function EditContactPage() {
 
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', job_title: '', email: '',
-        phone: '', company_name: '', description: '', account_id: ''
+        phone: '', company_name: '', supplier: '', description: '', account_id: ''
     });
 
     useEffect(() => {
@@ -36,7 +36,7 @@ export default function EditContactPage() {
                     first_name: data.first_name || '', last_name: data.last_name || '',
                     job_title: data.job_title || '', email: data.email || '',
                     phone: data.phone || '', company_name: data.company_name || '',
-                    description: data.description || '',
+                    supplier: data.supplier || '', description: data.description || '',
                     account_id: data.account_id ? data.account_id.toString() : ''
                 });
                 setAccounts(accountsRes.data);
@@ -156,6 +156,7 @@ export default function EditContactPage() {
                             </select>
                         </div>
 
+                        <Field label="Supplier" field="supplier" placeholder="e.g. Parts Supplier LLC" />
 
                         <div className="col-span-1 md:col-span-2">
                             <label className={labelCls}>Description / Notes</label>
