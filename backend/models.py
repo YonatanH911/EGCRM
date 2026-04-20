@@ -67,6 +67,7 @@ class Account(Base):
     zip_code = Column(String(50), nullable=True)
     country = Column(String(255), nullable=True)
     
+    is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     contacts = relationship("Contact", back_populates="account")

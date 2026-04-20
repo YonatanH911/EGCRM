@@ -112,11 +112,12 @@ export default function EditAccountPage() {
                     api.get(`/deposits`),
                 ]);
                 const d = accRes.data;
-                setFormData({
-                    name: d.name || '', website: d.website || '',
-                    phone: d.phone || '', street: d.street || '', city: d.city || '',
-                    state_or_province: d.state_or_province || '', zip_code: d.zip_code || '', country: d.country || '',
-                });
+                    setFormData({
+                        name: d.name || '', website: d.website || '',
+                        phone: d.phone || '', street: d.street || '', city: d.city || '',
+                        state_or_province: d.state_or_province || '', zip_code: d.zip_code || '', country: d.country || '',
+                        is_active: d.is_active !== undefined ? d.is_active : true,
+                    });
 
                 setAllContacts(contactsRes.data);
                 setAllDeposits(depositsRes.data);
@@ -154,6 +155,22 @@ export default function EditAccountPage() {
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to delete account');
             setLoading(false);
+        }
+    };
+
+    const handleToggleActive = async () => {
+        const action = formData.is_active ? 'deactivate' : 'activate';
+        if (!confirm(`Are you sure you want to ${action} this account?`)) return;
+        setLoading(true);
+        try {
+            const res = await api.put(`/accounts/${accountId}`, { ...formData, is_active: !formData.is_active });
+            setFormData(prev => ({ ...prev, is_active: res.data.is_active }));
+            router.refresh();
+        } catch (err: any) {
+            setError(err.response?.data?.detail || `Failed to ${action} account`);
+        } finally {
+            setLoading(true); // Wait for navigation or refresh
+            router.push('/dashboard/accounts');
         }
     };
 
@@ -279,10 +296,20 @@ export default function EditAccountPage() {
 
                     {/* Actions */}
                     <div className="flex justify-between items-center gap-3 pt-8 border-t border-border-subtle">
-                        <button type="button" onClick={handleDelete} disabled={loading}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
-                            <Trash2 className="w-4 h-4" /> Delete Account
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <button type="button" onClick={handleDelete} disabled={loading}
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
+                                <Trash2 className="w-4 h-4" /> Delete
+                            </button>
+                            <button type="button" onClick={handleToggleActive} disabled={loading}
+                                className={`flex items-center gap-2 px-5 py-2.5 text-sm font-bold rounded-xl border transition-all disabled:opacity-50 ${
+                                    formData.is_active 
+                                    ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20' 
+                                    : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                                }`}>
+                                <Check className="w-4 h-4" /> {formData.is_active ? 'Deactivate' : 'Activate'}
+                            </button>
+                        </div>
                         <div className="flex gap-3">
                             <Link href="/dashboard/accounts"
                                 className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">

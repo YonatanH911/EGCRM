@@ -16,6 +16,7 @@ export default function AccountsPage() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [showDeactivated, setShowDeactivated] = useState(false);
     const { isRTL } = usePreferences();
 
     useEffect(() => {
@@ -32,9 +33,16 @@ export default function AccountsPage() {
         fetchAccounts();
     }, []);
 
-    const filteredAccounts = accounts.filter(account => {
-        return account.name.toLowerCase().includes(searchQuery.toLowerCase());
-    });
+    const filteredAccounts = accounts
+        .filter(account => {
+            const matchesSearch = account.name.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesActive = showDeactivated ? true : account.is_active !== false;
+            return matchesSearch && matchesActive;
+        })
+        .sort((a, b) => {
+            if (a.is_active === b.is_active) return a.name.localeCompare(b.name);
+            return a.is_active ? -1 : 1;
+        });
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
@@ -65,6 +73,19 @@ export default function AccountsPage() {
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                             className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10`}
                         />
+                    </div>
+                    
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background-subtle border border-border-subtle">
+                        <input 
+                            type="checkbox" 
+                            id="showDeactivated"
+                            checked={showDeactivated}
+                            onChange={(e) => setShowDeactivated(e.target.checked)}
+                            className="w-4 h-4 rounded border-border-subtle text-crm-500 focus:ring-crm-500/20 bg-background"
+                        />
+                        <label htmlFor="showDeactivated" className="text-xs font-medium text-muted-text cursor-pointer select-none">
+                            Include deactivated accounts
+                        </label>
                     </div>
                 </div>
 
@@ -98,7 +119,9 @@ export default function AccountsPage() {
                                 {filteredAccounts.map((account) => (
                                     <tr key={account.id}
                                         onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                                        className="cursor-pointer group transition-colors duration-150 hover:bg-background-subtle/50"
+                                        className={`cursor-pointer group transition-all duration-150 hover:bg-background-subtle/50 ${
+                                            account.is_active === false ? 'opacity-50 grayscale-[0.5]' : ''
+                                        }`}
                                     >
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-3">

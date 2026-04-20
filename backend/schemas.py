@@ -37,6 +37,7 @@ class AccountBase(BaseModel):
     state_or_province: Optional[str] = None
     zip_code: Optional[str] = None
     country: Optional[str] = None
+    is_active: Optional[bool] = True
 
 class AccountCreate(AccountBase):
     pass
