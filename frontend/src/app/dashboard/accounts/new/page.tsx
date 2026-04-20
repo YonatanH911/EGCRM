@@ -26,7 +26,6 @@ export default function NewAccountPage() {
         state_or_province: '',
         zip_code: '',
         country: '',
-        is_active: true,
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
