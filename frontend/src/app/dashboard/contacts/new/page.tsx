@@ -41,17 +41,24 @@ export default function NewContactPage() {
         setLoading(true);
         setError('');
 
-        const payload = {
-            ...formData,
-            account_id: formData.account_id ? parseInt(formData.account_id) : null,
-        };
+        const payload = Object.fromEntries(
+            Object.entries(formData).map(([k, v]) => {
+                if (k === 'account_id') return [k, v ? parseInt(v) : null];
+                return [k, v === '' ? null : v];
+            })
+        );
 
         try {
             await api.post('/contacts', payload);
             router.push('/dashboard/contacts');
             router.refresh();
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Failed to create contact');
+            const detail = err.response?.data?.detail;
+            setError(
+                Array.isArray(detail) 
+                    ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ') 
+                    : (detail || 'Failed to create contact')
+            );
             setLoading(false);
         }
     };

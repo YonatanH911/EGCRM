@@ -33,12 +33,21 @@ export default function NewAccountPage() {
         setLoading(true);
         setError('');
 
+        const payload = Object.fromEntries(
+            Object.entries(formData).map(([k, v]) => [k, v === '' ? null : v])
+        );
+
         try {
-            await api.post('/accounts', formData);
+            await api.post('/accounts', payload);
             router.push('/dashboard/accounts');
             router.refresh();
         } catch (err: any) {
-            setError(err.response?.data?.detail || 'Failed to create account');
+            const detail = err.response?.data?.detail;
+            setError(
+                Array.isArray(detail) 
+                    ? detail.map((d: any) => d.msg || JSON.stringify(d)).join(', ') 
+                    : (detail || 'Failed to create account')
+            );
             setLoading(false);
         }
     };

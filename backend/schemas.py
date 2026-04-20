@@ -1,10 +1,18 @@
-from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from pydantic import BaseModel, EmailStr, model_validator
+from typing import Optional, List, Any
 from datetime import datetime
 from models import LeadStatus, UserRole, ContractStatus, VaultStatus, DepositStatus
 
+class BaseSchema(BaseModel):
+    @model_validator(mode='before')
+    @classmethod
+    def empty_str_to_none(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            return {k: (None if v == "" else v) for k, v in data.items()}
+        return data
+
 # ----------------- User Schemas -----------------
-class UserBase(BaseModel):
+class UserBase(BaseSchema):
     email: EmailStr
     name: str
     role: UserRole = UserRole.SALES
@@ -27,7 +35,7 @@ class TokenData(BaseModel):
     email: Optional[str] = None
 
 # ----------------- Account Schemas -----------------
-class AccountBase(BaseModel):
+class AccountBase(BaseSchema):
     name: Optional[str] = None
     industry: Optional[str] = None
     website: Optional[str] = None
@@ -52,7 +60,7 @@ class AccountResponse(AccountBase):
         from_attributes = True
 
 # ----------------- Contact Schemas -----------------
-class ContactBase(BaseModel):
+class ContactBase(BaseSchema):
     first_name: str
     last_name: str
     middle_name: Optional[str] = None
@@ -80,7 +88,7 @@ class ContactResponse(ContactBase):
         from_attributes = True
 
 # ----------------- Lead Schemas -----------------
-class LeadBase(BaseModel):
+class LeadBase(BaseSchema):
     title: str
     status: LeadStatus = LeadStatus.NEW
     value: float = 0.0
@@ -100,7 +108,7 @@ class LeadResponse(LeadBase):
         from_attributes = True
 
 # ----------------- Contract Schemas -----------------
-class ContractBase(BaseModel):
+class ContractBase(BaseSchema):
     title: str
     status: ContractStatus = ContractStatus.DRAFT
     value: float = 0.0
@@ -128,7 +136,7 @@ class ContractResponse(ContractBase):
         from_attributes = True
 
 # ----------------- Vault Schemas -----------------
-class VaultBase(BaseModel):
+class VaultBase(BaseSchema):
     name: str
     location: Optional[str] = None
     capacity: Optional[str] = None
@@ -151,7 +159,7 @@ class VaultResponse(VaultBase):
         from_attributes = True
 
 # ----------------- Deposit Schemas -----------------
-class DepositBase(BaseModel):
+class DepositBase(BaseSchema):
     reference_number: str
     amount: float
     date: Optional[datetime] = None
@@ -190,7 +198,7 @@ class DepositResponse(DepositBase):
         from_attributes = True
 
 # ----------------- Activity Schemas -----------------
-class ActivityBase(BaseModel):
+class ActivityBase(BaseSchema):
     task_type_id: Optional[int] = None
     subject: str
     regarding: Optional[str] = None
@@ -218,7 +226,7 @@ class ActivityResponse(ActivityBase):
         from_attributes = True
 
 # ----------------- TaskType Schemas -----------------
-class TaskTypeBase(BaseModel):
+class TaskTypeBase(BaseSchema):
     name: str
     color: str = "#6366f1"
 
