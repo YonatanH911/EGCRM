@@ -62,6 +62,7 @@ class ContactBase(BaseModel):
     is_israeli: Optional[bool] = None
     job_title: Optional[str] = None
     company_name: Optional[str] = None
+    supplier: Optional[str] = None
     description: Optional[str] = None
     account_id: Optional[int] = None
 

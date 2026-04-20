@@ -86,6 +86,7 @@ class Contact(Base):
     is_israeli = Column(Boolean, default=False, nullable=True)
     job_title = Column(String(255), nullable=True)
     company_name = Column(String(255), nullable=True)
+    supplier = Column(String(255), nullable=True)
     description = Column(String(1000), nullable=True)
     account_id = Column(Integer, ForeignKey("accounts.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
