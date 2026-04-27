@@ -12,6 +12,7 @@ interface Account { id: number; name: string; }
 interface Contract {
     id: number; title: string; status: string; value: number; currency: string | null;
     start_date: string | null; end_date: string | null; account: Account | null; created_at: string;
+    is_active?: boolean;
 }
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
@@ -61,7 +62,23 @@ export default function ContractsPage() {
         return matchesSearch && matchesFilter;
     });
 
-    const filterInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
+    const sortedContracts = [...filteredContracts].sort((a, b) => {
+        const aActive = a.is_active !== false;
+        const bActive = b.is_active !== false;
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    const handleReactivate = async (e: React.MouseEvent, contractId: number) => {
+        e.stopPropagation();
+        try {
+            await api.patch(`/contracts/${contractId}/reactivate`);
+            setContracts(contracts.map(c => c.id === contractId ? { ...c, is_active: true } : c));
+        } catch (error) {
+            console.error("Failed to reactivate contract", error);
+        }
+    };
 
     return (
         <div className="space-y-6">
@@ -105,36 +122,41 @@ export default function ContractsPage() {
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
-                                {['Title', 'Status', 'Account', 'Value', 'Dates'].map((h, i) => (
+                                {['Title', 'Status', 'Account', 'Value', 'Dates', 'Actions'].map((h, i) => (
                                     <th key={i} scope="col" className={thCls}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-text text-sm">Loading contracts…</td></tr>
-                            ) : filteredContracts.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-16 text-center">
+                                <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-text text-sm">Loading contracts…</td></tr>
+                            ) : sortedContracts.length === 0 ? (
+                                <tr><td colSpan={6} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <FileText className="h-10 w-10 text-muted-text mb-3" />
                                         <p className="text-foreground text-sm font-semibold">No contracts found.</p>
                                     </div>
                                 </td></tr>
                             ) : (
-                                filteredContracts.map((contract) => {
+                                sortedContracts.map((contract) => {
                                     const sc = getStatusColor(contract.status);
+                                    const isActive = contract.is_active !== false;
+                                    const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     return (
                                         <tr key={contract.id}
-                                            className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                                            className={`cursor-pointer group transition-colors duration-150 ${isActive ? 'hover:bg-black/5 dark:hover:bg-white/5' : 'hover:bg-black/10 dark:hover:bg-white/10'}`}
+                                            style={rowStyle}
                                             onClick={() => router.push(`/dashboard/contracts/${contract.id}`)}
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                                                        style={{ background: 'rgba(99,102,241,0.12)' }}>
-                                                        <FileText className="h-4 w-4 text-indigo-500" />
+                                                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isActive ? 'bg-indigo-500/10' : 'bg-slate-500/20'}`}>
+                                                        <FileText className={`h-4 w-4 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
                                                     </div>
-                                                    <span className="text-sm font-medium text-foreground">{contract.title}</span>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-sm font-medium text-foreground">{contract.title}</span>
+                                                        {!isActive && <span className="text-[10px] text-slate-400 uppercase tracking-wider">Inactive</span>}
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
@@ -158,9 +180,17 @@ export default function ContractsPage() {
                                                 {contract.start_date || contract.end_date ? (
                                                     <div className="flex items-center gap-1.5">
                                                         <Calendar className="h-3.5 w-3.5 text-muted-text" />
-                                                        {formatDate(contract.start_date) || 'N/A'} – {formatDate(contract.end_date) || 'N/A'}
+                                                        {formatDate(contract.start_date) || '—'} – {formatDate(contract.end_date) || '—'}
                                                     </div>
                                                 ) : '—'}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {!isActive && (
+                                                    <button onClick={(e) => handleReactivate(e, contract.id)}
+                                                        className="px-3 py-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                        Reactivate
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     );

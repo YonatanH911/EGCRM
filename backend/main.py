@@ -94,6 +94,27 @@ def delete_account(account_id: int, db: Session = Depends(get_db), current_user:
     except Exception as e:
         raise HTTPException(status_code=400, detail="Cannot delete account that is linked to existing records.")
 
+
+@app.patch("/accounts/{account_id}/deactivate", response_model=schemas.AccountResponse)
+def deactivate_account(account_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_account = crud.get_account(db, account_id=account_id)
+    if db_account is None:
+        raise HTTPException(status_code=404, detail="Account not found")
+    db_account.is_active = False
+    db.commit()
+    db.refresh(db_account)
+    return db_account
+
+@app.patch("/accounts/{account_id}/reactivate", response_model=schemas.AccountResponse)
+def reactivate_account(account_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_account = crud.get_account(db, account_id=account_id)
+    if db_account is None:
+        raise HTTPException(status_code=404, detail="Account not found")
+    db_account.is_active = True
+    db.commit()
+    db.refresh(db_account)
+    return db_account
+
 # --- Contacts API ---
 @app.post("/contacts", response_model=schemas.ContactResponse)
 def create_contact(contact: schemas.ContactCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
@@ -174,6 +195,27 @@ def delete_contract(contract_id: int, db: Session = Depends(get_db), current_use
     db.delete(db_contract)
     db.commit()
     return {"message": "Contract deleted successfully"}
+
+
+@app.patch("/contracts/{contract_id}/deactivate", response_model=schemas.ContractResponse)
+def deactivate_contract(contract_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_contract = crud.get_contract(db, contract_id=contract_id)
+    if db_contract is None:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    db_contract.is_active = False
+    db.commit()
+    db.refresh(db_contract)
+    return db_contract
+
+@app.patch("/contracts/{contract_id}/reactivate", response_model=schemas.ContractResponse)
+def reactivate_contract(contract_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_contract = crud.get_contract(db, contract_id=contract_id)
+    if db_contract is None:
+        raise HTTPException(status_code=404, detail="Contract not found")
+    db_contract.is_active = True
+    db.commit()
+    db.refresh(db_contract)
+    return db_contract
 
 # --- Vaults API ---
 @app.post("/vaults", response_model=schemas.VaultResponse)

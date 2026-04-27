@@ -45,6 +45,7 @@ class AccountBase(BaseSchema):
     state_or_province: Optional[str] = None
     zip_code: Optional[str] = None
     country: Optional[str] = None
+    is_active: Optional[bool] = True
 
 class AccountCreate(AccountBase):
     pass
@@ -54,6 +55,7 @@ class AccountUpdate(AccountBase):
 
 class AccountResponse(AccountBase):
     id: int
+    is_active: bool
     created_at: datetime
 
     class Config:
@@ -124,12 +126,14 @@ class ContractBase(BaseSchema):
     supplier_financial_contact: Optional[str] = None
     paid_by: Optional[str] = None
     account_id: Optional[int] = None
+    is_active: Optional[bool] = True
 
 class ContractCreate(ContractBase):
     pass
 
 class ContractResponse(ContractBase):
     id: int
+    is_active: bool
     created_at: datetime
     account: Optional[AccountResponse] = None
 

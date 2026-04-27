@@ -4,11 +4,10 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import { Building2, Plus, Search, Building, Loader2 } from 'lucide-react';
-import { usePreferences } from '@/components/PreferencesProvider';
+import { Building2, Plus, Search, Building } from 'lucide-react';
 
 /* ── shared dark-table helpers ── */
-const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
+const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
 export default function AccountsPage() {
@@ -16,7 +15,7 @@ export default function AccountsPage() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const { isRTL } = usePreferences();
+    const [filterIndustry, setFilterIndustry] = useState('');
 
     useEffect(() => {
         const fetchAccounts = async () => {
@@ -32,101 +31,142 @@ export default function AccountsPage() {
         fetchAccounts();
     }, []);
 
+    const uniqueIndustries = Array.from(new Set(accounts.map(a => a.industry).filter(Boolean)));
+
     const filteredAccounts = accounts.filter(account => {
-        return account.name.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = account.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (account.industry && account.industry.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesFilter = filterIndustry ? account.industry === filterIndustry : true;
+        return matchesSearch && matchesFilter;
     });
+
+    // Sort accounts: active first, deactivated last, then by created_at descending
+    const sortedAccounts = [...filteredAccounts].sort((a, b) => {
+        const aActive = a.is_active !== false;
+        const bActive = b.is_active !== false;
+        if (aActive && !bActive) return -1;
+        if (!aActive && bActive) return 1;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+
+    const handleReactivate = async (e: React.MouseEvent, accountId: number) => {
+        e.stopPropagation();
+        try {
+            await api.patch(`/accounts/${accountId}/reactivate`);
+            setAccounts(accounts.map(a => a.id === accountId ? { ...a, is_active: true } : a));
+        } catch (error) {
+            console.error("Failed to reactivate account", error);
+        }
+    };
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/20">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center"
+                        style={{ background: 'linear-gradient(135deg, #3b82f6, #06b6d4)' }}>
                         <Building2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Accounts</h1>
-                        <p className="text-xs text-muted-text">Manage client organizations and companies.</p>
+                        <h1 className="text-2xl font-bold text-white">Accounts</h1>
+                        <p className="text-xs text-slate-500">Manage client organizations and companies.</p>
                     </div>
                 </div>
                 <Link href="/dashboard/accounts/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-transform hover:-translate-y-0.5 duration-200">
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg transition-all duration-200"
+                    style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                     <Plus className="w-4 h-4" /> Add Account
                 </Link>
             </div>
 
             {/* Card */}
-            <div className="rounded-2xl overflow-hidden glass-card">
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                 {/* Toolbar */}
-                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-white/5">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text`} />
-                        <input type="text" placeholder="Search names…"
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                        <input type="text" placeholder="Search names or industries…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10`}
-                        />
+                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
+                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
+                            onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(99,102,241,0.5)'; }}
+                            onBlur={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; }} />
                     </div>
+                    <select value={filterIndustry} onChange={(e) => setFilterIndustry(e.target.value)}
+                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none transition-all sm:w-48"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <option value="">All Industries…</option>
+                        {uniqueIndustries.map(ind => (
+                            <option key={ind as string} value={ind as string}>{ind as string}</option>
+                        ))}
+                    </select>
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-border-subtle">
+                <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-12 flex justify-center">
-                            <Loader2 className="w-6 h-6 animate-spin text-crm-500" />
-                        </div>
-                    ) : filteredAccounts.length === 0 ? (
-                        <div className="p-16 flex flex-col items-center justify-center text-center">
-                            <div className="w-16 h-16 rounded-full bg-background-subtle flex items-center justify-center mb-4 border border-border-subtle shadow-inner">
-                                <Building className="w-8 h-8 text-muted-text opacity-50" />
-                            </div>
-                            <h3 className="text-base font-semibold text-foreground">No accounts found</h3>
-                            <p className="text-muted-text mt-1 text-sm max-w-[250px]">Get started by creating a new organization record.</p>
-                            <Link href="/dashboard/accounts/new" className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-xl text-crm-500 font-bold text-sm bg-crm-500/10 hover:bg-crm-500/20 transition-all">
-                                Create Account <Plus className="w-4 h-4" />
+                        <div className="p-12 text-center text-slate-500 text-sm">Loading accounts…</div>
+                    ) : sortedAccounts.length === 0 ? (
+                        <div className="p-16 flex flex-col items-center justify-center">
+                            <Building className="w-10 h-10 text-slate-700 mb-3" />
+                            <h3 className="text-base font-semibold text-slate-400">No accounts found</h3>
+                            <p className="text-slate-600 mt-1 text-sm">Get started by creating a new account.</p>
+                            <Link href="/dashboard/accounts/new" className="mt-5 text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors">
+                                Create Account →
                             </Link>
                         </div>
                     ) : (
                         <table className="min-w-full">
-                            <thead className="border-b border-border-subtle bg-background-subtle/30">
-                                <tr>
-                                    {['Account Name', 'Street', 'City', 'State / Prov', 'ZIP', 'Country', 'Phone / Website', 'Created'].map(h => (
+                            <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                                    {['Account Name', 'Industry', 'Street', 'City', 'Country', 'Actions'].map(h => (
                                         <th key={h} scope="col" className={thCls}>{h}</th>
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border-subtle">
-                                {filteredAccounts.map((account) => (
+                            <tbody>
+                                {sortedAccounts.map((account) => {
+                                    const isActive = account.is_active !== false;
+                                    const rowStyle = isActive ? { borderBottom: '1px solid rgba(255,255,255,0.04)' } : { borderBottom: '1px solid rgba(255,255,255,0.04)', opacity: 0.5, filter: 'grayscale(100%)' };
+                                    return (
                                     <tr key={account.id}
                                         onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                                        className="cursor-pointer group transition-colors duration-150 hover:bg-background-subtle/50"
-                                    >
+                                        className="cursor-pointer group transition-all duration-150"
+                                        style={rowStyle}
+                                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = isActive ? 'rgba(99,102,241,0.07)' : 'rgba(255,255,255,0.02)'; }}
+                                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm bg-gradient-to-br from-crm-500 to-blue-500">
-                                                    {account.name.charAt(0)}
+                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm"
+                                                    style={{ background: isActive ? 'linear-gradient(135deg, #6366f1, #3b82f6)' : '#64748b' }}>
+                                                    {account.name?.charAt(0) || '?'}
                                                 </div>
-                                                <span className="text-sm font-medium text-foreground group-hover:text-crm-500 transition-colors">{account.name}</span>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-medium text-slate-200">{account.name || 'Unnamed'}</span>
+                                                    {!isActive && <span className="text-[10px] text-slate-400 uppercase tracking-wider">Inactive</span>}
+                                                </div>
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.street || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.city || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.state_or_province || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.zip_code || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.country || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.industry || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.street || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.city || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.country || '—'}</span></td>
                                         <td className={tdCls}>
-                                            <div className="text-sm text-foreground">{account.phone || '—'}</div>
-                                            {account.website && (
-                                                <div className="text-[11px] text-crm-500 hover:text-crm-600 mt-0.5 font-semibold">
-                                                    <a href={account.website.startsWith('http') ? account.website : `https://${account.website}`}
-                                                        target="_blank" rel="noopener noreferrer" onClick={e => e.stopPropagation()}>Website ↗</a>
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className={`${tdCls} ltr:text-right rtl:text-left text-sm text-muted-text font-medium`}>
-                                            {new Date(account.created_at).toLocaleDateString()}
+                                            <div className="flex items-center gap-2">
+                                                {!isActive && (
+                                                    <button onClick={(e) => handleReactivate(e, account.id)}
+                                                        className="px-3 py-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                        Reactivate
+                                                    </button>
+                                                )}
+                                                <span className="text-xs text-slate-500">
+                                                    {new Date(account.created_at).toLocaleDateString()}
+                                                </span>
+                                            </div>
                                         </td>
                                     </tr>
-                                ))}
+                                )})}
                             </tbody>
                         </table>
                     )}

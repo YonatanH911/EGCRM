@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import {
-    Building2, ArrowLeft, Loader2, Check, Trash2,
+    Building2, ArrowLeft, Loader2, Check, Trash2, PowerOff, Power,
     ChevronDown, ChevronUp, User, Package, Mail, Phone, Banknote, Search, X
 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
@@ -88,6 +88,7 @@ export default function EditAccountPage() {
     const [loading, setLoading] = useState(false);
     const [initialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState('');
+    const [isActive, setIsActive] = useState(true);
 
     const [formData, setFormData] = useState({
         name: '', website: '', phone: '',
@@ -112,6 +113,7 @@ export default function EditAccountPage() {
                     api.get(`/deposits`),
                 ]);
                 const d = accRes.data;
+                setIsActive(d.is_active !== false);
                 setFormData({
                     name: d.name || '', website: d.website || '',
                     phone: d.phone || '', street: d.street || '', city: d.city || '',
@@ -128,8 +130,6 @@ export default function EditAccountPage() {
         };
         if (accountId) fetchAll();
     }, [accountId]);
-
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -153,6 +153,20 @@ export default function EditAccountPage() {
             router.push('/dashboard/accounts');
         } catch (err: any) {
             setError(err.response?.data?.detail || 'Failed to delete account');
+            setLoading(false);
+        }
+    };
+
+    const handleToggleActive = async () => {
+        const action = isActive ? 'deactivate' : 'reactivate';
+        if (isActive && !confirm('Deactivate this account? It will be moved to the bottom of the list and greyed out.')) return;
+        setLoading(true);
+        try {
+            await api.patch(`/accounts/${accountId}/${action}`);
+            setIsActive(!isActive);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || `Failed to ${action} account`);
+        } finally {
             setLoading(false);
         }
     };
@@ -233,11 +247,18 @@ export default function EditAccountPage() {
                     <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/20">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isActive ? 'bg-gradient-to-br from-blue-500 to-cyan-500 shadow-blue-500/20' : 'bg-slate-600'}`}>
                         <Building2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">{formData.name || 'Edit Account'}</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className={`text-2xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>{formData.name || 'Edit Account'}</h1>
+                            {!isActive && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                    Inactive
+                                </span>
+                            )}
+                        </div>
                         <p className="text-xs text-muted-text">Update this organizational record.</p>
                     </div>
                 </div>
@@ -279,10 +300,20 @@ export default function EditAccountPage() {
 
                     {/* Actions */}
                     <div className="flex justify-between items-center gap-3 pt-8 border-t border-border-subtle">
-                        <button type="button" onClick={handleDelete} disabled={loading}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
-                            <Trash2 className="w-4 h-4" /> Delete Account
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button type="button" onClick={handleDelete} disabled={loading}
+                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
+                                <Trash2 className="w-4 h-4" /> Delete
+                            </button>
+                            <button type="button" onClick={handleToggleActive} disabled={loading}
+                                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl border transition-all disabled:opacity-50 ${
+                                    isActive
+                                        ? 'text-slate-400 bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'
+                                        : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                                }`}>
+                                {isActive ? <><PowerOff className="w-4 h-4" /> Deactivate</> : <><Power className="w-4 h-4" /> Reactivate</>}
+                            </button>
+                        </div>
                         <div className="flex gap-3">
                             <Link href="/dashboard/accounts"
                                 className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">

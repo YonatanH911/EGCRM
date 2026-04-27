@@ -67,6 +67,7 @@ class Account(Base):
     zip_code = Column(String(50), nullable=True)
     country = Column(String(255), nullable=True)
     
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     contacts = relationship("Contact", back_populates="account")
@@ -130,6 +131,7 @@ class Contract(Base):
     paid_by                     = Column(String(255), nullable=True)
 
     account_id = Column(Integer, ForeignKey("accounts.id"))
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     account = relationship("Account", back_populates="contracts")

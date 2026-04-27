@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Loader2, Check, FileText, Trash2, User, CreditCard } from 'lucide-react';
+import { ArrowLeft, Loader2, Check, FileText, Trash2, PowerOff, Power, User, CreditCard } from 'lucide-react';
 import api from '@/lib/api';
 
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
@@ -58,6 +58,7 @@ export default function EditContractPage() {
     const [saving, setSaving]                 = useState(false);
     const [error, setError]                   = useState('');
     const [contacts, setContacts]             = useState<Contact[]>([]);
+    const [isActive, setIsActive]             = useState(true);
     const [form, setForm]                     = useState<Record<FormField, string>>(emptyForm);
 
     useEffect(() => {
@@ -68,6 +69,7 @@ export default function EditContractPage() {
                     api.get('/contacts'),
                 ]);
                 const c = contractRes.data;
+                setIsActive(c.is_active !== false);
                 setForm({
                     title:    c.title    || '',
                     status:   c.status   || 'Draft',
@@ -136,6 +138,20 @@ export default function EditContractPage() {
         }
     };
 
+    const handleToggleActive = async () => {
+        const action = isActive ? 'deactivate' : 'reactivate';
+        if (isActive && !confirm('Deactivate this contract? It will be moved to the bottom of the list and greyed out.')) return;
+        setLoading(true);
+        try {
+            await api.patch(`/contracts/${id}/${action}`);
+            setIsActive(!isActive);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || `Failed to ${action} contract`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (initialLoading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -168,11 +184,18 @@ export default function EditContractPage() {
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isActive ? 'bg-gradient-to-br from-purple-500 to-indigo-500' : 'bg-slate-600'}`}>
                         <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Edit Contract</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className={`text-2xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>Edit Contract</h1>
+                            {!isActive && (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                    Inactive
+                                </span>
+                            )}
+                        </div>
                         <p className="text-xs text-muted-text">{form.title || 'Update contract details below'}</p>
                     </div>
                 </div>
@@ -277,10 +300,20 @@ export default function EditContractPage() {
 
                 {/* Actions */}
                 <div className="flex justify-between items-center gap-3 pt-2">
-                    <button type="button" onClick={handleDelete} disabled={loading || saving}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
-                        <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contract</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                        <button type="button" onClick={handleDelete} disabled={loading || saving}
+                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
+                            <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contract</span>
+                        </button>
+                        <button type="button" onClick={handleToggleActive} disabled={loading || saving}
+                            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl border transition-all disabled:opacity-50 ${
+                                isActive
+                                    ? 'text-slate-400 bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'
+                                    : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                            }`}>
+                            {isActive ? <><PowerOff className="w-4 h-4" /> <span className="hidden sm:inline">Deactivate</span></> : <><Power className="w-4 h-4" /> <span className="hidden sm:inline">Reactivate</span></>}
+                        </button>
+                    </div>
                     <div className="flex gap-3">
                         <Link href="/dashboard/contracts"
                             className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl">
