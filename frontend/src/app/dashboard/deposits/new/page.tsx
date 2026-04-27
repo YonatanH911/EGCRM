@@ -36,7 +36,7 @@ export default function NewDepositPage() {
         supplier: '',
         product_name: '',
         version: '',
-        box: '',
+        is_confirmation_sent: false,
         received_by: ''
     });
 
@@ -189,15 +189,18 @@ export default function NewDepositPage() {
                                 </div>
 
                                 <div>
-                                    <label htmlFor="box" className="block text-sm font-medium text-foreground">Box</label>
+                                    <label htmlFor="is_confirmation_sent" className="block text-sm font-medium text-foreground">Confirmation Sent?</label>
                                     <div className="mt-1">
-                                        <input
-                                            type="text"
-                                            id="box"
-                                            value={formData.box}
-                                            onChange={(e) => setFormData({ ...formData, box: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
-                                        />
+                                        <select
+                                            id="is_confirmation_sent"
+                                            name="is_confirmation_sent"
+                                            value={formData.is_confirmation_sent ? 'true' : 'false'}
+                                            onChange={(e) => setFormData({ ...formData, is_confirmation_sent: e.target.value === 'true' })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
+                                        >
+                                            <option value="false">No</option>
+                                            <option value="true">Yes</option>
+                                        </select>
                                     </div>
                                 </div>
 

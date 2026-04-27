@@ -159,7 +159,7 @@ class Deposit(Base):
     product_name = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
     supplier = Column(String(255), nullable=True)
-    box = Column(String(255), nullable=True)
+    is_confirmation_sent = Column(Boolean, default=False, nullable=True)
     received_by = Column(String(255), nullable=True)
     
     account_id = Column(Integer, ForeignKey("accounts.id"))

@@ -10,7 +10,7 @@ interface Vault { id: number; name: string; }
 interface Account { id: number; name: string; }
 interface DepositForm {
     product_name: string; version: string; supplier: string; date: string;
-    vault_id: string; box: string; reference_number: string; received_by: string;
+    vault_id: string; is_confirmation_sent: boolean; reference_number: string; received_by: string;
 }
 
 const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
@@ -22,7 +22,7 @@ export default function EditDepositPage() {
 
     const [form, setForm] = useState<DepositForm>({
         product_name: '', version: '', supplier: '', date: '',
-        vault_id: '', box: '', reference_number: '', received_by: '',
+        vault_id: '', is_confirmation_sent: false, reference_number: '', received_by: '',
     });
     const [vaults, setVaults] = useState<Vault[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -42,7 +42,7 @@ export default function EditDepositPage() {
                 setForm({
                     product_name: d.product_name || '', version: d.version || '',
                     supplier: d.supplier || '', date: d.date ? d.date.substring(0, 10) : '',
-                    vault_id: d.vault_id ? String(d.vault_id) : '', box: d.box || '',
+                    vault_id: d.vault_id ? String(d.vault_id) : '', is_confirmation_sent: d.is_confirmation_sent || false,
                     reference_number: d.reference_number || '', received_by: d.received_by || '',
                 });
                 setVaults(vaultsRes.data);
@@ -157,7 +157,13 @@ export default function EditDepositPage() {
                         </select>
                     </div>
 
-                    <Field label="Box" name="box" placeholder="e.g. IAI" />
+                    <div>
+                        <label className={labelCls}>Confirmation Sent?</label>
+                        <select name="is_confirmation_sent" value={form.is_confirmation_sent ? 'true' : 'false'} onChange={(e) => setForm(prev => ({ ...prev, is_confirmation_sent: e.target.value === 'true' }))} className={`${inputCls} *:bg-background`}>
+                            <option value="false">No</option>
+                            <option value="true">Yes</option>
+                        </select>
+                    </div>
                     <Field label="Deposit Number" name="reference_number" placeholder="e.g. 2022061901" />
                     <Field label="Received By" name="received_by" placeholder="e.g. Delivery" />
                 </div>

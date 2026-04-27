@@ -9,7 +9,7 @@ import api from '@/lib/api';
 interface Vault { id: number; name: string; }
 interface Deposit {
     id: number; reference_number: string; date: string | null;
-    vault: Vault | null; box: string | null; version: string | null;
+    vault: Vault | null; is_confirmation_sent: boolean | null; version: string | null;
     supplier: string | null; received_by: string | null; product_name: string | null;
 }
 
@@ -84,7 +84,7 @@ export default function DepositsPage() {
                                 <th className={thCls}><div className="flex items-center gap-1"><User className="w-3 h-3" />Supplier</div></th>
                                 <th className={thCls}><div className="flex items-center gap-1"><Calendar className="w-3 h-3" />Date</div></th>
                                 <th className={thCls}><div className="flex items-center gap-1"><Shield className="w-3 h-3" />Vault</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Box className="w-3 h-3" />Box</div></th>
+                                <th className={thCls}><div className="flex items-center gap-1"><Box className="w-3 h-3" />Confirmed?</div></th>
                                 <th className={thCls}><div className="flex items-center gap-1"><Landmark className="w-3 h-3" />Ref #</div></th>
                                 <th className={thCls}><div className="flex items-center gap-1"><User className="w-3 h-3" />Received By</div></th>
                             </tr>
@@ -121,7 +121,11 @@ export default function DepositsPage() {
                                                 {deposit.vault ? deposit.vault.name : dash}
                                             </div>
                                         </td>
-                                        <td className={tdCls}><div className="text-sm text-muted-text whitespace-nowrap">{deposit.box || dash}</div></td>
+                                        <td className={tdCls}>
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold ${deposit.is_confirmation_sent ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`} style={{ border: '1px solid' }}>
+                                                {deposit.is_confirmation_sent ? 'Yes' : 'No'}
+                                            </span>
+                                        </td>
                                         <td className={tdCls}>
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-mono font-semibold"
                                                 style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
