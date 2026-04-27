@@ -20,29 +20,29 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
-            title: 'Dynamic Task Types',
-            description: 'You can now create and manage custom activity types with unique colors. Head to the Activities page and click "Manage Types" to get started.',
+            title: 'Deactivate Feature',
+            description: 'You can now soft-delete Accounts and Contracts. Deactivated items are styled gray and moved to the bottom of the list with a one-click reactivate button.',
             icon: Sparkles,
             color: 'text-indigo-500',
             bg: 'bg-indigo-500/10',
         },
         {
-            title: 'Refined Contract Module',
-            description: 'Contracts now feature dedicated "Beneficiary" and "Supplier" contact cubes and a new "Paid By" dropdown in the billing section.',
+            title: 'Refined Deposit Fields',
+            description: 'The "Box" field has been removed and replaced with an "Is Confirmation Sent?" indicator. You can also now track a custom "Description" for every deposit.',
             icon: Layout,
-            color: 'text-purple-500',
-            bg: 'bg-purple-500/10',
-        },
-        {
-            title: 'Linked Deposit Suppliers',
-            description: 'The Supplier field in Deposits is now a searchable dropdown linked to your Accounts database, ensuring consistent data entry.',
-            icon: Boxes,
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
         },
         {
-            title: 'Data Integrity Fixes',
-            description: 'Accounts are now correctly imported with their names instead of internal GUIDs. We also added a database cleanup utility for resets.',
+            title: 'Automatic Account Linking',
+            description: 'The Related Contacts and Related Deposits sections on Accounts now automatically link records where the company name or supplier matches the account name.',
+            icon: Boxes,
+            color: 'text-purple-500',
+            bg: 'bg-purple-500/10',
+        },
+        {
+            title: 'Contract Cross-Linking',
+            description: 'Contracts now support specifying the Product Name directly on the contract, and you can cross-link a "Related Deposit" dropdown in the Billing Information section.',
             icon: Database,
             color: 'text-blue-500',
             bg: 'bg-blue-500/10',
