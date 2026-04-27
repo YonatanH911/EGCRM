@@ -10,7 +10,7 @@ interface Vault { id: number; name: string; }
 interface Account { id: number; name: string; }
 interface DepositForm {
     product_name: string; version: string; supplier: string; date: string;
-    vault_id: string; is_confirmation_sent: boolean; reference_number: string; received_by: string;
+    vault_id: string; is_confirmation_sent: boolean; reference_number: string; received_by: string; description: string;
 }
 
 const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
@@ -22,7 +22,7 @@ export default function EditDepositPage() {
 
     const [form, setForm] = useState<DepositForm>({
         product_name: '', version: '', supplier: '', date: '',
-        vault_id: '', is_confirmation_sent: false, reference_number: '', received_by: '',
+        vault_id: '', is_confirmation_sent: false, reference_number: '', received_by: '', description: '',
     });
     const [vaults, setVaults] = useState<Vault[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -43,7 +43,7 @@ export default function EditDepositPage() {
                     product_name: d.product_name || '', version: d.version || '',
                     supplier: d.supplier || '', date: d.date ? d.date.substring(0, 10) : '',
                     vault_id: d.vault_id ? String(d.vault_id) : '', is_confirmation_sent: d.is_confirmation_sent || false,
-                    reference_number: d.reference_number || '', received_by: d.received_by || '',
+                    reference_number: d.reference_number || '', received_by: d.received_by || '', description: d.description || '',
                 });
                 setVaults(vaultsRes.data);
                 setAccounts(accountsRes.data);
@@ -87,7 +87,7 @@ export default function EditDepositPage() {
     }
 
     const Field = ({ label, name, placeholder, type = 'text' }: {
-        label: string; name: keyof Omit<DepositForm, 'is_confirmation_sent'>; placeholder?: string; type?: string;
+        label: string; name: keyof Omit<DepositForm, 'is_confirmation_sent' | 'description'>; placeholder?: string; type?: string;
     }) => (
         <div>
             <label className={labelCls}>{label}</label>
@@ -166,6 +166,18 @@ export default function EditDepositPage() {
                     </div>
                     <Field label="Deposit Number" name="reference_number" placeholder="e.g. 2022061901" />
                     <Field label="Received By" name="received_by" placeholder="e.g. Delivery" />
+                    
+                    <div className="sm:col-span-2">
+                        <label className={labelCls}>Description</label>
+                        <textarea
+                            name="description"
+                            rows={3}
+                            value={form.description}
+                            onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+                            className={inputCls}
+                            placeholder="Add deposit notes (optional)..."
+                        />
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-3 pt-3 border-t border-border-subtle">

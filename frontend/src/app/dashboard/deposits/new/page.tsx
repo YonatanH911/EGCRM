@@ -36,6 +36,7 @@ export default function NewDepositPage() {
         supplier: '',
         product_name: '',
         version: '',
+        description: '',
         is_confirmation_sent: false,
         received_by: ''
     });
@@ -292,6 +293,19 @@ export default function NewDepositPage() {
                                             onChange={(e) => setFormData({ ...formData, received_by: e.target.value })}
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
                                             placeholder="e.g. Delivery"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="description" className="block text-sm font-medium text-foreground">Description</label>
+                                    <div className="mt-1">
+                                        <textarea
+                                            id="description"
+                                            rows={3}
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                            placeholder="Add deposit notes (optional)..."
                                         />
                                     </div>
                                 </div>
