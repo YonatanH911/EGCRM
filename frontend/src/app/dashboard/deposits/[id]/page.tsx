@@ -87,7 +87,7 @@ export default function EditDepositPage() {
     }
 
     const Field = ({ label, name, placeholder, type = 'text' }: {
-        label: string; name: keyof DepositForm; placeholder?: string; type?: string;
+        label: string; name: keyof Omit<DepositForm, 'is_confirmation_sent'>; placeholder?: string; type?: string;
     }) => (
         <div>
             <label className={labelCls}>{label}</label>
