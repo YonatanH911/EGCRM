@@ -7,6 +7,7 @@ import { ArrowLeft, Loader2, Check, FileText, Trash2, PowerOff, Power, User, Cre
 import api from '@/lib/api';
 
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
+interface Deposit { id: number; reference_number: string; product_name?: string; }
 
 const CONTRACT_STATUSES = ['Draft', 'Active', 'Expired', 'Terminated'];
 
@@ -15,6 +16,7 @@ const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placehol
 
 type FormField =
     'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
+    'product_name' | 'deposit_id' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
     'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
 
@@ -43,7 +45,7 @@ const CUBES = [
 
 const emptyForm: Record<FormField, string> = {
     title: '', status: 'Draft', value: '0', currency: 'USD',
-    start_date: '', end_date: '', paid_by: '',
+    start_date: '', end_date: '', paid_by: '', product_name: '', deposit_id: '',
     beneficiary_management_contact: '', beneficiary_technical_contact: '', beneficiary_financial_contact: '',
     supplier_management_contact: '',   supplier_technical_contact: '',   supplier_financial_contact: '',
 };
@@ -58,15 +60,17 @@ export default function EditContractPage() {
     const [saving, setSaving]                 = useState(false);
     const [error, setError]                   = useState('');
     const [contacts, setContacts]             = useState<Contact[]>([]);
+    const [deposits, setDeposits]             = useState<Deposit[]>([]);
     const [isActive, setIsActive]             = useState(true);
     const [form, setForm]                     = useState<Record<FormField, string>>(emptyForm);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [contractRes, contactsRes] = await Promise.all([
+                const [contractRes, contactsRes, depositsRes] = await Promise.all([
                     api.get(`/contracts/${id}`),
                     api.get('/contacts'),
+                    api.get('/deposits'),
                 ]);
                 const c = contractRes.data;
                 setIsActive(c.is_active !== false);
@@ -75,6 +79,8 @@ export default function EditContractPage() {
                     status:   c.status   || 'Draft',
                     value:    c.value != null ? String(c.value) : '0',
                     currency: c.currency || 'USD',
+                    product_name: c.product_name || '',
+                    deposit_id: c.deposit_id != null ? String(c.deposit_id) : '',
                     start_date: c.start_date ? c.start_date.slice(0, 10) : '',
                     end_date:   c.end_date   ? c.end_date.slice(0, 10)   : '',
                     beneficiary_management_contact: c.beneficiary_management_contact || '',
@@ -86,6 +92,7 @@ export default function EditContractPage() {
                     paid_by:                        c.paid_by                        || '',
                 });
                 setContacts(contactsRes.data);
+                setDeposits(depositsRes.data);
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to load contract');
             } finally {
@@ -107,6 +114,8 @@ export default function EditContractPage() {
                 ...form,
                 value:      Number(form.value) || 0,
                 account_id: null,
+                deposit_id: form.deposit_id ? Number(form.deposit_id) : null,
+                product_name: form.product_name || null,
                 start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
                 end_date:   form.end_date   ? new Date(form.end_date).toISOString()   : null,
                 beneficiary_management_contact: form.beneficiary_management_contact || null,
@@ -225,7 +234,10 @@ export default function EditContractPage() {
                                 {CONTRACT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
                             </select>
                         </div>
-                        <div />
+                        <div>
+                            <label className={labelCls}>Product Name</label>
+                            <input type="text" value={form.product_name} onChange={set('product_name')} placeholder="e.g. Master License" className={inputCls} />
+                        </div>
                         <div>
                             <label className={labelCls}>Date Contract Signed</label>
                             <input type="date" value={form.start_date} onChange={set('start_date')} className={inputCls} />
@@ -294,6 +306,18 @@ export default function EditContractPage() {
                         <div className="col-span-1 sm:col-span-2">
                             <label className={labelCls}>Paid By</label>
                             <ContactDropdown field="paid_by" />
+                        </div>
+                        <div className="col-span-1 sm:col-span-2">
+                            <label className={labelCls}>Related Deposit</label>
+                            <select value={form.deposit_id} onChange={set('deposit_id')}
+                                className={`${inputCls} *:bg-background *:text-foreground`}>
+                                <option value="">— None —</option>
+                                {deposits.map(d => (
+                                    <option key={d.id} value={d.id}>
+                                        {d.reference_number} {d.product_name ? `- ${d.product_name}` : ''}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>

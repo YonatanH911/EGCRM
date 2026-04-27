@@ -131,6 +131,8 @@ class Contract(Base):
     paid_by                     = Column(String(255), nullable=True)
 
     account_id = Column(Integer, ForeignKey("accounts.id"))
+    deposit_id = Column(Integer, ForeignKey("deposits.id"), nullable=True)
+    product_name = Column(String(255), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

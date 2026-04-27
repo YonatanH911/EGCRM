@@ -126,6 +126,8 @@ class ContractBase(BaseSchema):
     supplier_financial_contact: Optional[str] = None
     paid_by: Optional[str] = None
     account_id: Optional[int] = None
+    deposit_id: Optional[int] = None
+    product_name: Optional[str] = None
     is_active: Optional[bool] = True
 
 class ContractCreate(ContractBase):
