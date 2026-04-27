@@ -20,6 +20,8 @@ interface Contact {
     email?: string;
     phone?: string;
     job_title?: string;
+    company_name?: string;
+    supplier?: string;
     account_id?: number | null;
 }
 
@@ -29,6 +31,7 @@ interface Deposit {
     amount: number;
     status: string;
     product_name?: string;
+    supplier?: string;
     date?: string;
     account_id?: number | null;
 }
@@ -221,11 +224,19 @@ export default function EditAccountPage() {
         );
     }
 
-    const linkedContacts = allContacts.filter(c => c.account_id === Number(accountId));
-    const unlinkedContactsList = allContacts.filter(c => c.account_id !== Number(accountId));
+    const linkedContacts = allContacts.filter(c => 
+        c.account_id === Number(accountId) || 
+        (formData.name && (c.company_name?.toLowerCase() === formData.name.toLowerCase() || c.supplier?.toLowerCase() === formData.name.toLowerCase()))
+    );
+    const linkedContactIds = new Set(linkedContacts.map(c => c.id));
+    const unlinkedContactsList = allContacts.filter(c => !linkedContactIds.has(c.id));
 
-    const linkedDeposits = allDeposits.filter(d => d.account_id === Number(accountId));
-    const unlinkedDepositsList = allDeposits.filter(d => d.account_id !== Number(accountId));
+    const linkedDeposits = allDeposits.filter(d => 
+        d.account_id === Number(accountId) || 
+        (formData.name && d.supplier?.toLowerCase() === formData.name.toLowerCase())
+    );
+    const linkedDepositIds = new Set(linkedDeposits.map(d => d.id));
+    const unlinkedDepositsList = allDeposits.filter(d => !linkedDepositIds.has(d.id));
 
     const Field = ({ label, field, type = 'text', placeholder, colSpan2 = false }: {
         label: string; field: keyof typeof formData; type?: string; placeholder?: string; colSpan2?: boolean;
