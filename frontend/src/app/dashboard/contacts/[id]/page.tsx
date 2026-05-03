@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Users2, ArrowLeft, Loader2, Check, Trash2 } from 'lucide-react';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
@@ -146,14 +147,16 @@ export default function EditContactPage() {
 
                         <div>
                             <label className={labelCls}>Associated Account</label>
-                            <select value={formData.account_id}
-                                onChange={e => setFormData({ ...formData, account_id: e.target.value })}
-                                className={`${inputCls} *:bg-background *:text-foreground`} >
-                                <option value="">— No Account —</option>
-                                {accounts.map(acc => (
-                                    <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                ))}
-                            </select>
+                            <SearchableDropdown
+                                value={formData.account_id}
+                                onChange={(value) => setFormData({ ...formData, account_id: value })}
+                                placeholder="No Account"
+                                className={inputCls}
+                                options={[
+                                    { value: '', label: 'No Account' },
+                                    ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
+                                ]}
+                            />
                         </div>
 
                         <Field label="Supplier" field="supplier" placeholder="e.g. Parts Supplier LLC" />

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 /* ── shared dark-table helpers ── */
 const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
@@ -93,14 +94,18 @@ export default function AccountsPage() {
                             onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(99,102,241,0.5)'; }}
                             onBlur={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; }} />
                     </div>
-                    <select value={filterIndustry} onChange={(e) => setFilterIndustry(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none transition-all sm:w-48"
-                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                        <option value="">All Industries…</option>
-                        {uniqueIndustries.map(ind => (
-                            <option key={ind as string} value={ind as string}>{ind as string}</option>
-                        ))}
-                    </select>
+                    <div className="sm:w-48">
+                        <SearchableDropdown
+                            value={filterIndustry}
+                            onChange={setFilterIndustry}
+                            placeholder="All Industries..."
+                            className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            options={[
+                                { value: '', label: 'All Industries...' },
+                                ...uniqueIndustries.map(ind => ({ value: String(ind), label: String(ind) })),
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 {/* Table */}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Shield, Plus, Search, MapPin, Database } from 'lucide-react';
 import api from '@/lib/api';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; }
 
@@ -74,12 +75,18 @@ export default function VaultsPage() {
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
-                    <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none sm:w-44 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
-                    >
-                        <option value="">All Statuses</option>
-                        {uniqueStatuses.map(status => (<option key={status as string} value={status as string}>{status as string}</option>))}
-                    </select>
+                    <div className="sm:w-44">
+                        <SearchableDropdown
+                            value={filterStatus}
+                            onChange={setFilterStatus}
+                            placeholder="All Statuses"
+                            className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            options={[
+                                { value: '', label: 'All Statuses' },
+                                ...uniqueStatuses.map(status => ({ value: String(status), label: String(status) })),
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">

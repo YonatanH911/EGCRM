@@ -5,11 +5,22 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Check, FileText, Trash2, PowerOff, Power, User, CreditCard } from 'lucide-react';
 import api from '@/lib/api';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
 interface Deposit { id: number; reference_number: string; product_name?: string; }
 
 const CONTRACT_STATUSES = ['Draft', 'Active', 'Expired', 'Terminated'];
+const CURRENCIES = [
+    { value: 'USD', label: 'USD - US Dollar' },
+    { value: 'EUR', label: 'EUR - Euro' },
+    { value: 'GBP', label: 'GBP - British Pound' },
+    { value: 'ILS', label: 'ILS - Israeli Shekel' },
+    { value: 'JPY', label: 'JPY - Japanese Yen' },
+    { value: 'CAD', label: 'CAD - Canadian Dollar' },
+    { value: 'AUD', label: 'AUD - Australian Dollar' },
+    { value: 'CHF', label: 'CHF - Swiss Franc' },
+];
 
 const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
@@ -173,15 +184,19 @@ export default function EditContractPage() {
     }
 
     const ContactDropdown = ({ field }: { field: FormField }) => (
-        <select value={form[field]} onChange={set(field)}
-            className={`${inputCls} *:bg-background *:text-foreground`}>
-            <option value="">— None —</option>
-            {contacts.map(c => (
-                <option key={c.id} value={`${c.first_name} ${c.last_name}`}>
-                    {c.first_name} {c.last_name}{c.job_title ? ` · ${c.job_title}` : ''}
-                </option>
-            ))}
-        </select>
+        <SearchableDropdown
+            value={form[field]}
+            onChange={(value) => setForm(prev => ({ ...prev, [field]: value }))}
+            placeholder="None"
+            className={inputCls}
+            options={[
+                { value: '', label: 'None' },
+                ...contacts.map(c => ({
+                    value: `${c.first_name} ${c.last_name}`,
+                    label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
+                })),
+            ]}
+        />
     );
 
     return (
@@ -216,7 +231,7 @@ export default function EditContractPage() {
 
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Contract Details */}
-                <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+                <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-indigo-500" />
                         <h2 className="text-sm font-semibold text-foreground">Contract Details</h2>
@@ -229,10 +244,12 @@ export default function EditContractPage() {
                         </div>
                         <div>
                             <label className={labelCls}>Status</label>
-                            <select value={form.status} onChange={set('status')}
-                                className={`${inputCls} *:bg-background *:text-foreground`}>
-                                {CONTRACT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                            </select>
+                            <SearchableDropdown
+                                value={form.status}
+                                onChange={(value) => setForm(prev => ({ ...prev, status: value }))}
+                                className={inputCls}
+                                options={CONTRACT_STATUSES.map(s => ({ value: s, label: s }))}
+                            />
                         </div>
                         <div>
                             <label className={labelCls}>Product Name</label>
@@ -252,7 +269,7 @@ export default function EditContractPage() {
                 {/* Beneficiary + Supplier cubes side by side */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     {CUBES.map(cube => (
-                        <div key={cube.key} className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+                        <div key={cube.key} className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                             <div className="px-5 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${cube.gradient}`}>
                                     <User className="w-3.5 h-3.5 text-white" />
@@ -272,7 +289,7 @@ export default function EditContractPage() {
                 </div>
 
                 {/* Billing */}
-                <div className="glass-card rounded-2xl overflow-hidden border border-border-subtle">
+                <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-indigo-500" />
                         <h2 className="text-sm font-semibold text-foreground">Billing Information</h2>
@@ -280,17 +297,12 @@ export default function EditContractPage() {
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label className={labelCls}>Currency</label>
-                            <select value={form.currency} onChange={set('currency')}
-                                className={`${inputCls} *:bg-background *:text-foreground`}>
-                                <option value="USD">USD — US Dollar</option>
-                                <option value="EUR">EUR — Euro</option>
-                                <option value="GBP">GBP — British Pound</option>
-                                <option value="ILS">ILS — Israeli Shekel</option>
-                                <option value="JPY">JPY — Japanese Yen</option>
-                                <option value="CAD">CAD — Canadian Dollar</option>
-                                <option value="AUD">AUD — Australian Dollar</option>
-                                <option value="CHF">CHF — Swiss Franc</option>
-                            </select>
+                            <SearchableDropdown
+                                value={form.currency}
+                                onChange={(value) => setForm(prev => ({ ...prev, currency: value }))}
+                                className={inputCls}
+                                options={CURRENCIES}
+                            />
                         </div>
                         <div>
                             <label className={labelCls}>Annual Fee</label>
@@ -309,15 +321,19 @@ export default function EditContractPage() {
                         </div>
                         <div className="col-span-1 sm:col-span-2">
                             <label className={labelCls}>Related Deposit</label>
-                            <select value={form.deposit_id} onChange={set('deposit_id')}
-                                className={`${inputCls} *:bg-background *:text-foreground`}>
-                                <option value="">— None —</option>
-                                {deposits.map(d => (
-                                    <option key={d.id} value={d.id}>
-                                        {d.reference_number} {d.product_name ? `- ${d.product_name}` : ''}
-                                    </option>
-                                ))}
-                            </select>
+                            <SearchableDropdown
+                                value={form.deposit_id}
+                                onChange={(value) => setForm(prev => ({ ...prev, deposit_id: value }))}
+                                placeholder="None"
+                                className={inputCls}
+                                options={[
+                                    { value: '', label: 'None' },
+                                    ...deposits.map(d => ({
+                                        value: String(d.id),
+                                        label: `${d.reference_number}${d.product_name ? ` - ${d.product_name}` : ''}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                     </div>
                 </div>

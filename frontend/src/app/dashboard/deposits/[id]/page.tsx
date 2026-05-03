@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Landmark, ArrowLeft, Loader2, Check } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface Vault { id: number; name: string; }
 interface Account { id: number; name: string; }
@@ -133,36 +134,45 @@ export default function EditDepositPage() {
                     
                     <div>
                         <label className={labelCls}>Supplier</label>
-                        <select
-                            name="supplier"
+                        <SearchableDropdown
                             value={form.supplier}
-                            onChange={handleChange}
-                            className={`${inputCls} *:bg-background`}
-                        >
-                            <option value="">— Select Supplier —</option>
-                            {accounts.map(acc => (
-                                <option key={acc.id} value={acc.name}>{acc.name}</option>
-                            ))}
-                        </select>
+                            onChange={(value) => setForm(prev => ({ ...prev, supplier: value }))}
+                            placeholder="Select Supplier"
+                            className={inputCls}
+                            options={[
+                                { value: '', label: 'Select Supplier' },
+                                ...accounts.map(acc => ({ value: acc.name, label: acc.name })),
+                            ]}
+                        />
                     </div>
 
                     <Field label="Date Received" name="date" type="date" />
 
                     <div>
                         <label className={labelCls}>Vault</label>
-                        <select name="vault_id" value={form.vault_id} onChange={handleChange}
-                            className={`${inputCls} *:bg-background`} >
-                            <option value="">— No Vault —</option>
-                            {vaults.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
-                        </select>
+                        <SearchableDropdown
+                            value={form.vault_id}
+                            onChange={(value) => setForm(prev => ({ ...prev, vault_id: value }))}
+                            placeholder="No Vault"
+                            className={inputCls}
+                            options={[
+                                { value: '', label: 'No Vault' },
+                                ...vaults.map(v => ({ value: String(v.id), label: v.name })),
+                            ]}
+                        />
                     </div>
 
                     <div>
                         <label className={labelCls}>Confirmation Sent?</label>
-                        <select name="is_confirmation_sent" value={form.is_confirmation_sent ? 'true' : 'false'} onChange={(e) => setForm(prev => ({ ...prev, is_confirmation_sent: e.target.value === 'true' }))} className={`${inputCls} *:bg-background`}>
-                            <option value="false">No</option>
-                            <option value="true">Yes</option>
-                        </select>
+                        <SearchableDropdown
+                            value={form.is_confirmation_sent ? 'true' : 'false'}
+                            onChange={(value) => setForm(prev => ({ ...prev, is_confirmation_sent: value === 'true' }))}
+                            className={inputCls}
+                            options={[
+                                { value: 'false', label: 'No' },
+                                { value: 'true', label: 'Yes' },
+                            ]}
+                        />
                     </div>
                     <Field label="Deposit Number" name="reference_number" placeholder="e.g. 2022061901" />
                     <Field label="Received By" name="received_by" placeholder="e.g. Delivery" />

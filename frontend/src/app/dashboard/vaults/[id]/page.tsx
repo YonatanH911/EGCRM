@@ -6,6 +6,7 @@ import { Shield, ArrowLeft, Loader2, Check } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { usePreferences } from '@/components/PreferencesProvider';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 const VAULT_STATUSES = ['Open', 'Locked', 'Maintenance'];
 
@@ -100,10 +101,12 @@ export default function EditVaultPage() {
 
                 <div>
                     <label className={labelCls}>Status</label>
-                    <select name="status" value={form.status} onChange={handleChange}
-                        className={inputCls}>
-                        {VAULT_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-                    </select>
+                    <SearchableDropdown
+                        value={form.status}
+                        onChange={(value) => setForm(prev => ({ ...prev, status: value }))}
+                        className={inputCls}
+                        options={VAULT_STATUSES.map(s => ({ value: s, label: s }))}
+                    />
                 </div>
 
                 <div>

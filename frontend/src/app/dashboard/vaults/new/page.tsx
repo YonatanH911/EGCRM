@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Shield } from 'lucide-react';
 import api from '@/lib/api';
+import SearchableDropdown from '@/components/SearchableDropdown';
+
+const VAULT_STATUSES = ['Open', 'Locked', 'Maintenance'];
 
 export default function NewVaultPage() {
     const router = useRouter();
@@ -118,17 +121,12 @@ export default function NewVaultPage() {
                                         Status
                                     </label>
                                     <div className="mt-1">
-                                        <select
-                                            id="status"
-                                            name="status"
+                                        <SearchableDropdown
                                             value={formData.status}
-                                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
-                                        >
-                                            <option value="Open">Open</option>
-                                            <option value="Locked">Locked</option>
-                                            <option value="Maintenance">Maintenance</option>
-                                        </select>
+                                            onChange={(value) => setFormData({ ...formData, status: value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={VAULT_STATUSES.map(status => ({ value: status, label: status }))}
+                                        />
                                     </div>
                                 </div>
                             </div>

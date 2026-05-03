@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Briefcase, ArrowLeft, Loader2 } from 'lucide-react';
+import SearchableDropdown from '@/components/SearchableDropdown';
+
+const LEAD_STATUSES = ['New', 'Contacted', 'Qualified', 'Lost'];
 
 export default function NewLeadPage() {
     const router = useRouter();
@@ -105,30 +108,29 @@ export default function NewLeadPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-1">Initial Stage</label>
-                            <select
+                            <SearchableDropdown
                                 value={formData.status}
-                                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm *:bg-background"
-                            >
-                                <option value="New">New</option>
-                                <option value="Contacted">Contacted</option>
-                                <option value="Qualified">Qualified</option>
-                                <option value="Lost">Lost</option>
-                            </select>
+                                onChange={(value) => setFormData({ ...formData, status: value })}
+                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm"
+                                options={LEAD_STATUSES.map(status => ({ value: status, label: status }))}
+                            />
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
                             <label className="block text-sm font-medium text-foreground mb-1">Primary Contact</label>
-                            <select
+                            <SearchableDropdown
                                 value={formData.contact_id}
-                                onChange={(e) => setFormData({ ...formData, contact_id: e.target.value })}
-                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm *:bg-background"
-                            >
-                                <option value="">-- Unassigned --</option>
-                                {contacts.map(c => (
-                                    <option key={c.id} value={c.id}>{c.first_name} {c.last_name} ({c.email})</option>
-                                ))}
-                            </select>
+                                onChange={(value) => setFormData({ ...formData, contact_id: value })}
+                                placeholder="Unassigned"
+                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm"
+                                options={[
+                                    { value: '', label: 'Unassigned' },
+                                    ...contacts.map(c => ({
+                                        value: String(c.id),
+                                        label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                    })),
+                                ]}
+                            />
                         </div>
                     </div>
 

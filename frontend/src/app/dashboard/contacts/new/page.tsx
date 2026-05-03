@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Users2, ArrowLeft, Loader2 } from 'lucide-react';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 export default function NewContactPage() {
     const router = useRouter();
@@ -152,16 +153,16 @@ export default function NewContactPage() {
                         {/* CRM Relations */}
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-1">Associated Account</label>
-                            <select
+                            <SearchableDropdown
                                 value={formData.account_id}
-                                onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
-                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm *:bg-background *:text-foreground"
-                            >
-                                <option value="">-- No Account --</option>
-                                {accounts.map(acc => (
-                                    <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                ))}
-                            </select>
+                                onChange={(value) => setFormData({ ...formData, account_id: value })}
+                                placeholder="No Account"
+                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm"
+                                options={[
+                                    { value: '', label: 'No Account' },
+                                    ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
+                                ]}
+                            />
                         </div>
 
                         <div>

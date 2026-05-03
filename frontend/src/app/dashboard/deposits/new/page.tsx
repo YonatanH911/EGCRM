@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Loader2, Landmark, Shield } from 'lucide-react';
 import api from '@/lib/api';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface Account {
     id: number;
@@ -130,36 +131,32 @@ export default function NewDepositPage() {
                                         Billed Account
                                     </label>
                                     <div className="mt-1">
-                                        <select
-                                            id="account_id"
-                                            name="account_id"
+                                        <SearchableDropdown
                                             value={formData.account_id}
-                                            onChange={(e) => setFormData({ ...formData, account_id: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
-                                        >
-                                            <option value="">Select an account</option>
-                                            {accounts.map(acc => (
-                                                <option key={acc.id} value={acc.id}>{acc.name}</option>
-                                            ))}
-                                        </select>
+                                            onChange={(value) => setFormData({ ...formData, account_id: value })}
+                                            placeholder="Select an account"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: '', label: 'Select an account' },
+                                                ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
+                                            ]}
+                                        />
                                     </div>
                                 </div>
 
                                 <div>
                                     <label htmlFor="supplier" className="block text-sm font-medium text-foreground">Supplier</label>
                                     <div className="mt-1">
-                                        <select
-                                            id="supplier"
-                                            name="supplier"
+                                        <SearchableDropdown
                                             value={formData.supplier}
-                                            onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
-                                        >
-                                            <option value="">— Select Supplier —</option>
-                                            {accounts.map(acc => (
-                                                <option key={acc.id} value={acc.name}>{acc.name}</option>
-                                            ))}
-                                        </select>
+                                            onChange={(value) => setFormData({ ...formData, supplier: value })}
+                                            placeholder="Select Supplier"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: '', label: 'Select Supplier' },
+                                                ...accounts.map(acc => ({ value: acc.name, label: acc.name })),
+                                            ]}
+                                        />
                                     </div>
                                 </div>
 
@@ -192,16 +189,15 @@ export default function NewDepositPage() {
                                 <div>
                                     <label htmlFor="is_confirmation_sent" className="block text-sm font-medium text-foreground">Confirmation Sent?</label>
                                     <div className="mt-1">
-                                        <select
-                                            id="is_confirmation_sent"
-                                            name="is_confirmation_sent"
+                                        <SearchableDropdown
                                             value={formData.is_confirmation_sent ? 'true' : 'false'}
-                                            onChange={(e) => setFormData({ ...formData, is_confirmation_sent: e.target.value === 'true' })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
-                                        >
-                                            <option value="false">No</option>
-                                            <option value="true">Yes</option>
-                                        </select>
+                                            onChange={(value) => setFormData({ ...formData, is_confirmation_sent: value === 'true' })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: 'false', label: 'No' },
+                                                { value: 'true', label: 'Yes' },
+                                            ]}
+                                        />
                                     </div>
                                 </div>
 
@@ -211,18 +207,16 @@ export default function NewDepositPage() {
                                         Destination Vault
                                     </label>
                                     <div className="mt-1">
-                                        <select
-                                            id="vault_id"
-                                            name="vault_id"
+                                        <SearchableDropdown
                                             value={formData.vault_id}
-                                            onChange={(e) => setFormData({ ...formData, vault_id: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
-                                        >
-                                            <option value="">Select a storage vault (optional)</option>
-                                            {vaults.map(v => (
-                                                <option key={v.id} value={v.id}>{v.name}</option>
-                                            ))}
-                                        </select>
+                                            onChange={(value) => setFormData({ ...formData, vault_id: value })}
+                                            placeholder="Select a storage vault"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: '', label: 'Select a storage vault (optional)' },
+                                                ...vaults.map(v => ({ value: String(v.id), label: v.name })),
+                                            ]}
+                                        />
                                     </div>
                                 </div>
 
@@ -253,17 +247,16 @@ export default function NewDepositPage() {
                                         Status
                                     </label>
                                     <div className="mt-1">
-                                        <select
-                                            id="status"
-                                            name="status"
+                                        <SearchableDropdown
                                             value={formData.status}
-                                            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border *:bg-background"
-                                        >
-                                            <option value="Pending">Pending</option>
-                                            <option value="Cleared">Cleared</option>
-                                            <option value="Failed">Failed</option>
-                                        </select>
+                                            onChange={(value) => setFormData({ ...formData, status: value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-sm border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: 'Pending', label: 'Pending' },
+                                                { value: 'Cleared', label: 'Cleared' },
+                                                { value: 'Failed', label: 'Failed' },
+                                            ]}
+                                        />
                                     </div>
                                 </div>
 

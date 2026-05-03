@@ -9,6 +9,7 @@ import {
     ChevronDown, ChevronUp, User, Package, Mail, Phone, Banknote, Search, X
 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
@@ -380,18 +381,19 @@ export default function EditAccountPage() {
                 {/* Add new link block */}
                 <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
                     <div className="flex gap-3">
-                        <select
+                        <SearchableDropdown
                             value={selectedContactId}
-                            onChange={e => setSelectedContactId(e.target.value)}
+                            onChange={setSelectedContactId}
+                            placeholder="Select an existing contact to link"
                             className={inputCls}
-                        >
-                            <option value="">-- Select an existing contact to link --</option>
-                            {unlinkedContactsList.map(c => (
-                                <option key={c.id} value={c.id}>
-                                    {c.first_name} {c.last_name} {c.email ? `(${c.email})` : ''}
-                                </option>
-                            ))}
-                        </select>
+                            options={[
+                                { value: '', label: 'Select an existing contact to link' },
+                                ...unlinkedContactsList.map(c => ({
+                                    value: String(c.id),
+                                    label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                })),
+                            ]}
+                        />
                         <button
                             type="button"
                             disabled={!selectedContactId}
@@ -456,18 +458,19 @@ export default function EditAccountPage() {
                 {/* Add new link block */}
                 <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
                     <div className="flex gap-3">
-                        <select
+                        <SearchableDropdown
                             value={selectedDepositId}
-                            onChange={e => setSelectedDepositId(e.target.value)}
+                            onChange={setSelectedDepositId}
+                            placeholder="Select an existing deposit to link"
                             className={inputCls.replace('focus:border-crm-500/50 focus:ring-crm-500/10', 'focus:border-emerald-500/50 focus:ring-emerald-500/10')}
-                        >
-                            <option value="">-- Select an existing deposit to link --</option>
-                            {unlinkedDepositsList.map(d => (
-                                <option key={d.id} value={d.id}>
-                                    {d.reference_number} - {d.product_name || `Deposit #${d.id}`}
-                                </option>
-                            ))}
-                        </select>
+                            options={[
+                                { value: '', label: 'Select an existing deposit to link' },
+                                ...unlinkedDepositsList.map(d => ({
+                                    value: String(d.id),
+                                    label: `${d.reference_number} - ${d.product_name || `Deposit #${d.id}`}`,
+                                })),
+                            ]}
+                        />
                         <button
                             type="button"
                             disabled={!selectedDepositId}

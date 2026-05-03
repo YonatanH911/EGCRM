@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Users, Plus, Search } from 'lucide-react'; /* ── shared dark-table helpers ── */
+import SearchableDropdown from '@/components/SearchableDropdown';
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
@@ -70,12 +71,19 @@ export default function ContactsPage() {
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
-                    <select value={filterContact} onChange={(e) => setFilterContact(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none sm:w-44 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10">
-                        <option value="">All Contacts</option>
-                        <option value="has_email">Has Email</option>
-                        <option value="has_phone">Has Phone Number</option>
-                    </select>
+                    <div className="sm:w-44">
+                        <SearchableDropdown
+                            value={filterContact}
+                            onChange={setFilterContact}
+                            placeholder="All Contacts"
+                            className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            options={[
+                                { value: '', label: 'All Contacts' },
+                                { value: 'has_email', label: 'Has Email' },
+                                { value: 'has_phone', label: 'Has Phone Number' },
+                            ]}
+                        />
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Briefcase, Plus, MoreHorizontal, ArrowRight, DollarSign, Calendar, Search, Loader2 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 const STATUSES = ['New', 'Contacted', 'Qualified', 'Lost'];
 
@@ -74,12 +75,18 @@ export default function LeadsKanbanPage() {
                             className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10`}
                         />
                     </div>
-                    <select value={filterLead} onChange={(e) => setFilterLead(e.target.value)}
-                        className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none w-full sm:w-32 bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 appearance-none"
-                    >
-                        <option value="">All Leads</option>
-                        <option value="has_value">Has Value</option>
-                    </select>
+                    <div className="w-full sm:w-32">
+                        <SearchableDropdown
+                            value={filterLead}
+                            onChange={setFilterLead}
+                            placeholder="All Leads"
+                            className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10"
+                            options={[
+                                { value: '', label: 'All Leads' },
+                                { value: 'has_value', label: 'Has Value' },
+                            ]}
+                        />
+                    </div>
                     <Link href="/dashboard/leads/new"
                         className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 whitespace-nowrap transition-transform hover:-translate-y-0.5 duration-200">
                         <Plus className="w-4 h-4" /> New Lead
