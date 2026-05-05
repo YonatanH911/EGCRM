@@ -7,8 +7,7 @@ import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
-/* ── shared dark-table helpers ── */
-const thCls = "px-6 py-3.5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest";
+const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
 export default function AccountsPage() {
@@ -70,8 +69,8 @@ export default function AccountsPage() {
                         <Building2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-white">Accounts</h1>
-                        <p className="text-xs text-slate-500">Manage client organizations and companies.</p>
+                        <h1 className="text-2xl font-bold text-foreground">Accounts</h1>
+                        <p className="text-xs text-muted-text">Manage client organizations and companies.</p>
                     </div>
                 </div>
                 <Link href="/dashboard/accounts/new"
@@ -82,24 +81,22 @@ export default function AccountsPage() {
             </div>
 
             {/* Card */}
-            <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="rounded-2xl overflow-hidden glass-card">
                 {/* Toolbar */}
-                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-white/5">
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
                     <div className="relative flex-1 max-w-sm">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600" />
+                        <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
                         <input type="text" placeholder="Search names or industries…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-3 py-2 text-sm rounded-xl text-slate-200 placeholder-slate-600 focus:outline-none transition-all"
-                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
-                            onFocus={(e) => { e.currentTarget.style.border = '1px solid rgba(99,102,241,0.5)'; }}
-                            onBlur={(e) => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)'; }} />
+                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                        />
                     </div>
                     <div className="sm:w-48">
                         <SearchableDropdown
                             value={filterIndustry}
                             onChange={setFilterIndustry}
                             placeholder="All Industries..."
-                            className="px-3 py-2 text-sm rounded-xl text-slate-300 focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                             options={[
                                 { value: '', label: 'All Industries...' },
                                 ...uniqueIndustries.map(ind => ({ value: String(ind), label: String(ind) })),
@@ -111,36 +108,35 @@ export default function AccountsPage() {
                 {/* Table */}
                 <div className="overflow-x-auto">
                     {loading ? (
-                        <div className="p-12 text-center text-slate-500 text-sm">Loading accounts…</div>
+                        <div className="p-12 text-center text-muted-text text-sm">Loading accounts…</div>
                     ) : sortedAccounts.length === 0 ? (
                         <div className="p-16 flex flex-col items-center justify-center">
-                            <Building className="w-10 h-10 text-slate-700 mb-3" />
-                            <h3 className="text-base font-semibold text-slate-400">No accounts found</h3>
-                            <p className="text-slate-600 mt-1 text-sm">Get started by creating a new account.</p>
-                            <Link href="/dashboard/accounts/new" className="mt-5 text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors">
+                            <Building className="w-10 h-10 text-muted-text mb-3 opacity-50" />
+                            <h3 className="text-base font-semibold text-foreground">No accounts found</h3>
+                            <p className="text-muted-text mt-1 text-sm">Get started by creating a new account.</p>
+                            <Link href="/dashboard/accounts/new" className="mt-5 text-indigo-500 font-medium text-sm hover:text-indigo-400 transition-colors">
                                 Create Account →
                             </Link>
                         </div>
                     ) : (
                         <table className="min-w-full">
-                            <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                            <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
+                                <tr>
                                     {['Account Name', 'Industry', 'Street', 'City', 'Country', 'Actions'].map(h => (
                                         <th key={h} scope="col" className={thCls}>{h}</th>
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="divide-y divide-border-subtle">
                                 {sortedAccounts.map((account) => {
                                     const isActive = account.is_active !== false;
-                                    const rowStyle = isActive ? { borderBottom: '1px solid rgba(255,255,255,0.04)' } : { borderBottom: '1px solid rgba(255,255,255,0.04)', opacity: 0.5, filter: 'grayscale(100%)' };
+                                    const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     return (
                                     <tr key={account.id}
                                         onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                                        className="cursor-pointer group transition-all duration-150"
+                                        className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
                                         style={rowStyle}
-                                        onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = isActive ? 'rgba(99,102,241,0.07)' : 'rgba(255,255,255,0.02)'; }}
-                                        onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}>
+                                    >
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-3">
                                                 <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs uppercase shadow-sm"
@@ -148,15 +144,15 @@ export default function AccountsPage() {
                                                     {account.name?.charAt(0) || '?'}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-sm font-medium text-slate-200">{account.name || 'Unnamed'}</span>
-                                                    {!isActive && <span className="text-[10px] text-slate-400 uppercase tracking-wider">Inactive</span>}
+                                                    <span className="text-sm font-medium text-foreground">{account.name || 'Unnamed'}</span>
+                                                    {!isActive && <span className="text-[10px] text-muted-text uppercase tracking-wider">Inactive</span>}
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.industry || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.street || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.city || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-sm text-slate-400">{account.country || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.industry || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.street || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.city || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-sm text-muted-text">{account.country || '—'}</span></td>
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-2">
                                                 {!isActive && (
@@ -165,7 +161,7 @@ export default function AccountsPage() {
                                                         Reactivate
                                                     </button>
                                                 )}
-                                                <span className="text-xs text-slate-500">
+                                                <span className="text-xs text-muted-text">
                                                     {new Date(account.created_at).toLocaleDateString()}
                                                 </span>
                                             </div>
