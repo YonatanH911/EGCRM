@@ -10,20 +10,20 @@ import SearchableDropdown from '@/components/SearchableDropdown';
 interface Vault { id: number; name: string; }
 interface Account { id: number; name: string; }
 interface DepositForm {
-    product_name: string; version: string; supplier: string; date: string;
-    vault_id: string; is_confirmation_sent: boolean; reference_number: string; received_by: string; description: string;
+    product_name: string; version: string; supplier: string[]; date: string;
+    vault_ids: string[]; is_confirmation_sent: boolean; reference_number: string; received_by: string; description: string;
 }
 
-const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 export default function EditDepositPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
 
     const [form, setForm] = useState<DepositForm>({
-        product_name: '', version: '', supplier: '', date: '',
-        vault_id: '', is_confirmation_sent: false, reference_number: '', received_by: '', description: '',
+        product_name: '', version: '', supplier: [], date: '',
+        vault_ids: [], is_confirmation_sent: false, reference_number: '', received_by: '', description: '',
     });
     const [vaults, setVaults] = useState<Vault[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -42,8 +42,10 @@ export default function EditDepositPage() {
                 const d = depositRes.data;
                 setForm({
                     product_name: d.product_name || '', version: d.version || '',
-                    supplier: d.supplier || '', date: d.date ? d.date.substring(0, 10) : '',
-                    vault_id: d.vault_id ? String(d.vault_id) : '', is_confirmation_sent: d.is_confirmation_sent || false,
+                    supplier: d.supplier ? d.supplier.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    date: d.date ? d.date.substring(0, 10) : '',
+                    vault_ids: (d.vault_ids?.length ? d.vault_ids : (d.vault_id ? [d.vault_id] : [])).map(String),
+                    is_confirmation_sent: d.is_confirmation_sent || false,
                     reference_number: d.reference_number || '', received_by: d.received_by || '', description: d.description || '',
                 });
                 setVaults(vaultsRes.data);
@@ -66,7 +68,9 @@ export default function EditDepositPage() {
         try {
             await api.put(`/deposits/${id}`, {
                 ...form,
-                vault_id: form.vault_id ? Number(form.vault_id) : null,
+                supplier: form.supplier.join(', '),
+                vault_ids: form.vault_ids.map(Number),
+                vault_id: form.vault_ids[0] ? Number(form.vault_ids[0]) : null,
                 date: form.date || null,
             });
             router.push('/dashboard/deposits');
@@ -88,7 +92,7 @@ export default function EditDepositPage() {
     }
 
     const Field = ({ label, name, placeholder, type = 'text' }: {
-        label: string; name: keyof Omit<DepositForm, 'is_confirmation_sent' | 'description'>; placeholder?: string; type?: string;
+        label: string; name: keyof Omit<DepositForm, 'is_confirmation_sent' | 'description' | 'supplier' | 'vault_ids'>; placeholder?: string; type?: string;
     }) => (
         <div>
             <label className={labelCls}>{label}</label>
@@ -112,8 +116,8 @@ export default function EditDepositPage() {
                         <Landmark className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Edit Deposit</h1>
-                        <p className="text-xs text-muted-text">Update deposit details below</p>
+                        <h1 className="text-5xl font-bold text-foreground">Edit Deposit</h1>
+                        <p className="text-lg text-muted-text">Update deposit details below</p>
                     </div>
                 </div>
             </div>
@@ -122,25 +126,25 @@ export default function EditDepositPage() {
             <div className="glass-card rounded-2xl p-6 space-y-5 border border-border-subtle"
             >
                 {error && (
-                    <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
+                    <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
                     >
                         {error}
                     </div>
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <Field label="Product Name" name="product_name" placeholder="e.g. 4370-8001-00 MW QCL kit" />
-                    <Field label="Version" name="version" placeholder="e.g. Rev. B" />
+                    <Field label="Product Name" name="product_name" placeholder="" />
+                    <Field label="Version" name="version" placeholder="" />
                     
                     <div>
                         <label className={labelCls}>Supplier</label>
                         <SearchableDropdown
                             value={form.supplier}
+                            multiple
                             onChange={(value) => setForm(prev => ({ ...prev, supplier: value }))}
                             placeholder="Select Supplier"
                             className={inputCls}
                             options={[
-                                { value: '', label: 'Select Supplier' },
                                 ...accounts.map(acc => ({ value: acc.name, label: acc.name })),
                             ]}
                         />
@@ -151,12 +155,12 @@ export default function EditDepositPage() {
                     <div>
                         <label className={labelCls}>Vault</label>
                         <SearchableDropdown
-                            value={form.vault_id}
-                            onChange={(value) => setForm(prev => ({ ...prev, vault_id: value }))}
+                            multiple
+                            value={form.vault_ids}
+                            onChange={(value) => setForm(prev => ({ ...prev, vault_ids: value }))}
                             placeholder="No Vault"
                             className={inputCls}
                             options={[
-                                { value: '', label: 'No Vault' },
                                 ...vaults.map(v => ({ value: String(v.id), label: v.name })),
                             ]}
                         />
@@ -174,8 +178,8 @@ export default function EditDepositPage() {
                             ]}
                         />
                     </div>
-                    <Field label="Deposit Number" name="reference_number" placeholder="e.g. 2022061901" />
-                    <Field label="Received By" name="received_by" placeholder="e.g. Delivery" />
+                    <Field label="Deposit Number" name="reference_number" placeholder="" />
+                    <Field label="Received By" name="received_by" placeholder="" />
                     
                     <div className="sm:col-span-2">
                         <label className={labelCls}>Description</label>
@@ -185,20 +189,20 @@ export default function EditDepositPage() {
                             value={form.description}
                             onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
                             className={inputCls}
-                            placeholder="Add deposit notes (optional)..."
+                            placeholder=""
                         />
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3 pt-3 border-t border-border-subtle">
                     <button onClick={handleSave} disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
+                        className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
                         style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                         {saving ? 'Saving…' : 'Save Changes'}
                     </button>
                     <Link href="/dashboard/deposits"
-                        className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
+                        className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
                     >
                         Cancel
                     </Link>

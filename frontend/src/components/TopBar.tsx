@@ -23,7 +23,7 @@ export default function TopBar() {
                     </div>
                     <input
                         type="text"
-                        className="block w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-sm rounded-xl leading-5 placeholder-muted-text focus:outline-none transition-all duration-300 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-foreground focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                        className="block w-full ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 py-2 text-xl rounded-xl leading-5 placeholder-muted-text focus:outline-none transition-all duration-300 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 text-foreground focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         placeholder="Search accounts, contacts, leads…"
                     />
                 </div>

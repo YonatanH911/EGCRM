@@ -1,6 +1,27 @@
 from sqlalchemy.orm import Session, joinedload
 import models, schemas, auth
 
+def _ordered_by_ids(db: Session, model, ids):
+    ids = [int(item) for item in (ids or []) if item is not None]
+    if not ids:
+        return []
+    rows = db.query(model).filter(model.id.in_(ids)).all()
+    by_id = {row.id: row for row in rows}
+    return [by_id[item] for item in ids if item in by_id]
+
+def _sync_multi_relationships(db: Session, db_obj, update_data: dict, config: dict):
+    for ids_key, (relationship_name, model, single_key) in config.items():
+        if ids_key in update_data:
+            ids = update_data.pop(ids_key) or []
+            setattr(db_obj, relationship_name, _ordered_by_ids(db, model, ids))
+            if single_key:
+                setattr(db_obj, single_key, int(ids[0]) if ids else None)
+        elif single_key and single_key in update_data and update_data[single_key]:
+            ids = [int(update_data[single_key])]
+            existing = [item.id for item in getattr(db_obj, relationship_name, [])]
+            if ids[0] not in existing:
+                setattr(db_obj, relationship_name, _ordered_by_ids(db, model, ids + existing))
+
 # --- Users ---
 def get_user_by_email(db: Session, email: str):
     return db.query(models.User).filter(models.User.email == email).first()
@@ -57,7 +78,13 @@ def get_contacts(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Contact).offset(skip).limit(limit).all()
 
 def create_contact(db: Session, contact: schemas.ContactCreate):
-    db_contact = models.Contact(**contact.model_dump())
+    data = contact.model_dump()
+    db_contact = models.Contact()
+    _sync_multi_relationships(db, db_contact, data, {
+        "account_ids": ("accounts", models.Account, "account_id"),
+    })
+    for key, value in data.items():
+        setattr(db_contact, key, value)
     db.add(db_contact)
     db.commit()
     db.refresh(db_contact)
@@ -67,6 +94,9 @@ def update_contact(db: Session, contact_id: int, contact_update: schemas.Contact
     db_contact = get_contact(db, contact_id)
     if db_contact:
         update_data = contact_update.model_dump(exclude_unset=True)
+        _sync_multi_relationships(db, db_contact, update_data, {
+            "account_ids": ("accounts", models.Account, "account_id"),
+        })
         for key, value in update_data.items():
             setattr(db_contact, key, value)
         db.commit()
@@ -85,7 +115,13 @@ def get_leads(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Lead).offset(skip).limit(limit).all()
 
 def create_lead(db: Session, lead: schemas.LeadCreate):
-    db_lead = models.Lead(**lead.model_dump())
+    data = lead.model_dump()
+    db_lead = models.Lead()
+    _sync_multi_relationships(db, db_lead, data, {
+        "contact_ids": ("contacts", models.Contact, "contact_id"),
+    })
+    for key, value in data.items():
+        setattr(db_lead, key, value)
     db.add(db_lead)
     db.commit()
     db.refresh(db_lead)
@@ -107,7 +143,14 @@ def get_contracts(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Contract).offset(skip).limit(limit).all()
 
 def create_contract(db: Session, contract: schemas.ContractCreate):
-    db_contract = models.Contract(**contract.model_dump())
+    data = contract.model_dump()
+    db_contract = models.Contract()
+    _sync_multi_relationships(db, db_contract, data, {
+        "account_ids": ("accounts", models.Account, "account_id"),
+        "deposit_ids": ("deposits", models.Deposit, "deposit_id"),
+    })
+    for key, value in data.items():
+        setattr(db_contract, key, value)
     db.add(db_contract)
     db.commit()
     db.refresh(db_contract)
@@ -117,6 +160,10 @@ def update_contract(db: Session, contract_id: int, contract_update: schemas.Cont
     db_contract = get_contract(db, contract_id)
     if db_contract:
         update_data = contract_update.model_dump(exclude_unset=True)
+        _sync_multi_relationships(db, db_contract, update_data, {
+            "account_ids": ("accounts", models.Account, "account_id"),
+            "deposit_ids": ("deposits", models.Deposit, "deposit_id"),
+        })
         for key, value in update_data.items():
             setattr(db_contract, key, value)
         db.commit()
@@ -155,7 +202,14 @@ def get_deposits(db: Session, skip: int = 0, limit: int = 10000):
     return db.query(models.Deposit).offset(skip).limit(limit).all()
 
 def create_deposit(db: Session, deposit: schemas.DepositCreate):
-    db_deposit = models.Deposit(**deposit.model_dump())
+    data = deposit.model_dump()
+    db_deposit = models.Deposit()
+    _sync_multi_relationships(db, db_deposit, data, {
+        "account_ids": ("accounts", models.Account, "account_id"),
+        "vault_ids": ("vaults", models.Vault, "vault_id"),
+    })
+    for key, value in data.items():
+        setattr(db_deposit, key, value)
     db.add(db_deposit)
     db.commit()
     db.refresh(db_deposit)
@@ -165,6 +219,10 @@ def update_deposit(db: Session, deposit_id: int, deposit_update: schemas.Deposit
     db_deposit = get_deposit(db, deposit_id)
     if db_deposit:
         update_data = deposit_update.model_dump(exclude_unset=True)
+        _sync_multi_relationships(db, db_deposit, update_data, {
+            "account_ids": ("accounts", models.Account, "account_id"),
+            "vault_ids": ("vaults", models.Vault, "vault_id"),
+        })
         for key, value in update_data.items():
             setattr(db_deposit, key, value)
         db.commit()

@@ -22,8 +22,8 @@ export default function EditVaultPage() {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
-    const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
-    const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl bg-background-subtle border border-border-subtle text-foreground placeholder-muted-text focus:outline-none focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 transition-all";
+    const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
+    const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl bg-background-subtle border border-border-subtle text-foreground placeholder-muted-text focus:outline-none focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 transition-all";
 
     useEffect(() => {
         const fetchVault = async () => {
@@ -79,8 +79,8 @@ export default function EditVaultPage() {
                         <Shield className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Edit Vault</h1>
-                        <p className="text-xs text-muted-text">Update vault details below</p>
+                        <h1 className="text-5xl font-bold text-foreground">Edit Vault</h1>
+                        <p className="text-lg text-muted-text">Update vault details below</p>
                     </div>
                 </div>
             </div>
@@ -88,7 +88,7 @@ export default function EditVaultPage() {
             {/* Card */}
             <div className="glass-card rounded-2xl p-6 space-y-5">
                 {error && (
-                    <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
+                    <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
                         {error}
                     </div>
                 )}
@@ -96,7 +96,7 @@ export default function EditVaultPage() {
                 <div>
                     <label className={labelCls}>Vault Name <span className="text-red-500">*</span></label>
                     <input name="name" value={form.name} onChange={handleChange}
-                        className={inputCls} placeholder="e.g. Hard Disk Ronen" />
+                        className={inputCls} placeholder="" />
                 </div>
 
                 <div>
@@ -112,23 +112,23 @@ export default function EditVaultPage() {
                 <div>
                     <label className={labelCls}>Location</label>
                     <input name="location" value={form.location} onChange={handleChange}
-                        className={inputCls} placeholder="e.g. Leumi Raanana" />
+                        className={inputCls} placeholder="" />
                 </div>
 
                 <div>
                     <label className={labelCls}>Capacity</label>
                     <input name="capacity" value={form.capacity} onChange={handleChange}
-                        className={inputCls} placeholder="e.g. 2 TB" />
+                        className={inputCls} placeholder="" />
                 </div>
 
                 <div className="flex items-center gap-3 pt-3 border-t border-border-subtle">
                     <button onClick={handleSave} disabled={saving || !form.name}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all disabled:opacity-50">
+                        className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all disabled:opacity-50">
                         {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                         {saving ? 'Saving…' : 'Save Changes'}
                     </button>
                     <Link href="/dashboard/vaults"
-                        className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-background-subtle border border-border-subtle rounded-xl transition-all">
+                        className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-background-subtle border border-border-subtle rounded-xl transition-all">
                         Cancel
                     </Link>
                 </div>

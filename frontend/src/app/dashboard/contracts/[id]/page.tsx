@@ -22,8 +22,8 @@ const CURRENCIES = [
     { value: 'CHF', label: 'CHF - Swiss Franc' },
 ];
 
-const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
     'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
@@ -54,11 +54,11 @@ const CUBES = [
     },
 ];
 
-const emptyForm: Record<FormField, string> = {
+const emptyForm: Record<FormField, string | string[]> = {
     title: '', status: 'Draft', value: '0', currency: 'USD',
-    start_date: '', end_date: '', paid_by: '', product_name: '', deposit_id: '',
-    beneficiary_management_contact: '', beneficiary_technical_contact: '', beneficiary_financial_contact: '',
-    supplier_management_contact: '',   supplier_technical_contact: '',   supplier_financial_contact: '',
+    start_date: '', end_date: '', paid_by: [], product_name: '', deposit_id: [],
+    beneficiary_management_contact: [], beneficiary_technical_contact: [], beneficiary_financial_contact: [],
+    supplier_management_contact: [],   supplier_technical_contact: [],   supplier_financial_contact: [],
 };
 
 export default function EditContractPage() {
@@ -73,7 +73,7 @@ export default function EditContractPage() {
     const [contacts, setContacts]             = useState<Contact[]>([]);
     const [deposits, setDeposits]             = useState<Deposit[]>([]);
     const [isActive, setIsActive]             = useState(true);
-    const [form, setForm]                     = useState<Record<FormField, string>>(emptyForm);
+    const [form, setForm]                     = useState<Record<FormField, string | string[]>>(emptyForm);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -91,16 +91,16 @@ export default function EditContractPage() {
                     value:    c.value != null ? String(c.value) : '0',
                     currency: c.currency || 'USD',
                     product_name: c.product_name || '',
-                    deposit_id: c.deposit_id != null ? String(c.deposit_id) : '',
+                    deposit_id: (c.deposit_ids?.length ? c.deposit_ids : (c.deposit_id ? [c.deposit_id] : [])).map(String),
                     start_date: c.start_date ? c.start_date.slice(0, 10) : '',
                     end_date:   c.end_date   ? c.end_date.slice(0, 10)   : '',
-                    beneficiary_management_contact: c.beneficiary_management_contact || '',
-                    beneficiary_technical_contact:  c.beneficiary_technical_contact  || '',
-                    beneficiary_financial_contact:  c.beneficiary_financial_contact  || '',
-                    supplier_management_contact:    c.supplier_management_contact    || '',
-                    supplier_technical_contact:     c.supplier_technical_contact     || '',
-                    supplier_financial_contact:     c.supplier_financial_contact     || '',
-                    paid_by:                        c.paid_by                        || '',
+                    beneficiary_management_contact: c.beneficiary_management_contact ? c.beneficiary_management_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    beneficiary_technical_contact:  c.beneficiary_technical_contact  ? c.beneficiary_technical_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    beneficiary_financial_contact:  c.beneficiary_financial_contact  ? c.beneficiary_financial_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier_management_contact:    c.supplier_management_contact    ? c.supplier_management_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier_technical_contact:     c.supplier_technical_contact     ? c.supplier_technical_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier_financial_contact:     c.supplier_financial_contact     ? c.supplier_financial_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    paid_by:                        c.paid_by                        ? c.paid_by.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
                 });
                 setContacts(contactsRes.data);
                 setDeposits(depositsRes.data);
@@ -125,17 +125,18 @@ export default function EditContractPage() {
                 ...form,
                 value:      Number(form.value) || 0,
                 account_id: null,
-                deposit_id: form.deposit_id ? Number(form.deposit_id) : null,
+                deposit_ids: (form.deposit_id as string[]).map(Number),
+                deposit_id: (form.deposit_id as string[])[0] ? Number((form.deposit_id as string[])[0]) : null,
                 product_name: form.product_name || null,
-                start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
-                end_date:   form.end_date   ? new Date(form.end_date).toISOString()   : null,
-                beneficiary_management_contact: form.beneficiary_management_contact || null,
-                beneficiary_technical_contact:  form.beneficiary_technical_contact  || null,
-                beneficiary_financial_contact:  form.beneficiary_financial_contact  || null,
-                supplier_management_contact:    form.supplier_management_contact    || null,
-                supplier_technical_contact:     form.supplier_technical_contact     || null,
-                supplier_financial_contact:     form.supplier_financial_contact     || null,
-                paid_by:                        form.paid_by                        || null,
+                start_date: form.start_date ? new Date(form.start_date as string).toISOString() : null,
+                end_date:   form.end_date   ? new Date(form.end_date as string).toISOString()   : null,
+                beneficiary_management_contact: (form.beneficiary_management_contact as string[]).join(', ') || null,
+                beneficiary_technical_contact:  (form.beneficiary_technical_contact  as string[]).join(', ') || null,
+                beneficiary_financial_contact:  (form.beneficiary_financial_contact  as string[]).join(', ') || null,
+                supplier_management_contact:    (form.supplier_management_contact    as string[]).join(', ') || null,
+                supplier_technical_contact:     (form.supplier_technical_contact     as string[]).join(', ') || null,
+                supplier_financial_contact:     (form.supplier_financial_contact     as string[]).join(', ') || null,
+                paid_by:                        (form.paid_by as string[]).join(', ') || null,
             });
             router.push('/dashboard/contracts');
         } catch (err: any) {
@@ -185,12 +186,12 @@ export default function EditContractPage() {
 
     const ContactDropdown = ({ field }: { field: FormField }) => (
         <SearchableDropdown
-            value={form[field]}
+            multiple
+            value={form[field] as string[]}
             onChange={(value) => setForm(prev => ({ ...prev, [field]: value }))}
             placeholder="None"
             className={inputCls}
             options={[
-                { value: '', label: 'None' },
                 ...contacts.map(c => ({
                     value: `${c.first_name} ${c.last_name}`,
                     label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
@@ -213,20 +214,20 @@ export default function EditContractPage() {
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className={`text-2xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>Edit Contract</h1>
+                            <h1 className={`text-5xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>Edit Contract</h1>
                             {!isActive && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                <span className="text-base font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
                                     Inactive
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs text-muted-text">{form.title || 'Update contract details below'}</p>
+                        <p className="text-lg text-muted-text">{form.title as string || 'Update contract details below'}</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">{error}</div>
+                <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">{error}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -234,18 +235,18 @@ export default function EditContractPage() {
                 <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-indigo-500" />
-                        <h2 className="text-sm font-semibold text-foreground">Contract Details</h2>
+                        <h2 className="text-xl font-semibold text-foreground">Contract Details</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="col-span-1 sm:col-span-2">
                             <label className={labelCls}>Contract Title *</label>
-                            <input type="text" value={form.title} onChange={set('title')}
-                                placeholder="e.g. Annual Software License" className={inputCls} />
+                            <input type="text" value={form.title as string} onChange={set('title')}
+                                placeholder="" className={inputCls} />
                         </div>
                         <div>
                             <label className={labelCls}>Status</label>
                             <SearchableDropdown
-                                value={form.status}
+                                value={form.status as string}
                                 onChange={(value) => setForm(prev => ({ ...prev, status: value }))}
                                 className={inputCls}
                                 options={CONTRACT_STATUSES.map(s => ({ value: s, label: s }))}
@@ -253,15 +254,15 @@ export default function EditContractPage() {
                         </div>
                         <div>
                             <label className={labelCls}>Product Name</label>
-                            <input type="text" value={form.product_name} onChange={set('product_name')} placeholder="e.g. Master License" className={inputCls} />
+                            <input type="text" value={form.product_name as string} onChange={set('product_name')} placeholder="" className={inputCls} />
                         </div>
                         <div>
                             <label className={labelCls}>Date Contract Signed</label>
-                            <input type="date" value={form.start_date} onChange={set('start_date')} className={inputCls} />
+                            <input type="date" value={form.start_date as string} onChange={set('start_date')} className={inputCls} />
                         </div>
                         <div>
                             <label className={labelCls}>Date Contract Ends</label>
-                            <input type="date" value={form.end_date} onChange={set('end_date')} className={inputCls} />
+                            <input type="date" value={form.end_date as string} onChange={set('end_date')} className={inputCls} />
                         </div>
                     </div>
                 </div>
@@ -274,7 +275,7 @@ export default function EditContractPage() {
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${cube.gradient}`}>
                                     <User className="w-3.5 h-3.5 text-white" />
                                 </div>
-                                <h2 className="text-sm font-semibold text-foreground">{cube.label}</h2>
+                                <h2 className="text-xl font-semibold text-foreground">{cube.label}</h2>
                             </div>
                             <div className="p-5 space-y-4">
                                 {cube.fields.map(({ field, label }) => (
@@ -292,13 +293,13 @@ export default function EditContractPage() {
                 <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-indigo-500" />
-                        <h2 className="text-sm font-semibold text-foreground">Billing Information</h2>
+                        <h2 className="text-xl font-semibold text-foreground">Billing Information</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label className={labelCls}>Currency</label>
                             <SearchableDropdown
-                                value={form.currency}
+                                value={form.currency as string}
                                 onChange={(value) => setForm(prev => ({ ...prev, currency: value }))}
                                 className={inputCls}
                                 options={CURRENCIES}
@@ -307,12 +308,12 @@ export default function EditContractPage() {
                         <div>
                             <label className={labelCls}>Annual Fee</label>
                             <div className="flex rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 focus-within:border-crm-500 focus-within:ring-4 focus-within:ring-crm-500/10 transition-all">
-                                <span className="flex items-center px-3 text-xs font-semibold text-muted-text border-r border-border-subtle bg-black/5 dark:bg-white/5">
-                                    {form.currency}
+                                <span className="flex items-center px-3 text-lg font-semibold text-muted-text border-r border-border-subtle bg-black/5 dark:bg-white/5">
+                                    {form.currency as string}
                                 </span>
-                                <input type="number" min="0" step="0.01" value={form.value}
+                                <input type="number" min="0" step="0.01" value={form.value as string}
                                     onChange={e => setForm(prev => ({ ...prev, value: e.target.value }))}
-                                    className="flex-1 px-4 py-2.5 text-sm text-foreground focus:outline-none bg-transparent" />
+                                    className="flex-1 px-4 py-2.5 text-xl text-foreground focus:outline-none bg-transparent" />
                             </div>
                         </div>
                         <div className="col-span-1 sm:col-span-2">
@@ -322,12 +323,12 @@ export default function EditContractPage() {
                         <div className="col-span-1 sm:col-span-2">
                             <label className={labelCls}>Related Deposit</label>
                             <SearchableDropdown
-                                value={form.deposit_id}
+                                multiple
+                                value={form.deposit_id as string[]}
                                 onChange={(value) => setForm(prev => ({ ...prev, deposit_id: value }))}
                                 placeholder="None"
                                 className={inputCls}
                                 options={[
-                                    { value: '', label: 'None' },
                                     ...deposits.map(d => ({
                                         value: String(d.id),
                                         label: `${d.reference_number}${d.product_name ? ` - ${d.product_name}` : ''}`,
@@ -342,11 +343,11 @@ export default function EditContractPage() {
                 <div className="flex justify-between items-center gap-3 pt-2">
                     <div className="flex items-center gap-2">
                         <button type="button" onClick={handleDelete} disabled={loading || saving}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
+                            className="flex items-center gap-2 px-4 py-2.5 text-xl font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
                             <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contract</span>
                         </button>
                         <button type="button" onClick={handleToggleActive} disabled={loading || saving}
-                            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl border transition-all disabled:opacity-50 ${
+                            className={`flex items-center gap-2 px-4 py-2.5 text-xl font-bold rounded-xl border transition-all disabled:opacity-50 ${
                                 isActive
                                     ? 'text-slate-400 bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'
                                     : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
@@ -356,11 +357,11 @@ export default function EditContractPage() {
                     </div>
                     <div className="flex gap-3">
                         <Link href="/dashboard/contracts"
-                            className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl">
+                            className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl">
                             Cancel
                         </Link>
                         <button type="submit" disabled={saving || loading}
-                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
+                            className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
                             style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             Update <span className="hidden sm:inline">Contract</span>

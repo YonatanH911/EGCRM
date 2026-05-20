@@ -9,7 +9,7 @@ import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; }
 
-const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
+const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
 const getStatusStyle = (status: string) => {
@@ -55,12 +55,12 @@ export default function VaultsPage() {
                         <Shield className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Vaults</h1>
-                        <p className="text-xs text-muted-text">Manage secure storage and asset repositories.</p>
+                        <h1 className="text-5xl font-bold text-foreground">Vaults</h1>
+                        <p className="text-lg text-muted-text">Manage secure storage and asset repositories.</p>
                     </div>
                 </div>
                 <Link href="/dashboard/vaults/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg transition-transform hover:-translate-y-0.5 duration-200"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xl font-semibold text-white rounded-xl shadow-lg transition-transform hover:-translate-y-0.5 duration-200"
                     style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                     <Plus className="w-4 h-4" /> New Vault
                 </Link>
@@ -72,7 +72,7 @@ export default function VaultsPage() {
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
                         <input type="text" placeholder="Search vaults by name or location…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
                     <div className="sm:w-44">
@@ -80,7 +80,7 @@ export default function VaultsPage() {
                             value={filterStatus}
                             onChange={setFilterStatus}
                             placeholder="All Statuses"
-                            className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                             options={[
                                 { value: '', label: 'All Statuses' },
                                 ...uniqueStatuses.map(status => ({ value: String(status), label: String(status) })),
@@ -100,12 +100,12 @@ export default function VaultsPage() {
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-text text-sm">Loading vaults…</td></tr>
+                                <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-text text-xl">Loading vaults…</td></tr>
                             ) : filteredVaults.length === 0 ? (
                                 <tr><td colSpan={5} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <Shield className="h-10 w-10 text-muted-text mb-3" />
-                                        <p className="text-foreground text-sm font-semibold">No vaults found.</p>
+                                        <p className="text-foreground text-xl font-semibold">No vaults found.</p>
                                     </div>
                                 </td></tr>
                             ) : (
@@ -121,26 +121,26 @@ export default function VaultsPage() {
                                                         style={{ background: 'rgba(99,102,241,0.12)' }}>
                                                         <Shield className="h-4 w-4 text-indigo-500" />
                                                     </div>
-                                                    <span className="text-sm font-medium text-foreground">{vault.name}</span>
+                                                    <span className="text-xl font-medium text-foreground">{vault.name}</span>
                                                 </div>
                                             </td>
                                             <td className={tdCls}>
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
                                                     style={{ background: st.bg, color: st.color, border: `1px solid ${st.border}` }}>
                                                     {vault.status}
                                                 </span>
                                             </td>
                                             <td className={tdCls}>
-                                                <div className="flex items-center text-sm text-muted-text">
+                                                <div className="flex items-center text-xl text-muted-text">
                                                     <MapPin className="mr-1.5 h-3.5 w-3.5 text-muted-text" />{vault.location || '—'}
                                                 </div>
                                             </td>
                                             <td className={tdCls}>
-                                                <div className="flex items-center text-sm text-muted-text">
+                                                <div className="flex items-center text-xl text-muted-text">
                                                     <Database className="mr-1.5 h-3.5 w-3.5 text-muted-text" />{vault.capacity || '—'}
                                                 </div>
                                             </td>
-                                            <td className={`${tdCls} text-sm text-muted-text`}>
+                                            <td className={`${tdCls} text-xl text-muted-text`}>
                                                 {new Date(vault.created_at).toLocaleDateString()}
                                             </td>
                                         </tr>

@@ -14,8 +14,8 @@ function toDateInput(iso: string | null) {
     return iso.slice(0, 10);
 }
 
-const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
+const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 export default function EditActivityPage() {
     const router = useRouter();
@@ -104,8 +104,8 @@ export default function EditActivityPage() {
                         <Activity className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Edit Activity</h1>
-                        <p className="text-xs text-muted-text">Update the activity details below.</p>
+                        <h1 className="text-5xl font-bold text-foreground">Edit Activity</h1>
+                        <p className="text-lg text-muted-text">Update the activity details below.</p>
                     </div>
                 </div>
             </div>
@@ -113,11 +113,11 @@ export default function EditActivityPage() {
             <div className="rounded-2xl overflow-hidden glass-card">
                 <div className="px-6 py-4 border-b border-border-subtle bg-background-subtle/30 flex items-center gap-2">
                     <Activity className="w-4 h-4 text-crm-500" />
-                    <h2 className="text-[11px] font-bold text-foreground uppercase tracking-widest">Activity Details</h2>
+                    <h2 className="text-lg font-bold text-foreground uppercase tracking-widest">Activity Details</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
-                        <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
                             {error}
                         </div>
                     )}
@@ -126,11 +126,11 @@ export default function EditActivityPage() {
                     <div>
                         <label className={labelCls}>Activity Type *</label>
                         {fetchingTypes ? (
-                            <div className="h-10 flex items-center gap-2 text-sm text-muted-text">
+                            <div className="h-10 flex items-center gap-2 text-xl text-muted-text">
                                 <Loader2 className="w-4 h-4 animate-spin" /> Loading types...
                             </div>
                         ) : taskTypes.length === 0 ? (
-                            <div className="text-sm text-red-500 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+                            <div className="text-xl text-red-500 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20">
                                 No task types configured. Please create one in the Activities dashboard first.
                             </div>
                         ) : (
@@ -147,7 +147,7 @@ export default function EditActivityPage() {
                                                 borderColor: isSelected ? t.color : '',
                                                 color: isSelected ? '#fff' : '',
                                             }}
-                                            className={`flex justify-center items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 border ${isSelected
+                                            className={`flex justify-center items-center py-2.5 px-3 rounded-xl text-lg font-bold transition-all duration-200 border ${isSelected
                                                 ? 'shadow-lg'
                                                 : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'
                                                 }`}
@@ -164,14 +164,14 @@ export default function EditActivityPage() {
                     <div>
                         <label className={labelCls}>Subject *</label>
                         <input required type="text" value={form.subject} onChange={e => set('subject', e.target.value)}
-                            className={inputCls} placeholder="e.g. Follow-up call with client" />
+                            className={inputCls} placeholder="" />
                     </div>
 
                     {/* Regarding */}
                     <div>
                         <label className={labelCls}>Regarding</label>
                         <input type="text" value={form.regarding} onChange={e => set('regarding', e.target.value)}
-                            className={inputCls} placeholder="e.g. Account name or opportunity" />
+                            className={inputCls} placeholder="" />
                     </div>
 
                     {/* Dates */}
@@ -192,17 +192,17 @@ export default function EditActivityPage() {
                     <div>
                         <label className={labelCls}>Notes</label>
                         <textarea rows={4} value={form.notes} onChange={e => set('notes', e.target.value)}
-                            className={`${inputCls} resize-none`} placeholder="Additional details about this activity…" />
+                            className={`${inputCls} resize-none`} placeholder="" />
                     </div>
 
                     {/* Actions */}
                     <div className="flex justify-end gap-3 pt-8 border-t border-border-subtle">
                         <Link href="/dashboard/activities"
-                            className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
+                            className="px-6 py-2.5 text-xl font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
                             Cancel
                         </Link>
                         <button type="submit" disabled={saving}
-                            className="flex items-center gap-2 px-8 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
+                            className="flex items-center gap-2 px-8 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
                             {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                             Update Activity
                         </button>

@@ -54,12 +54,12 @@ export default function DashboardOverview() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">Dashboard <span className="gradient-text">Overview</span></h1>
-                    <p className="text-sm text-muted-text mt-0.5">Welcome back. Here's what's happening with your pipeline today.</p>
+                    <h1 className="text-5xl font-bold text-foreground">Dashboard <span className="gradient-text">Overview</span></h1>
+                    <p className="text-xl text-muted-text mt-0.5">Welcome back. Here's what's happening with your pipeline today.</p>
                 </div>
                 <div className="flex gap-3">
                     <Link href="/dashboard/leads"
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl transition-all duration-200 shadow-lg"
+                        className="flex items-center gap-2 px-4 py-2 text-xl font-semibold text-white rounded-xl transition-all duration-200 shadow-lg"
                         style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                         + New Lead
                     </Link>
@@ -77,8 +77,8 @@ export default function DashboardOverview() {
                                 style={{ background: glow }} />
                             <div className="flex justify-between items-start relative z-10">
                                 <div>
-                                    <p className="text-xs font-semibold text-muted-text uppercase tracking-wider">{label}</p>
-                                    <h3 className="text-2xl font-bold text-foreground mt-1.5">
+                                    <p className="text-lg font-semibold text-muted-text uppercase tracking-wider">{label}</p>
+                                    <h3 className="text-5xl font-bold text-foreground mt-1.5">
                                         {isCurrency ? `$${val.toLocaleString()}` : val}
                                     </h3>
                                 </div>
@@ -96,15 +96,15 @@ export default function DashboardOverview() {
                 {/* Chart placeholder */}
                 <div className="lg:col-span-2 rounded-2xl flex flex-col items-center justify-center min-h-[280px] relative overflow-hidden glass-card">
                     <TrendingUp className="w-12 h-12 text-indigo-500/20 mb-3" />
-                    <p className="text-muted-text font-medium text-sm">Pipeline Chart coming soon</p>
-                    <p className="text-xs text-muted-text mt-1">Requires additional charting library setup.</p>
+                    <p className="text-muted-text font-medium text-xl">Pipeline Chart coming soon</p>
+                    <p className="text-lg text-muted-text mt-1">Requires additional charting library setup.</p>
                 </div>
 
                 {/* Recent Leads */}
                 <div className="rounded-2xl overflow-hidden flex flex-col glass-card">
                     <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between">
-                        <h3 className="font-semibold text-foreground text-sm">Recent Leads</h3>
-                        <Link href="/dashboard/leads" className="text-xs text-indigo-500 hover:text-indigo-400 font-medium transition-colors">
+                        <h3 className="font-semibold text-foreground text-xl">Recent Leads</h3>
+                        <Link href="/dashboard/leads" className="text-lg text-indigo-500 hover:text-indigo-400 font-medium transition-colors">
                             View all →
                         </Link>
                     </div>
@@ -114,10 +114,10 @@ export default function DashboardOverview() {
                                 {recentLeads.map((lead) => (
                                     <div key={lead.id} className="flex justify-between items-center py-2.5 border-b border-border-subtle last:border-0 last:pb-0">
                                         <div>
-                                            <p className="text-sm font-medium text-foreground">{lead.title}</p>
-                                            <p className="text-xs text-muted-text mt-0.5">{lead.status} · ${lead.value?.toLocaleString()}</p>
+                                            <p className="text-xl font-medium text-foreground">{lead.title}</p>
+                                            <p className="text-lg text-muted-text mt-0.5">{lead.status} · ${lead.value?.toLocaleString()}</p>
                                         </div>
-                                        <span className="text-xs px-2 py-0.5 rounded-full font-medium text-crm-600 dark:text-crm-300 bg-crm-500/15 border border-crm-500/25">
+                                        <span className="text-lg px-2 py-0.5 rounded-full font-medium text-crm-600 dark:text-crm-300 bg-crm-500/15 border border-crm-500/25">
                                             {lead.status}
                                         </span>
                                     </div>
@@ -125,8 +125,8 @@ export default function DashboardOverview() {
                             </div>
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-center py-8">
-                                <p className="text-sm text-muted-text">No recent leads found.</p>
-                                <Link href="/dashboard/leads" className="text-sm text-indigo-500 font-medium mt-2 hover:text-indigo-400 transition-colors">
+                                <p className="text-xl text-muted-text">No recent leads found.</p>
+                                <Link href="/dashboard/leads" className="text-xl text-indigo-500 font-medium mt-2 hover:text-indigo-400 transition-colors">
                                     Create your first lead
                                 </Link>
                             </div>

@@ -16,7 +16,7 @@ interface Contract {
     is_active?: boolean;
 }
 
-const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
+const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 
 const getStatusColor = (status: string) => {
     switch (status) {
@@ -89,12 +89,12 @@ export default function ContractsPage() {
                         <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Contracts</h1>
-                        <p className="text-xs text-muted-text">Manage formal agreements and service records.</p>
+                        <h1 className="text-5xl font-bold text-foreground">Contracts</h1>
+                        <p className="text-lg text-muted-text">Manage formal agreements and service records.</p>
                     </div>
                 </div>
                 <Link href="/dashboard/contracts/new"
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl shadow-lg transition-transform hover:-translate-y-0.5 duration-200"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-xl font-semibold text-white rounded-xl shadow-lg transition-transform hover:-translate-y-0.5 duration-200"
                     style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                     <Plus className="w-4 h-4" /> New Contract
                 </Link>
@@ -107,7 +107,7 @@ export default function ContractsPage() {
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
                         <input type="text" placeholder="Search contracts or accounts…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
                     <div className="sm:w-44">
@@ -115,7 +115,7 @@ export default function ContractsPage() {
                             value={filterStatus}
                             onChange={setFilterStatus}
                             placeholder="All Statuses"
-                            className="px-3 py-2 text-sm rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                            className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                             options={[
                                 { value: '', label: 'All Statuses' },
                                 ...uniqueStatuses.map(s => ({ value: String(s), label: String(s) })),
@@ -136,12 +136,12 @@ export default function ContractsPage() {
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-text text-sm">Loading contracts…</td></tr>
+                                <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-text text-xl">Loading contracts…</td></tr>
                             ) : sortedContracts.length === 0 ? (
                                 <tr><td colSpan={6} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <FileText className="h-10 w-10 text-muted-text mb-3" />
-                                        <p className="text-foreground text-sm font-semibold">No contracts found.</p>
+                                        <p className="text-foreground text-xl font-semibold">No contracts found.</p>
                                     </div>
                                 </td></tr>
                             ) : (
@@ -161,29 +161,29 @@ export default function ContractsPage() {
                                                         <FileText className={`h-4 w-4 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-sm font-medium text-foreground">{contract.title}</span>
-                                                        {!isActive && <span className="text-[10px] text-slate-400 uppercase tracking-wider">Inactive</span>}
+                                                        <span className="text-xl font-medium text-foreground">{contract.title}</span>
+                                                        {!isActive && <span className="text-base text-slate-400 uppercase tracking-wider">Inactive</span>}
                                                     </div>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
                                                     style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
                                                     {contract.status}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center text-sm text-foreground">
+                                                <div className="flex items-center text-xl text-foreground">
                                                     <Building2 className="mr-1.5 h-4 w-4 text-muted-text" />
                                                     {contract.account ? contract.account.name : '—'}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-sm font-semibold text-foreground">
+                                                <span className="text-xl font-semibold text-foreground">
                                                     {formatCurrency(contract.value, contract.currency)}
                                                 </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-text">
+                                            <td className="px-6 py-4 whitespace-nowrap text-xl text-muted-text">
                                                 {contract.start_date || contract.end_date ? (
                                                     <div className="flex items-center gap-1.5">
                                                         <Calendar className="h-3.5 w-3.5 text-muted-text" />
@@ -194,7 +194,7 @@ export default function ContractsPage() {
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {!isActive && (
                                                     <button onClick={(e) => handleReactivate(e, contract.id)}
-                                                        className="px-3 py-1.5 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                        className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
                                                         Reactivate
                                                     </button>
                                                 )}

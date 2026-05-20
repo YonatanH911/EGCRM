@@ -7,8 +7,8 @@ import api from '@/lib/api';
 import { Users2, ArrowLeft, Loader2, Check, Trash2 } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
-const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 export default function EditContactPage() {
     const router = useRouter();
@@ -22,7 +22,7 @@ export default function EditContactPage() {
 
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', job_title: '', email: '',
-        phone: '', company_name: '', supplier: '', description: '', account_id: ''
+        phone: '', company_name: '', supplier: '', description: '', account_ids: [] as string[],
     });
 
     useEffect(() => {
@@ -38,7 +38,7 @@ export default function EditContactPage() {
                     job_title: data.job_title || '', email: data.email || '',
                     phone: data.phone || '', company_name: data.company_name || '',
                     supplier: data.supplier || '', description: data.description || '',
-                    account_id: data.account_id ? data.account_id.toString() : ''
+                    account_ids: (data.account_ids?.length ? data.account_ids : (data.account_id ? [data.account_id] : [])).map(String)
                 });
                 setAccounts(accountsRes.data);
             } catch (err: any) {
@@ -57,7 +57,8 @@ export default function EditContactPage() {
         try {
             await api.put(`/contacts/${contactId}`, {
                 ...formData,
-                account_id: formData.account_id ? parseInt(formData.account_id) : null,
+                account_ids: formData.account_ids.map(Number),
+                account_id: formData.account_ids[0] ? parseInt(formData.account_ids[0]) : null,
             });
             router.push('/dashboard/contacts');
             router.refresh();
@@ -114,8 +115,8 @@ export default function EditContactPage() {
                         <Users2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Edit Contact</h1>
-                        <p className="text-xs text-muted-text">Update detailed contact information</p>
+                        <h1 className="text-5xl font-bold text-foreground">Edit Contact</h1>
+                        <p className="text-lg text-muted-text">Update detailed contact information</p>
                     </div>
                 </div>
             </div>
@@ -126,65 +127,65 @@ export default function EditContactPage() {
                 {/* Card header */}
                 <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                     <Users2 className="w-4.5 h-4.5 text-indigo-500" />
-                    <h2 className="text-sm font-semibold text-foreground">Contact Details</h2>
+                    <h2 className="text-xl font-semibold text-foreground">Contact Details</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
-                        <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
+                        <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
                         >
                             {error}
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <Field label="First Name *" field="first_name" placeholder="Jane" />
-                        <Field label="Last Name *" field="last_name" placeholder="Smith" />
-                        <Field label="Job Title" field="job_title" placeholder="e.g. Chief Marketing Officer" />
-                        <Field label="Company Name" field="company_name" placeholder="e.g. Acme Corp" />
-                        <Field label="Email Address" field="email" type="email" placeholder="jane@example.com" />
-                        <Field label="Phone Number" field="phone" placeholder="+1 (555) 000-0000" />
+                        <Field label="First Name *" field="first_name" placeholder="" />
+                        <Field label="Last Name *" field="last_name" placeholder="" />
+                        <Field label="Job Title" field="job_title" placeholder="" />
+                        <Field label="Company Name" field="company_name" placeholder="" />
+                        <Field label="Email Address" field="email" type="email" placeholder="" />
+                        <Field label="Phone Number" field="phone" placeholder="" />
 
                         <div>
                             <label className={labelCls}>Associated Account</label>
                             <SearchableDropdown
-                                value={formData.account_id}
-                                onChange={(value) => setFormData({ ...formData, account_id: value })}
+                                multiple
+                                value={formData.account_ids}
+                                onChange={(value) => setFormData({ ...formData, account_ids: value })}
                                 placeholder="No Account"
                                 className={inputCls}
                                 options={[
-                                    { value: '', label: 'No Account' },
                                     ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
                                 ]}
                             />
                         </div>
 
-                        <Field label="Supplier" field="supplier" placeholder="e.g. Parts Supplier LLC" />
+                        <Field label="Supplier" field="supplier" placeholder="" />
 
                         <div className="col-span-1 md:col-span-2">
                             <label className={labelCls}>Description / Notes</label>
                             <textarea value={formData.description} rows={4}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 className={`${inputCls} resize-none`}
-                                placeholder="Write detailed notes about this contact…"
+                                placeholder=""
                             />
                         </div>
                     </div>
 
                     <div className="flex justify-between items-center gap-3 pt-4 border-t border-border-subtle">
                         <button type="button" onClick={handleDelete} disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
+                            className="flex items-center gap-2 px-4 py-2.5 text-xl font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
                         >
                             <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contact</span>
                         </button>
                         <div className="flex gap-3">
                             <Link href="/dashboard/contacts"
-                                className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
+                                className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
                             >
                                 Cancel
                             </Link>
                             <button type="submit" disabled={loading}
-                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-lg"
+                                className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-lg"
                                 style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                                 Update <span className="hidden sm:inline">Contact</span>

@@ -19,8 +19,8 @@ function fmt(d: string | null) {
     return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
-const thCls = "px-5 py-3.5 ltr:text-left rtl:text-right text-[10px] font-bold text-muted-text uppercase tracking-widest";
-const inputCls = "w-full px-3 py-2 text-sm rounded-lg text-foreground bg-background-subtle border border-border-subtle focus:border-crm-500 focus:outline-none";
+const thCls = "px-5 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
+const inputCls = "w-full px-3 py-2 text-xl rounded-lg text-foreground bg-background-subtle border border-border-subtle focus:border-crm-500 focus:outline-none";
 
 // Simple helper to convert hex to rgba with 0.15 opacity for badges
 function hexToRgba(hex: string, alpha: number = 0.15) {
@@ -115,17 +115,17 @@ export default function ActivitiesPage() {
                         <Activity className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">Activities</h1>
-                        <p className="text-xs text-muted-text">{activities.length} total activities</p>
+                        <h1 className="text-5xl font-bold text-foreground">Activities</h1>
+                        <p className="text-lg text-muted-text">{activities.length} total activities</p>
                     </div>
                 </div>
                 <div className="flex gap-3">
                     <button onClick={() => setIsManageModalOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-muted-text border border-border-subtle rounded-xl hover:bg-background-subtle transition-all">
+                        className="flex items-center gap-2 px-4 py-2 text-xl font-semibold text-muted-text border border-border-subtle rounded-xl hover:bg-background-subtle transition-all">
                         <Settings className="w-4 h-4" /> Manage Types
                     </button>
                     <Link href="/dashboard/activities/new"
-                        className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-transform hover:-translate-y-0.5 duration-200">
+                        className="flex items-center gap-2 px-4 py-2 text-xl font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-transform hover:-translate-y-0.5 duration-200">
                         <Plus className="w-4 h-4" /> New Activity
                     </Link>
                 </div>
@@ -134,7 +134,7 @@ export default function ActivitiesPage() {
             {/* Filter pills */}
             <div className="flex gap-2 flex-wrap items-center">
                 <button onClick={() => setFilter('All')}
-                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border ${filter === 'All' ? 'bg-crm-500 border-crm-500 text-white shadow-lg shadow-crm-500/20' : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'}`}
+                    className={`px-3.5 py-1.5 rounded-full text-lg font-bold transition-all duration-200 border ${filter === 'All' ? 'bg-crm-500 border-crm-500 text-white shadow-lg shadow-crm-500/20' : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'}`}
                 >
                     All Activities
                 </button>
@@ -147,7 +147,7 @@ export default function ActivitiesPage() {
                                 borderColor: isActive ? t.color : 'var(--border-subtle)',
                                 color: isActive ? '#fff' : 'var(--muted-text)',
                             }}
-                            className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 border ${isActive ? 'shadow-lg' : 'bg-background-subtle hover:bg-background-subtle/80'}`}
+                            className={`px-3.5 py-1.5 rounded-full text-lg font-bold transition-all duration-200 border ${isActive ? 'shadow-lg' : 'bg-background-subtle hover:bg-background-subtle/80'}`}
                         >
                             {t.name}
                         </button>
@@ -168,14 +168,14 @@ export default function ActivitiesPage() {
                                 <Activity className="w-8 h-8 text-muted-text opacity-50" />
                             </div>
                             <p className="font-bold text-foreground">No activities found</p>
-                            <p className="text-sm mt-1 text-muted-text max-w-[250px]">Track your tasks and appointments by adding a new one.</p>
+                            <p className="text-xl mt-1 text-muted-text max-w-[250px]">Track your tasks and appointments by adding a new one.</p>
                             <Link href="/dashboard/activities/new"
-                                className="mt-6 px-4 py-2 rounded-xl text-crm-500 font-bold text-sm bg-crm-500/10 hover:bg-crm-500/20 transition-all">
+                                className="mt-6 px-4 py-2 rounded-xl text-crm-500 font-bold text-xl bg-crm-500/10 hover:bg-crm-500/20 transition-all">
                                 New Activity <Plus className="w-4 h-4" />
                             </Link>
                         </div>
                     ) : (
-                        <table className="w-full text-sm">
+                        <table className="w-full text-xl">
                             <thead className="border-b border-border-subtle bg-background-subtle/30">
                                 <tr>
                                     {['Type', 'Subject', 'Regarding', 'Start Date', 'Due Date', ''].map((h, i) => (
@@ -192,7 +192,7 @@ export default function ActivitiesPage() {
                                             onClick={() => router.push(`/dashboard/activities/${activity.id}/edit`)}
                                         >
                                             <td className="px-5 py-3.5">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider"
+                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-base font-bold tracking-wider"
                                                     style={{ background: hexToRgba(tColor), color: tColor, border: `1px solid ${hexToRgba(tColor, 0.3)}` }}>
                                                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tColor }}></div>
                                                     {tName}
@@ -226,7 +226,7 @@ export default function ActivitiesPage() {
                     <div className="w-full max-w-md bg-background border border-border-subtle shadow-2xl rounded-2xl overflow-hidden flex flex-col max-h-[90vh]">
                         {/* Modal Header */}
                         <div className="px-6 py-4 border-b border-border-subtle flex items-center justify-between bg-background-subtle">
-                            <h2 className="text-lg font-bold text-foreground flex items-center gap-2">
+                            <h2 className="text-3xl font-bold text-foreground flex items-center gap-2">
                                 <Settings className="w-5 h-5 text-crm-500" /> Manage Task Types
                             </h2>
                             <button onClick={() => setIsManageModalOpen(false)} className="text-muted-text hover:text-foreground">
@@ -238,7 +238,7 @@ export default function ActivitiesPage() {
                         <div className="overflow-y-auto p-6 space-y-6 flex-1">
                             {/* Create New */}
                             <form onSubmit={handleCreateType} className="bg-background-subtle border border-border-subtle p-4 rounded-xl space-y-3">
-                                <h3 className="text-xs font-bold text-muted-text uppercase tracking-widest">Create New Type</h3>
+                                <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Create New Type</h3>
                                 <div className="flex items-center gap-3">
                                     <div className="relative">
                                         <input type="color" value={newTypeColor} onChange={e => setNewTypeColor(e.target.value)}
@@ -246,7 +246,7 @@ export default function ActivitiesPage() {
                                         <div className="w-10 h-10 rounded-xl border border-border-subtle shadow-sm cursor-pointer" style={{ backgroundColor: newTypeColor }}></div>
                                     </div>
                                     <input type="text" value={newTypeName} onChange={e => setNewTypeName(e.target.value)} required
-                                        className={inputCls} placeholder="Type Name (e.g. Code Review)" />
+                                        className={inputCls} placeholder="" />
                                     <button type="submit" disabled={savingType || !newTypeName.trim()}
                                         className="w-10 h-10 flex-shrink-0 flex items-center justify-center rounded-xl bg-crm-500 text-white hover:bg-crm-600 disabled:opacity-50 transition-all">
                                         {savingType ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-5 h-5" />}
@@ -257,13 +257,13 @@ export default function ActivitiesPage() {
                             {/* Existing List */}
                             <div className="space-y-2 relative">
                                 {taskTypes.length === 0 ? (
-                                    <p className="text-sm text-center text-muted-text py-4">No task types exist yet.</p>
+                                    <p className="text-xl text-center text-muted-text py-4">No task types exist yet.</p>
                                 ) : (
                                     taskTypes.map(t => (
                                         <div key={t.id} className="flex items-center justify-between p-3 rounded-xl border border-border-subtle hover:bg-background-subtle/50 transition-colors">
                                             <div className="flex items-center gap-3">
                                                 <div className="w-6 h-6 rounded-md shadow-sm border border-black/10 dark:border-white/10" style={{ backgroundColor: t.color }}></div>
-                                                <span className="text-sm font-bold text-foreground">{t.name}</span>
+                                                <span className="text-xl font-bold text-foreground">{t.name}</span>
                                             </div>
                                             <button onClick={() => handleDeleteType(t.id)} className="p-1.5 text-muted-text hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
                                                 <Trash2 className="w-4 h-4" />

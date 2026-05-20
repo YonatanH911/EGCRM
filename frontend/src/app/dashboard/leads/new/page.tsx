@@ -19,7 +19,7 @@ export default function NewLeadPage() {
         title: '',
         value: '',
         status: 'New',
-        contact_id: ''
+        contact_ids: [] as string[],
     });
 
     useEffect(() => {
@@ -42,7 +42,8 @@ export default function NewLeadPage() {
         const payload = {
             ...formData,
             value: formData.value ? parseFloat(formData.value) : 0,
-            contact_id: formData.contact_id ? parseInt(formData.contact_id) : null,
+            contact_ids: formData.contact_ids.map(Number),
+            contact_id: formData.contact_ids[0] ? parseInt(formData.contact_ids[0]) : null,
         };
 
         try {
@@ -62,39 +63,39 @@ export default function NewLeadPage() {
                     <ArrowLeft className="w-5 h-5 text-muted-text ltr:mr-0 rtl:rotate-180" />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">New Lead</h1>
-                    <p className="text-sm text-muted-text">Create a new sales opportunity for the pipeline</p>
+                    <h1 className="text-5xl font-bold text-foreground">New Lead</h1>
+                    <p className="text-xl text-muted-text">Create a new sales opportunity for the pipeline</p>
                 </div>
             </div>
 
             <div className="glass-card border border-border-subtle rounded-xl shadow-sm overflow-hidden">
                 <div className="bg-black/5 dark:bg-white/5 p-6 border-b border-border-subtle flex items-center gap-3">
                     <Briefcase className="w-6 h-6 text-muted-text" />
-                    <h2 className="text-lg font-medium text-foreground">Lead Details</h2>
+                    <h2 className="text-3xl font-medium text-foreground">Lead Details</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
-                        <div className="p-3 text-sm text-red-500 bg-red-500/10 rounded-md border border-red-500/20">
+                        <div className="p-3 text-xl text-red-500 bg-red-500/10 rounded-md border border-red-500/20">
                             {error}
                         </div>
                     )}
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="col-span-1 md:col-span-2">
-                            <label className="block text-sm font-medium text-foreground mb-1">Opportunity Title *</label>
+                            <label className="block text-xl font-medium text-foreground mb-1">Opportunity Title *</label>
                             <input
                                 type="text"
                                 required
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                 className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm placeholder-muted-text"
-                                placeholder="e.g. Q3 Enterprise Server Upgrade"
+                                placeholder=""
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">Estimated Value ($)</label>
+                            <label className="block text-xl font-medium text-foreground mb-1">Estimated Value ($)</label>
                             <input
                                 type="number"
                                 min="0"
@@ -102,12 +103,12 @@ export default function NewLeadPage() {
                                 value={formData.value}
                                 onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                                 className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm placeholder-muted-text"
-                                placeholder="25000"
+                                placeholder=""
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1">Initial Stage</label>
+                            <label className="block text-xl font-medium text-foreground mb-1">Initial Stage</label>
                             <SearchableDropdown
                                 value={formData.status}
                                 onChange={(value) => setFormData({ ...formData, status: value })}
@@ -117,14 +118,14 @@ export default function NewLeadPage() {
                         </div>
 
                         <div className="col-span-1 md:col-span-2">
-                            <label className="block text-sm font-medium text-foreground mb-1">Primary Contact</label>
+                            <label className="block text-xl font-medium text-foreground mb-1">Primary Contact</label>
                             <SearchableDropdown
-                                value={formData.contact_id}
-                                onChange={(value) => setFormData({ ...formData, contact_id: value })}
+                                multiple
+                                value={formData.contact_ids}
+                                onChange={(value) => setFormData({ ...formData, contact_ids: value })}
                                 placeholder="Unassigned"
                                 className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm"
                                 options={[
-                                    { value: '', label: 'Unassigned' },
                                     ...contacts.map(c => ({
                                         value: String(c.id),
                                         label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
@@ -137,14 +138,14 @@ export default function NewLeadPage() {
                     <div className="pt-6 border-t border-border-subtle flex justify-end gap-3">
                         <Link
                             href="/dashboard/leads"
-                            className="px-5 py-2.5 text-sm font-medium text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors shadow-sm"
+                            className="px-5 py-2.5 text-xl font-medium text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle rounded-lg hover:bg-black/10 dark:hover:bg-white/10 transition-colors shadow-sm"
                         >
                             Cancel
                         </Link>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-5 py-2.5 text-sm font-medium text-white bg-crm-600 rounded-lg hover:bg-crm-700 focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center min-w-[120px]"
+                            className="px-5 py-2.5 text-xl font-medium text-white bg-crm-600 rounded-lg hover:bg-crm-700 focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors shadow-sm disabled:opacity-50 flex items-center justify-center min-w-[120px]"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Lead'}
                         </button>

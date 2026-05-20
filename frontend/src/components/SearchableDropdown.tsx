@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Check, ChevronDown, Search } from 'lucide-react';
+import { Check, ChevronDown, Plus, Search, X } from 'lucide-react';
 import clsx from 'clsx';
 
 export type DropdownOption = {
@@ -10,16 +10,27 @@ export type DropdownOption = {
     label: string;
 };
 
-interface SearchableDropdownProps {
-    value: string;
+interface BaseSearchableDropdownProps {
     options: DropdownOption[];
-    onChange: (value: string) => void;
     placeholder?: string;
     searchPlaceholder?: string;
     emptyText?: string;
     className?: string;
     disabled?: boolean;
 }
+
+type SearchableDropdownProps = BaseSearchableDropdownProps & (
+    | {
+        value: string;
+        onChange: (value: string) => void;
+        multiple?: false;
+    }
+    | {
+        value: string[];
+        onChange: (value: string[]) => void;
+        multiple: true;
+    }
+);
 
 export default function SearchableDropdown({
     value,
@@ -30,6 +41,7 @@ export default function SearchableDropdown({
     emptyText = 'No options found',
     className,
     disabled = false,
+    multiple = false,
 }: SearchableDropdownProps) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -38,7 +50,16 @@ export default function SearchableDropdown({
     const menuRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const selected = options.find(option => option.value === value);
+    const selectedValues = useMemo(
+        () => multiple && Array.isArray(value) ? value : [],
+        [multiple, value]
+    );
+    const selected = !multiple && typeof value === 'string'
+        ? options.find(option => option.value === value)
+        : undefined;
+    const selectedOptions = multiple
+        ? options.filter(option => selectedValues.includes(option.value))
+        : [];
     const filteredOptions = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase();
         if (!normalizedQuery) return options;
@@ -102,8 +123,21 @@ export default function SearchableDropdown({
         };
     }, [open]);
 
+    const removeOption = (nextValue: string) => {
+        if (!multiple) return;
+        (onChange as (value: string[]) => void)(selectedValues.filter(item => item !== nextValue));
+    };
+
     const selectOption = (nextValue: string) => {
-        onChange(nextValue);
+        if (multiple) {
+            if (!nextValue || selectedValues.includes(nextValue)) return;
+            (onChange as (value: string[]) => void)([...selectedValues, nextValue]);
+            setQuery('');
+            window.setTimeout(() => inputRef.current?.focus(), 0);
+            return;
+        }
+
+        (onChange as (value: string) => void)(nextValue);
         setOpen(false);
         setQuery('');
     };
@@ -119,9 +153,46 @@ export default function SearchableDropdown({
                     className
                 )}
             >
-                <span className={clsx('min-w-0 flex-1 truncate', !selected && 'text-muted-text')}>
-                    {selected?.label || placeholder}
-                </span>
+                {multiple ? (
+                    <span className={clsx('min-w-0 flex-1', selectedOptions.length === 0 && 'text-muted-text')}>
+                        {selectedOptions.length > 0 ? (
+                            <span className="flex flex-wrap gap-2">
+                                {selectedOptions.map(option => (
+                                    <span
+                                        key={option.value}
+                                        className="inline-flex max-w-full items-center gap-1 rounded-lg bg-crm-500/10 px-2 py-0.5 text-crm-500"
+                                    >
+                                        <span className="truncate">{option.label}</span>
+                                        <span
+                                            role="button"
+                                            tabIndex={0}
+                                            onClick={event => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                removeOption(option.value);
+                                            }}
+                                            onKeyDown={event => {
+                                                if (event.key === 'Enter' || event.key === ' ') {
+                                                    event.preventDefault();
+                                                    event.stopPropagation();
+                                                    removeOption(option.value);
+                                                }
+                                            }}
+                                            className="rounded-full p-0.5 hover:bg-crm-500/20"
+                                            aria-label={`Remove ${option.label}`}
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </span>
+                                    </span>
+                                ))}
+                            </span>
+                        ) : placeholder}
+                    </span>
+                ) : (
+                    <span className={clsx('min-w-0 flex-1 truncate', !selected && 'text-muted-text')}>
+                        {selected?.label || placeholder}
+                    </span>
+                )}
                 <ChevronDown className={clsx('h-4 w-4 flex-shrink-0 text-muted-text transition-transform', open && 'rotate-180')} />
             </button>
 
@@ -138,32 +209,37 @@ export default function SearchableDropdown({
                             value={query}
                             onChange={event => setQuery(event.target.value)}
                             placeholder={searchPlaceholder}
-                            className="w-full bg-transparent py-2.5 pl-9 pr-3 text-sm text-foreground placeholder-muted-text outline-none"
+                            className="w-full bg-transparent py-2.5 pl-9 pr-3 text-xl text-foreground placeholder-muted-text outline-none"
                         />
                     </div>
                     <div className="overflow-y-auto py-1" style={{ maxHeight: menuStyle.maxHeight }}>
                         {filteredOptions.length > 0 ? (
                             filteredOptions.map(option => {
-                                const active = option.value === value;
+                                const active = multiple
+                                    ? selectedValues.includes(option.value)
+                                    : option.value === value;
                                 return (
                                     <button
                                         key={`${option.value}-${option.label}`}
                                         type="button"
                                         onClick={() => selectOption(option.value)}
                                         className={clsx(
-                                            'flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition-colors',
+                                            'flex w-full items-center gap-2 px-3 py-2 text-left text-xl transition-colors',
                                             active
                                                 ? 'bg-crm-500/10 text-crm-500'
                                                 : 'text-foreground hover:bg-black/5 dark:hover:bg-white/5'
                                         )}
                                     >
                                         <span className="min-w-0 flex-1 truncate">{option.label}</span>
-                                        {active && <Check className="h-4 w-4 flex-shrink-0" />}
+                                        {active
+                                            ? <Check className="h-4 w-4 flex-shrink-0" />
+                                            : multiple && <Plus className="h-4 w-4 flex-shrink-0" />
+                                        }
                                     </button>
                                 );
                             })
                         ) : (
-                            <div className="px-3 py-3 text-sm text-muted-text">{emptyText}</div>
+                            <div className="px-3 py-3 text-xl text-muted-text">{emptyText}</div>
                         )}
                     </div>
                 </div>,

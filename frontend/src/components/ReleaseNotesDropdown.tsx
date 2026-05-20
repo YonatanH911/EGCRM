@@ -64,7 +64,7 @@ export default function ReleaseNotesDropdown() {
                     <div className="px-5 py-4 border-b border-border-subtle bg-zinc-50 dark:bg-zinc-800/50 flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-indigo-500" />
-                            <h3 className="text-sm font-bold text-foreground">What's New</h3>
+                            <h3 className="text-xl font-bold text-foreground">What's New</h3>
                         </div>
                         <button onClick={() => setIsOpen(false)} className="text-muted-text hover:text-foreground">
                             <X className="w-4 h-4" />
@@ -78,11 +78,11 @@ export default function ReleaseNotesDropdown() {
                                     <note.icon className={`w-5 h-5 ${note.color}`} />
                                 </div>
                                 <div className="space-y-1">
-                                    <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
+                                    <h4 className="text-xl font-semibold text-foreground flex items-center gap-2">
                                         {note.title}
                                         <CheckCircle2 className="w-3 h-3 text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity" />
                                     </h4>
-                                    <p className="text-xs text-muted-text leading-relaxed">
+                                    <p className="text-lg text-muted-text leading-relaxed">
                                         {note.description}
                                     </p>
                                 </div>
@@ -93,7 +93,7 @@ export default function ReleaseNotesDropdown() {
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border-t border-border-subtle text-center">
                         <button 
                             onClick={() => setIsOpen(false)}
-                            className="text-[10px] font-bold uppercase tracking-widest text-muted-text hover:text-foreground transition-colors"
+                            className="text-base font-bold uppercase tracking-widest text-muted-text hover:text-foreground transition-colors"
                         >
                             Dismiss All
                         </button>

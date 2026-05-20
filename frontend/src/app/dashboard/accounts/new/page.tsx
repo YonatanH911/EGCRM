@@ -7,8 +7,8 @@ import api from '@/lib/api';
 import { Building2, ArrowLeft, Loader2 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 
-const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
+const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 export default function NewAccountPage() {
     const router = useRouter();
@@ -50,20 +50,20 @@ export default function NewAccountPage() {
                     <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">New Account</h1>
-                    <p className="text-xs text-muted-text">Create a new organizational record.</p>
+                    <h1 className="text-5xl font-bold text-foreground">New Account</h1>
+                    <p className="text-lg text-muted-text">Create a new organizational record.</p>
                 </div>
             </div>
 
             <div className="rounded-2xl overflow-hidden glass-card">
                 <div className="px-6 py-4 border-b border-border-subtle bg-background-subtle/30 flex items-center gap-3">
                     <Building2 className="w-5 h-5 text-crm-500" />
-                    <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">Account Details</h2>
+                    <h2 className="text-xl font-bold text-foreground uppercase tracking-widest">Account Details</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
-                        <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
                             {error}
                         </div>
                     )}
@@ -77,7 +77,7 @@ export default function NewAccountPage() {
                                 required
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                 className={inputCls}
-                                placeholder="e.g. Acme Corporation"
+                                placeholder=""
                             />
                         </div>
 
@@ -88,7 +88,7 @@ export default function NewAccountPage() {
                                 value={formData.industry}
                                 onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                                 className={inputCls}
-                                placeholder="e.g. Technology"
+                                placeholder=""
                             />
                         </div>
 
@@ -99,7 +99,7 @@ export default function NewAccountPage() {
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                 className={inputCls}
-                                placeholder="+1 (555) 000-0000"
+                                placeholder=""
                             />
                         </div>
 
@@ -110,13 +110,13 @@ export default function NewAccountPage() {
                                 value={formData.website}
                                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                                 className={inputCls}
-                                placeholder="https://www.example.com"
+                                placeholder=""
                             />
                         </div>
                     </div>
 
                     <div className="pt-6 border-t border-border-subtle">
-                        <h3 className="text-[11px] font-bold text-muted-text uppercase tracking-widest mb-5 flex items-center gap-2">
+                        <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest mb-5 flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
                             Address Information
                         </h3>
@@ -128,7 +128,7 @@ export default function NewAccountPage() {
                                     value={formData.street}
                                     onChange={(e) => setFormData({ ...formData, street: e.target.value })}
                                     className={inputCls}
-                                    placeholder="123 Main St"
+                                    placeholder=""
                                 />
                             </div>
 
@@ -139,7 +139,7 @@ export default function NewAccountPage() {
                                     value={formData.city}
                                     onChange={(e) => setFormData({ ...formData, city: e.target.value })}
                                     className={inputCls}
-                                    placeholder="e.g. New York"
+                                    placeholder=""
                                 />
                             </div>
 
@@ -150,7 +150,7 @@ export default function NewAccountPage() {
                                     value={formData.state_or_province}
                                     onChange={(e) => setFormData({ ...formData, state_or_province: e.target.value })}
                                     className={inputCls}
-                                    placeholder="e.g. NY"
+                                    placeholder=""
                                 />
                             </div>
 
@@ -161,7 +161,7 @@ export default function NewAccountPage() {
                                     value={formData.zip_code}
                                     onChange={(e) => setFormData({ ...formData, zip_code: e.target.value })}
                                     className={inputCls}
-                                    placeholder="10001"
+                                    placeholder=""
                                 />
                             </div>
 
@@ -172,7 +172,7 @@ export default function NewAccountPage() {
                                     value={formData.country}
                                     onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                                     className={inputCls}
-                                    placeholder="United States"
+                                    placeholder=""
                                 />
                             </div>
                         </div>
@@ -181,14 +181,14 @@ export default function NewAccountPage() {
                     <div className="pt-8 border-t border-border-subtle flex justify-end gap-3">
                         <Link
                             href="/dashboard/accounts"
-                            className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all"
+                            className="px-6 py-2.5 text-xl font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all"
                         >
                             Cancel
                         </Link>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="px-8 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center min-w-[140px]"
+                            className="px-8 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center min-w-[140px]"
                         >
                             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Account'}
                         </button>

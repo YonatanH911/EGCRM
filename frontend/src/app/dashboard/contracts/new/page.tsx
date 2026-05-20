@@ -22,8 +22,8 @@ const CURRENCIES = [
     { value: 'CHF', label: 'CHF - Swiss Franc' },
 ];
 
-const labelCls = "block text-xs font-bold text-muted-text uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
     'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' | 'account_id' |
@@ -53,11 +53,11 @@ const CUBES = [
     },
 ];
 
-const emptyForm: Record<FormField, string> = {
-    title: '', status: 'Draft', value: '0', currency: 'USD', account_id: '',
+const emptyForm: Record<FormField, string | string[]> = {
+    title: '', status: 'Draft', value: '0', currency: 'USD', account_id: [],
     start_date: '', end_date: '', paid_by: '',
-    beneficiary_management_contact: '', beneficiary_technical_contact: '', beneficiary_financial_contact: '',
-    supplier_management_contact: '',   supplier_technical_contact: '',   supplier_financial_contact: '',
+    beneficiary_management_contact: [], beneficiary_technical_contact: [], beneficiary_financial_contact: [],
+    supplier_management_contact: [],   supplier_technical_contact: [],   supplier_financial_contact: [],
 };
 
 export default function NewContractPage() {
@@ -66,7 +66,7 @@ export default function NewContractPage() {
     const [error, setError]       = useState('');
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [accounts, setAccounts] = useState<Account[]>([]);
-    const [form, setForm]         = useState<Record<FormField, string>>(emptyForm);
+    const [form, setForm]         = useState<Record<FormField, string | string[]>>(emptyForm);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -97,16 +97,17 @@ export default function NewContractPage() {
             await api.post('/contracts', {
                 ...form,
                 value:      Number(form.value) || 0,
-                account_id: form.account_id ? Number(form.account_id) : null,
-                start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
-                end_date:   form.end_date   ? new Date(form.end_date).toISOString()   : null,
-                beneficiary_management_contact: form.beneficiary_management_contact || null,
-                beneficiary_technical_contact:  form.beneficiary_technical_contact  || null,
-                beneficiary_financial_contact:  form.beneficiary_financial_contact  || null,
-                supplier_management_contact:    form.supplier_management_contact    || null,
-                supplier_technical_contact:     form.supplier_technical_contact     || null,
-                supplier_financial_contact:     form.supplier_financial_contact     || null,
-                paid_by:                        form.paid_by                        || null,
+                account_ids: (form.account_id as string[]).map(Number),
+                account_id: (form.account_id as string[])[0] ? Number((form.account_id as string[])[0]) : null,
+                start_date: form.start_date ? new Date(form.start_date as string).toISOString() : null,
+                end_date:   form.end_date   ? new Date(form.end_date as string).toISOString()   : null,
+                beneficiary_management_contact: (form.beneficiary_management_contact as string[]).join(', ') || null,
+                beneficiary_technical_contact:  (form.beneficiary_technical_contact  as string[]).join(', ') || null,
+                beneficiary_financial_contact:  (form.beneficiary_financial_contact  as string[]).join(', ') || null,
+                supplier_management_contact:    (form.supplier_management_contact    as string[]).join(', ') || null,
+                supplier_technical_contact:     (form.supplier_technical_contact     as string[]).join(', ') || null,
+                supplier_financial_contact:     (form.supplier_financial_contact     as string[]).join(', ') || null,
+                paid_by:                        (form.paid_by as string[]).join(', ') || null,
             });
             router.push('/dashboard/contracts');
         } catch (err: any) {
@@ -119,12 +120,12 @@ export default function NewContractPage() {
 
     const ContactDropdown = ({ field }: { field: FormField }) => (
         <SearchableDropdown
-            value={form[field]}
+            multiple
+            value={form[field] as string[]}
             onChange={(value) => setForm(prev => ({ ...prev, [field]: value }))}
             placeholder="None"
             className={inputCls}
             options={[
-                { value: '', label: 'None' },
                 ...contacts.map(c => ({
                     value: `${c.first_name} ${c.last_name}`,
                     label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
@@ -146,14 +147,14 @@ export default function NewContractPage() {
                         <FileText className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold text-foreground">New Contract</h1>
-                        <p className="text-xs text-muted-text">Create a formal agreement for an account</p>
+                        <h1 className="text-5xl font-bold text-foreground">New Contract</h1>
+                        <p className="text-lg text-muted-text">Create a formal agreement for an account</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">{error}</div>
+                <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">{error}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-5">
@@ -161,23 +162,23 @@ export default function NewContractPage() {
                 <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-indigo-500" />
-                        <h2 className="text-sm font-semibold text-foreground">Contract Details</h2>
+                        <h2 className="text-xl font-semibold text-foreground">Contract Details</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div className="col-span-1 sm:col-span-2">
                             <label className={labelCls}>Contract Title *</label>
-                            <input type="text" value={form.title} onChange={set('title')}
-                                placeholder="e.g. Annual Software License" className={inputCls} />
+                            <input type="text" value={form.title as string} onChange={set('title')}
+                                placeholder="" className={inputCls} />
                         </div>
                         <div className="col-span-1 sm:col-span-2">
                             <label className={labelCls}>Related Account</label>
                             <SearchableDropdown
-                                value={form.account_id}
+                                multiple
+                                value={form.account_id as string[]}
                                 onChange={(value) => setForm(prev => ({ ...prev, account_id: value }))}
                                 placeholder="Select an account"
                                 className={inputCls}
                                 options={[
-                                    { value: '', label: 'Select an account' },
                                     ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
                                 ]}
                             />
@@ -185,7 +186,7 @@ export default function NewContractPage() {
                         <div>
                             <label className={labelCls}>Status</label>
                             <SearchableDropdown
-                                value={form.status}
+                                value={form.status as string}
                                 onChange={(value) => setForm(prev => ({ ...prev, status: value }))}
                                 className={inputCls}
                                 options={CONTRACT_STATUSES.map(s => ({ value: s, label: s }))}
@@ -194,11 +195,11 @@ export default function NewContractPage() {
                         <div />
                         <div>
                             <label className={labelCls}>Date Contract Signed</label>
-                            <input type="date" value={form.start_date} onChange={set('start_date')} className={inputCls} />
+                            <input type="date" value={form.start_date as string} onChange={set('start_date')} className={inputCls} />
                         </div>
                         <div>
                             <label className={labelCls}>Date Contract Ends</label>
-                            <input type="date" value={form.end_date} onChange={set('end_date')} className={inputCls} />
+                            <input type="date" value={form.end_date as string} onChange={set('end_date')} className={inputCls} />
                         </div>
                     </div>
                 </div>
@@ -211,7 +212,7 @@ export default function NewContractPage() {
                                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${cube.gradient}`}>
                                     <User className="w-3.5 h-3.5 text-white" />
                                 </div>
-                                <h2 className="text-sm font-semibold text-foreground">{cube.label}</h2>
+                                <h2 className="text-xl font-semibold text-foreground">{cube.label}</h2>
                             </div>
                             <div className="p-5 space-y-4">
                                 {cube.fields.map(({ field, label }) => (
@@ -229,13 +230,13 @@ export default function NewContractPage() {
                 <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-indigo-500" />
-                        <h2 className="text-sm font-semibold text-foreground">Billing Information</h2>
+                        <h2 className="text-xl font-semibold text-foreground">Billing Information</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
                             <label className={labelCls}>Currency</label>
                             <SearchableDropdown
-                                value={form.currency}
+                                value={form.currency as string}
                                 onChange={(value) => setForm(prev => ({ ...prev, currency: value }))}
                                 className={inputCls}
                                 options={CURRENCIES}
@@ -244,12 +245,12 @@ export default function NewContractPage() {
                         <div>
                             <label className={labelCls}>Annual Fee</label>
                             <div className="flex rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 focus-within:border-crm-500 focus-within:ring-4 focus-within:ring-crm-500/10 transition-all">
-                                <span className="flex items-center px-3 text-xs font-semibold text-muted-text border-r border-border-subtle bg-black/5 dark:bg-white/5">
-                                    {form.currency}
+                                <span className="flex items-center px-3 text-lg font-semibold text-muted-text border-r border-border-subtle bg-black/5 dark:bg-white/5">
+                                    {form.currency as string}
                                 </span>
-                                <input type="number" min="0" step="0.01" value={form.value}
+                                <input type="number" min="0" step="0.01" value={form.value as string}
                                     onChange={e => setForm(prev => ({ ...prev, value: e.target.value }))}
-                                    className="flex-1 px-4 py-2.5 text-sm text-foreground focus:outline-none bg-transparent" />
+                                    className="flex-1 px-4 py-2.5 text-xl text-foreground focus:outline-none bg-transparent" />
                             </div>
                         </div>
                         <div className="col-span-1 sm:col-span-2">
@@ -262,11 +263,11 @@ export default function NewContractPage() {
                 {/* Actions */}
                 <div className="flex justify-end items-center gap-3 pt-2">
                     <Link href="/dashboard/contracts"
-                        className="px-5 py-2.5 text-sm font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl">
+                        className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl">
                         Cancel
                     </Link>
                     <button type="submit" disabled={loading}
-                        className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
+                        className="flex items-center gap-2 px-6 py-2.5 text-xl font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
                         style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
                         {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                         Create Contract

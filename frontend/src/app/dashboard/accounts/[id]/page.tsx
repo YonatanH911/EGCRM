@@ -11,8 +11,8 @@ import {
 import { usePreferences } from '@/components/PreferencesProvider';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
-const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
+const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 interface Contact {
     id: number;
@@ -24,6 +24,7 @@ interface Contact {
     company_name?: string;
     supplier?: string;
     account_id?: number | null;
+    account_ids?: number[];
 }
 
 interface Deposit {
@@ -35,6 +36,7 @@ interface Deposit {
     supplier?: string;
     date?: string;
     account_id?: number | null;
+    account_ids?: number[];
 }
 
 function RelatedSection({
@@ -65,8 +67,8 @@ function RelatedSection({
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${cls}`}>
                         <Icon className="w-4 h-4" />
                     </div>
-                    <span className="text-[11px] font-bold text-foreground uppercase tracking-widest">{title}</span>
-                    <span className="text-xs font-medium text-muted-text bg-background-subtle px-2 py-0.5 rounded-full">{count}</span>
+                    <span className="text-lg font-bold text-foreground uppercase tracking-widest">{title}</span>
+                    <span className="text-lg font-medium text-muted-text bg-background-subtle px-2 py-0.5 rounded-full">{count}</span>
                 </div>
                 {open
                     ? <ChevronUp className="w-4 h-4 text-muted-text" />
@@ -226,14 +228,16 @@ export default function EditAccountPage() {
     }
 
     const linkedContacts = allContacts.filter(c => 
-        c.account_id === Number(accountId) || 
+        c.account_id === Number(accountId) ||
+        c.account_ids?.includes(Number(accountId)) ||
         (formData.name && (c.company_name?.toLowerCase() === formData.name.toLowerCase() || c.supplier?.toLowerCase() === formData.name.toLowerCase()))
     );
     const linkedContactIds = new Set(linkedContacts.map(c => c.id));
     const unlinkedContactsList = allContacts.filter(c => !linkedContactIds.has(c.id));
 
     const linkedDeposits = allDeposits.filter(d => 
-        d.account_id === Number(accountId) || 
+        d.account_id === Number(accountId) ||
+        d.account_ids?.includes(Number(accountId)) ||
         (formData.name && d.supplier?.toLowerCase() === formData.name.toLowerCase())
     );
     const linkedDepositIds = new Set(linkedDeposits.map(d => d.id));
@@ -264,20 +268,20 @@ export default function EditAccountPage() {
                     </div>
                     <div>
                         <div className="flex items-center gap-2">
-                            <h1 className={`text-2xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>{formData.name || 'Edit Account'}</h1>
+                            <h1 className={`text-5xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>{formData.name || 'Edit Account'}</h1>
                             {!isActive && (
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                <span className="text-base font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
                                     Inactive
                                 </span>
                             )}
                         </div>
-                        <p className="text-xs text-muted-text">Update this organizational record.</p>
+                        <p className="text-lg text-muted-text">Update this organizational record.</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
+                <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
                     {error}
                 </div>
             )}
@@ -286,39 +290,185 @@ export default function EditAccountPage() {
             <div className="rounded-2xl overflow-hidden glass-card">
                 <div className="px-6 py-4 border-b border-border-subtle bg-background-subtle/30 flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-crm-500" />
-                    <h2 className="text-[11px] font-bold text-foreground uppercase tracking-widest">Account Details</h2>
+                    <h2 className="text-lg font-bold text-foreground uppercase tracking-widest">Account Details</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <Field label="Account Name *" field="name" placeholder="e.g. Acme Corporation" colSpan2 />
-                        <Field label="Phone Number" field="phone" placeholder="+1 (555) 000-0000" />
-                        <Field label="Website" field="website" type="url" placeholder="https://www.example.com" />
+                        <Field label="Account Name *" field="name" placeholder="" colSpan2 />
+                        <Field label="Phone Number" field="phone" placeholder="" />
+                        <Field label="Website" field="website" type="url" placeholder="" />
                     </div>
 
                     {/* Address Section */}
                     <div className="pt-6 border-t border-border-subtle">
                         <div className="flex items-center gap-2 mb-5">
                             <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
-                            <h3 className="text-[11px] font-bold text-muted-text uppercase tracking-widest">Address Information</h3>
+                            <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Address Information</h3>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <Field label="Street" field="street" placeholder="123 Main St" colSpan2 />
-                            <Field label="City" field="city" placeholder="e.g. New York" />
-                            <Field label="State / Province" field="state_or_province" placeholder="e.g. NY" />
-                            <Field label="ZIP / Postal Code" field="zip_code" placeholder="10001" />
-                            <Field label="Country / Region" field="country" placeholder="United States" />
+                            <Field label="Street" field="street" placeholder="" colSpan2 />
+                            <Field label="City" field="city" placeholder="" />
+                            <Field label="State / Province" field="state_or_province" placeholder="" />
+                            <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />
+                            <Field label="Country / Region" field="country" placeholder="" />
                         </div>
                     </div>
+
+                    {/* Related Contacts */}
+                    <RelatedSection
+                        title="Related Contacts"
+                        icon={User}
+                        count={linkedContacts.length}
+                        open={contactsOpen}
+                        onToggle={() => setContactsOpen(v => !v)}
+                        color="crm"
+                    >
+                        {linkedContacts.length === 0 ? (
+                            <p className="px-6 py-5 text-xl text-muted-text">No contacts currently linked to this account.</p>
+                        ) : (
+                            <div className="divide-y divide-border-subtle bg-background/30">
+                                {linkedContacts.map(c => (
+                                    <Link key={c.id} href={`/dashboard/contacts/${c.id}`}
+                                        className="flex items-center gap-4 px-6 py-3 hover:bg-background-subtle/60 transition-colors group">
+                                        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-crm-500/10 text-crm-500 text-xl font-bold shrink-0">
+                                            {c.first_name?.[0]}{c.last_name?.[0]}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xl font-semibold text-foreground group-hover:text-crm-500 transition-colors">
+                                                {c.first_name} {c.last_name}
+                                            </p>
+                                            {c.job_title && <p className="text-lg text-muted-text">{c.job_title}</p>}
+                                        </div>
+                                        <div className="flex items-center gap-4 text-lg text-muted-text shrink-0">
+                                            {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>}
+                                        </div>
+                                        <button type="button" onClick={(e) => handleUnlinkContact(e, c)}
+                                            className="p-2 ml-2 text-muted-text hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
+                                            title="Unlink Contact">
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                        <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
+                            <div className="flex gap-3">
+                                <SearchableDropdown
+                                    value={selectedContactId}
+                                    onChange={setSelectedContactId}
+                                    placeholder="Select an existing contact to link"
+                                    className={inputCls}
+                                    options={[
+                                        { value: '', label: 'Select an existing contact to link' },
+                                        ...unlinkedContactsList.map(c => ({
+                                            value: String(c.id),
+                                            label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                        })),
+                                    ]}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={!selectedContactId}
+                                    onClick={() => {
+                                        const c = allContacts.find(x => x.id.toString() === selectedContactId);
+                                        if (c) {
+                                            handleLinkContact(c);
+                                            setSelectedContactId('');
+                                        }
+                                    }}
+                                    className="px-6 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 transition-all disabled:opacity-50 shrink-0"
+                                >
+                                    Link
+                                </button>
+                            </div>
+                        </div>
+                    </RelatedSection>
+
+                    {/* Related Deposits */}
+                    <RelatedSection
+                        title="Related Deposits"
+                        icon={Package}
+                        count={linkedDeposits.length}
+                        open={depositsOpen}
+                        onToggle={() => setDepositsOpen(v => !v)}
+                        color="emerald"
+                    >
+                        {linkedDeposits.length === 0 ? (
+                            <p className="px-6 py-5 text-xl text-muted-text">No deposits currently linked to this account.</p>
+                        ) : (
+                            <div className="divide-y divide-border-subtle bg-background/30">
+                                {linkedDeposits.map(d => (
+                                    <Link key={d.id} href={`/dashboard/deposits/${d.id}`}
+                                        className="flex items-center gap-4 px-6 py-3 hover:bg-background-subtle/60 transition-colors group">
+                                        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500 text-xl font-bold shrink-0">
+                                            <Banknote className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xl font-semibold text-foreground group-hover:text-emerald-500 transition-colors">
+                                                {d.product_name || d.reference_number}
+                                            </p>
+                                            <p className="text-lg text-muted-text">Ref: {d.reference_number}</p>
+                                        </div>
+                                        <div className="flex items-center gap-3 shrink-0">
+                                            <span className={`text-lg font-semibold px-2.5 py-1 rounded-full ${
+                                                d.status === 'Cleared' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                d.status === 'Pending' ? 'bg-amber-500/10 text-amber-500' :
+                                                'bg-red-500/10 text-red-500'
+                                            }`}>
+                                                {d.status}
+                                            </span>
+                                        </div>
+                                        <button type="button" onClick={(e) => handleUnlinkDeposit(e, d)}
+                                            className="p-2 ml-2 text-muted-text hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
+                                            title="Unlink Deposit">
+                                            <X className="w-4 h-4" />
+                                        </button>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                        <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
+                            <div className="flex gap-3">
+                                <SearchableDropdown
+                                    value={selectedDepositId}
+                                    onChange={setSelectedDepositId}
+                                    placeholder="Select an existing deposit to link"
+                                    className={inputCls.replace('focus:border-crm-500/50 focus:ring-crm-500/10', 'focus:border-emerald-500/50 focus:ring-emerald-500/10')}
+                                    options={[
+                                        { value: '', label: 'Select an existing deposit to link' },
+                                        ...unlinkedDepositsList.map(d => ({
+                                            value: String(d.id),
+                                            label: `${d.reference_number} - ${d.product_name || `Deposit #${d.id}`}`,
+                                        })),
+                                    ]}
+                                />
+                                <button
+                                    type="button"
+                                    disabled={!selectedDepositId}
+                                    onClick={() => {
+                                        const d = allDeposits.find(x => x.id.toString() === selectedDepositId);
+                                        if (d) {
+                                            handleLinkDeposit(d);
+                                            setSelectedDepositId('');
+                                        }
+                                    }}
+                                    className="px-6 py-2.5 text-xl font-bold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition-all disabled:opacity-50 shrink-0"
+                                >
+                                    Link
+                                </button>
+                            </div>
+                        </div>
+                    </RelatedSection>
 
                     {/* Actions */}
                     <div className="flex justify-between items-center gap-3 pt-8 border-t border-border-subtle">
                         <div className="flex items-center gap-2">
                             <button type="button" onClick={handleDelete} disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
+                                className="flex items-center gap-2 px-4 py-2.5 text-xl font-bold text-red-500 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-all disabled:opacity-50">
                                 <Trash2 className="w-4 h-4" /> Delete
                             </button>
                             <button type="button" onClick={handleToggleActive} disabled={loading}
-                                className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold rounded-xl border transition-all disabled:opacity-50 ${
+                                className={`flex items-center gap-2 px-4 py-2.5 text-xl font-bold rounded-xl border transition-all disabled:opacity-50 ${
                                     isActive
                                         ? 'text-slate-400 bg-slate-500/10 border-slate-500/20 hover:bg-slate-500/20'
                                         : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
@@ -328,11 +478,11 @@ export default function EditAccountPage() {
                         </div>
                         <div className="flex gap-3">
                             <Link href="/dashboard/accounts"
-                                className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
+                                className="px-6 py-2.5 text-xl font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
                                 Cancel
                             </Link>
                             <button type="submit" disabled={loading}
-                                className="flex items-center gap-2 px-8 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
+                                className="flex items-center gap-2 px-8 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                                 Update Account
                             </button>
@@ -341,153 +491,6 @@ export default function EditAccountPage() {
                 </form>
             </div>
 
-            {/* Related Contacts */}
-            <RelatedSection
-                title="Related Contacts"
-                icon={User}
-                count={linkedContacts.length}
-                open={contactsOpen}
-                onToggle={() => setContactsOpen(v => !v)}
-                color="crm"
-            >
-                {linkedContacts.length === 0 ? (
-                    <p className="px-6 py-5 text-sm text-muted-text">No contacts currently linked to this account.</p>
-                ) : (
-                    <div className="divide-y divide-border-subtle bg-background/30">
-                        {linkedContacts.map(c => (
-                            <Link key={c.id} href={`/dashboard/contacts/${c.id}`}
-                                className="flex items-center gap-4 px-6 py-3 hover:bg-background-subtle/60 transition-colors group">
-                                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-crm-500/10 text-crm-500 text-sm font-bold shrink-0">
-                                    {c.first_name?.[0]}{c.last_name?.[0]}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-foreground group-hover:text-crm-500 transition-colors">
-                                        {c.first_name} {c.last_name}
-                                    </p>
-                                    {c.job_title && <p className="text-xs text-muted-text">{c.job_title}</p>}
-                                </div>
-                                <div className="flex items-center gap-4 text-xs text-muted-text shrink-0">
-                                    {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>}
-                                </div>
-                                <button type="button" onClick={(e) => handleUnlinkContact(e, c)}
-                                    className="p-2 ml-2 text-muted-text hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
-                                    title="Unlink Contact">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-                {/* Add new link block */}
-                <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
-                    <div className="flex gap-3">
-                        <SearchableDropdown
-                            value={selectedContactId}
-                            onChange={setSelectedContactId}
-                            placeholder="Select an existing contact to link"
-                            className={inputCls}
-                            options={[
-                                { value: '', label: 'Select an existing contact to link' },
-                                ...unlinkedContactsList.map(c => ({
-                                    value: String(c.id),
-                                    label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
-                                })),
-                            ]}
-                        />
-                        <button
-                            type="button"
-                            disabled={!selectedContactId}
-                            onClick={() => {
-                                const c = allContacts.find(x => x.id.toString() === selectedContactId);
-                                if (c) {
-                                    handleLinkContact(c);
-                                    setSelectedContactId('');
-                                }
-                            }}
-                            className="px-6 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 transition-all disabled:opacity-50 shrink-0"
-                        >
-                            Link
-                        </button>
-                    </div>
-                </div>
-            </RelatedSection>
-
-            {/* Related Deposits */}
-            <RelatedSection
-                title="Related Deposits"
-                icon={Package}
-                count={linkedDeposits.length}
-                open={depositsOpen}
-                onToggle={() => setDepositsOpen(v => !v)}
-                color="emerald"
-            >
-                {linkedDeposits.length === 0 ? (
-                    <p className="px-6 py-5 text-sm text-muted-text">No deposits currently linked to this account.</p>
-                ) : (
-                    <div className="divide-y divide-border-subtle bg-background/30">
-                        {linkedDeposits.map(d => (
-                            <Link key={d.id} href={`/dashboard/deposits/${d.id}`}
-                                className="flex items-center gap-4 px-6 py-3 hover:bg-background-subtle/60 transition-colors group">
-                                <div className="w-9 h-9 rounded-full flex items-center justify-center bg-emerald-500/10 text-emerald-500 text-sm font-bold shrink-0">
-                                    <Banknote className="w-4 h-4" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-foreground group-hover:text-emerald-500 transition-colors">
-                                        {d.product_name || d.reference_number}
-                                    </p>
-                                    <p className="text-xs text-muted-text">Ref: {d.reference_number}</p>
-                                </div>
-                                <div className="flex items-center gap-3 shrink-0">
-                                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
-                                        d.status === 'Cleared' ? 'bg-emerald-500/10 text-emerald-500' :
-                                        d.status === 'Pending' ? 'bg-amber-500/10 text-amber-500' :
-                                        'bg-red-500/10 text-red-500'
-                                    }`}>
-                                        {d.status}
-                                    </span>
-                                </div>
-                                <button type="button" onClick={(e) => handleUnlinkDeposit(e, d)}
-                                    className="p-2 ml-2 text-muted-text hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
-                                    title="Unlink Deposit">
-                                    <X className="w-4 h-4" />
-                                </button>
-                            </Link>
-                        ))}
-                    </div>
-                )}
-                {/* Add new link block */}
-                <div className="p-4 bg-background-subtle/30 border-t border-border-subtle">
-                    <div className="flex gap-3">
-                        <SearchableDropdown
-                            value={selectedDepositId}
-                            onChange={setSelectedDepositId}
-                            placeholder="Select an existing deposit to link"
-                            className={inputCls.replace('focus:border-crm-500/50 focus:ring-crm-500/10', 'focus:border-emerald-500/50 focus:ring-emerald-500/10')}
-                            options={[
-                                { value: '', label: 'Select an existing deposit to link' },
-                                ...unlinkedDepositsList.map(d => ({
-                                    value: String(d.id),
-                                    label: `${d.reference_number} - ${d.product_name || `Deposit #${d.id}`}`,
-                                })),
-                            ]}
-                        />
-                        <button
-                            type="button"
-                            disabled={!selectedDepositId}
-                            onClick={() => {
-                                const d = allDeposits.find(x => x.id.toString() === selectedDepositId);
-                                if (d) {
-                                    handleLinkDeposit(d);
-                                    setSelectedDepositId('');
-                                }
-                            }}
-                            className="px-6 py-2.5 text-sm font-bold text-white bg-emerald-500 rounded-xl hover:bg-emerald-600 transition-all disabled:opacity-50 shrink-0"
-                        >
-                            Link
-                        </button>
-                    </div>
-                </div>
-            </RelatedSection>
         </div>
     );
 }

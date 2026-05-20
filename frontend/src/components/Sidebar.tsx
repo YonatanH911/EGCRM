@@ -51,14 +51,14 @@ export default function Sidebar() {
                     </div>
                     <span className="absolute -top-0.5 ltr:-right-0.5 rtl:-left-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-surface animate-pulse" />
                 </div>
-                <span className="text-lg font-bold tracking-tight text-foreground">
+                <span className="text-3xl font-bold tracking-tight text-foreground">
                     EG<span className="gradient-text">CRM</span>
                 </span>
             </div>
 
             {/* Nav */}
             <div className="flex-1 py-5 px-3 space-y-0.5 overflow-y-auto">
-                <p className="text-[10px] font-bold text-muted-text uppercase tracking-widest mb-3 px-2">Main Menu</p>
+                <p className="text-base font-bold text-muted-text uppercase tracking-widest mb-3 px-2">Main Menu</p>
                 {navItems.map((item) => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                     const Icon = item.icon;
@@ -67,7 +67,7 @@ export default function Sidebar() {
                             key={item.name}
                             href={item.href}
                             className={clsx(
-                                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-sm font-medium relative overflow-hidden",
+                                "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group text-xl font-medium relative overflow-hidden",
                                 isActive
                                     ? "text-crm-600 dark:text-white bg-crm-50 dark:bg-white/5"
                                     : "text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5"
@@ -88,12 +88,12 @@ export default function Sidebar() {
             <div className="p-3 border-t border-border-subtle">
                 <div className="flex items-center justify-between px-2 py-2 rounded-xl border border-border-subtle bg-surface-hover">
                     <div className="flex items-center gap-3 overflow-hidden">
-                        <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center text-white font-bold text-xs uppercase shadow-lg bg-gradient-to-br from-crm-500 to-blue-500">
+                        <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center text-white font-bold text-lg uppercase shadow-lg bg-gradient-to-br from-crm-500 to-blue-500">
                             {user ? user.name.slice(0, 2) : 'US'}
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-sm font-semibold text-foreground truncate">{user ? user.name : 'Loading…'}</span>
-                            <span className="text-xs text-muted-text truncate">{user ? user.role : 'Member'}</span>
+                            <span className="text-xl font-semibold text-foreground truncate">{user ? user.name : 'Loading…'}</span>
+                            <span className="text-lg text-muted-text truncate">{user ? user.role : 'Member'}</span>
                         </div>
                     </div>
                     <button

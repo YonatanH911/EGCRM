@@ -1,8 +1,50 @@
-from sqlalchemy import Column, Integer, String, Enum, Float, ForeignKey, DateTime, Boolean, Text
+from sqlalchemy import Column, Integer, String, Enum, Float, ForeignKey, DateTime, Boolean, Text, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from database import Base
 import enum
+
+contact_accounts = Table(
+    "contact_accounts",
+    Base.metadata,
+    Column("contact_id", Integer, ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True),
+    Column("account_id", Integer, ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True),
+)
+
+lead_contacts = Table(
+    "lead_contacts",
+    Base.metadata,
+    Column("lead_id", Integer, ForeignKey("leads.id", ondelete="CASCADE"), primary_key=True),
+    Column("contact_id", Integer, ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True),
+)
+
+contract_accounts = Table(
+    "contract_accounts",
+    Base.metadata,
+    Column("contract_id", Integer, ForeignKey("contracts.id", ondelete="CASCADE"), primary_key=True),
+    Column("account_id", Integer, ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True),
+)
+
+contract_deposits = Table(
+    "contract_deposits",
+    Base.metadata,
+    Column("contract_id", Integer, ForeignKey("contracts.id", ondelete="CASCADE"), primary_key=True),
+    Column("deposit_id", Integer, ForeignKey("deposits.id", ondelete="CASCADE"), primary_key=True),
+)
+
+deposit_accounts = Table(
+    "deposit_accounts",
+    Base.metadata,
+    Column("deposit_id", Integer, ForeignKey("deposits.id", ondelete="CASCADE"), primary_key=True),
+    Column("account_id", Integer, ForeignKey("accounts.id", ondelete="CASCADE"), primary_key=True),
+)
+
+deposit_vaults = Table(
+    "deposit_vaults",
+    Base.metadata,
+    Column("deposit_id", Integer, ForeignKey("deposits.id", ondelete="CASCADE"), primary_key=True),
+    Column("vault_id", Integer, ForeignKey("vaults.id", ondelete="CASCADE"), primary_key=True),
+)
 
 class LeadStatus(str, enum.Enum):
     NEW = "New"
@@ -93,7 +135,15 @@ class Contact(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     account = relationship("Account", back_populates="contacts")
+    accounts = relationship("Account", secondary=contact_accounts)
     leads = relationship("Lead", back_populates="contact")
+
+    @property
+    def account_ids(self):
+        ids = [account.id for account in self.accounts]
+        if self.account_id and self.account_id not in ids:
+            ids.insert(0, self.account_id)
+        return ids
 
 class Lead(Base):
     __tablename__ = "leads"
@@ -108,7 +158,15 @@ class Lead(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     contact = relationship("Contact", back_populates="leads")
+    contacts = relationship("Contact", secondary=lead_contacts)
     assigned_user = relationship("User", back_populates="leads")
+
+    @property
+    def contact_ids(self):
+        ids = [contact.id for contact in self.contacts]
+        if self.contact_id and self.contact_id not in ids:
+            ids.insert(0, self.contact_id)
+        return ids
 
 class Contract(Base):
     __tablename__ = "contracts"
@@ -137,6 +195,22 @@ class Contract(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     account = relationship("Account", back_populates="contracts")
+    accounts = relationship("Account", secondary=contract_accounts)
+    deposits = relationship("Deposit", secondary=contract_deposits)
+
+    @property
+    def account_ids(self):
+        ids = [account.id for account in self.accounts]
+        if self.account_id and self.account_id not in ids:
+            ids.insert(0, self.account_id)
+        return ids
+
+    @property
+    def deposit_ids(self):
+        ids = [deposit.id for deposit in self.deposits]
+        if self.deposit_id and self.deposit_id not in ids:
+            ids.insert(0, self.deposit_id)
+        return ids
 
 class Vault(Base):
     __tablename__ = "vaults"
@@ -171,6 +245,22 @@ class Deposit(Base):
 
     account = relationship("Account", back_populates="deposits")
     vault = relationship("Vault", back_populates="deposits")
+    accounts = relationship("Account", secondary=deposit_accounts)
+    vaults = relationship("Vault", secondary=deposit_vaults)
+
+    @property
+    def account_ids(self):
+        ids = [account.id for account in self.accounts]
+        if self.account_id and self.account_id not in ids:
+            ids.insert(0, self.account_id)
+        return ids
+
+    @property
+    def vault_ids(self):
+        ids = [vault.id for vault in self.vaults]
+        if self.vault_id and self.vault_id not in ids:
+            ids.insert(0, self.vault_id)
+        return ids
 
 class Activity(Base):
     __tablename__ = "activities"

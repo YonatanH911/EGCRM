@@ -57,7 +57,7 @@ export default function LoginPage() {
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg bg-gradient-to-br from-crm-500 to-blue-500">
                         <Target className="w-5 h-5 text-white" strokeWidth={2.5} />
                     </div>
-                    <span className="text-xl font-bold text-foreground tracking-tight">
+                    <span className="text-4xl font-bold text-foreground tracking-tight">
                         EG<span className="gradient-text">CRM</span>
                     </span>
                 </div>
@@ -65,11 +65,11 @@ export default function LoginPage() {
                 {/* Middle content */}
                 <div className="relative z-10 space-y-10">
                     <div>
-                        <h1 className="text-4xl font-bold text-foreground leading-tight">
+                        <h1 className="text-7xl font-bold text-foreground leading-tight">
                             Your pipeline,<br />
                             <span className="gradient-text">beautifully managed</span>
                         </h1>
-                        <p className="mt-4 text-muted-text text-base leading-relaxed max-w-xs">
+                        <p className="mt-4 text-muted-text text-2xl leading-relaxed max-w-xs">
                             A powerful CRM built for modern teams — track accounts, leads, contracts, and more from one place.
                         </p>
                     </div>
@@ -86,14 +86,14 @@ export default function LoginPage() {
                                     style={{ background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)' }}>
                                     <Icon className="w-3.5 h-3.5 text-indigo-500" />
                                 </div>
-                                <span className="text-sm text-muted-text">{label}</span>
+                                <span className="text-xl text-muted-text">{label}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Footer */}
-                <p className="text-xs text-muted-text relative z-10">© 2026 EGCRM. All rights reserved.</p>
+                <p className="text-lg text-muted-text relative z-10">© 2026 EGCRM. All rights reserved.</p>
             </div>
 
             {/* ── Right form panel ── */}
@@ -103,20 +103,20 @@ export default function LoginPage() {
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-crm-500 to-blue-500">
                         <Target className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-xl font-bold text-foreground">EG<span className="gradient-text">CRM</span></span>
+                    <span className="text-4xl font-bold text-foreground">EG<span className="gradient-text">CRM</span></span>
                 </div>
 
                 <div className="w-full max-w-md">
                     <div className="mb-8">
-                        <h2 className="text-2xl font-bold text-foreground">Welcome back</h2>
-                        <p className="mt-1 text-sm text-muted-text">
+                        <h2 className="text-5xl font-bold text-foreground">Welcome back</h2>
+                        <p className="mt-1 text-xl text-muted-text">
                             Sign in to your account
                         </p>
                     </div>
 
                     <form className="space-y-5" onSubmit={handleSubmit}>
                         {error && (
-                            <div className="p-3.5 text-sm text-red-600 dark:text-red-400 rounded-xl flex items-center gap-2"
+                            <div className="p-3.5 text-xl text-red-600 dark:text-red-400 rounded-xl flex items-center gap-2"
                                 style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)' }}>
                                 <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
                                 {error}
@@ -124,7 +124,7 @@ export default function LoginPage() {
                         )}
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold text-muted-text uppercase tracking-wider">
+                            <label className="block text-lg font-semibold text-muted-text uppercase tracking-wider">
                                 Email address
                             </label>
                             <input
@@ -132,13 +132,13 @@ export default function LoginPage() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full px-4 py-3 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all duration-200 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                                className="w-full px-4 py-3 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all duration-200 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                                 placeholder="you@company.com"
                             />
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-semibold text-muted-text uppercase tracking-wider">
+                            <label className="block text-lg font-semibold text-muted-text uppercase tracking-wider">
                                 Password
                             </label>
                             <input
@@ -146,7 +146,7 @@ export default function LoginPage() {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full px-4 py-3 text-sm rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all duration-200 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                                className="w-full px-4 py-3 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all duration-200 bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -154,7 +154,7 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold text-white transition-all duration-200 disabled:opacity-60 mt-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+                            className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xl font-semibold text-white transition-all duration-200 disabled:opacity-60 mt-2 shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                             style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}
                         >
                             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : (

@@ -7,8 +7,8 @@ import api from '@/lib/api';
 import { ArrowLeft, Loader2, Activity, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 
-const labelCls = "block text-[10px] font-bold text-muted-text uppercase tracking-widest mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-sm rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
+const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
+const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 interface TaskType { id: number; name: string; color: string; }
 
@@ -70,20 +70,20 @@ export default function NewActivityPage() {
                     <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div>
-                    <h1 className="text-2xl font-bold text-foreground">New Activity</h1>
-                    <p className="text-xs text-muted-text">Log a task, email, appointment or phone call.</p>
+                    <h1 className="text-5xl font-bold text-foreground">New Activity</h1>
+                    <p className="text-lg text-muted-text">Log a task, email, appointment or phone call.</p>
                 </div>
             </div>
 
             <div className="rounded-2xl overflow-hidden glass-card">
                 <div className="px-6 py-4 border-b border-border-subtle bg-background-subtle/30 flex items-center gap-3">
                     <Activity className="w-5 h-5 text-crm-500" />
-                    <h2 className="text-sm font-bold text-foreground uppercase tracking-widest">Activity Details</h2>
+                    <h2 className="text-xl font-bold text-foreground uppercase tracking-widest">Activity Details</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {error && (
-                        <div className="p-3.5 text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
+                        <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">
                             {error}
                         </div>
                     )}
@@ -92,11 +92,11 @@ export default function NewActivityPage() {
                     <div>
                         <label className={labelCls}>Activity Type *</label>
                         {fetchingTypes ? (
-                            <div className="h-10 flex items-center gap-2 text-sm text-muted-text">
+                            <div className="h-10 flex items-center gap-2 text-xl text-muted-text">
                                 <Loader2 className="w-4 h-4 animate-spin" /> Loading types...
                             </div>
                         ) : taskTypes.length === 0 ? (
-                            <div className="text-sm text-red-500 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20">
+                            <div className="text-xl text-red-500 font-medium bg-red-500/10 p-3 rounded-xl border border-red-500/20">
                                 No task types configured. Please create one in the Activities dashboard first.
                             </div>
                         ) : (
@@ -113,7 +113,7 @@ export default function NewActivityPage() {
                                                 borderColor: isSelected ? t.color : '',
                                                 color: isSelected ? '#fff' : '',
                                             }}
-                                            className={`flex justify-center items-center py-2.5 px-3 rounded-xl text-xs font-bold transition-all duration-200 border ${isSelected
+                                            className={`flex justify-center items-center py-2.5 px-3 rounded-xl text-lg font-bold transition-all duration-200 border ${isSelected
                                                 ? 'shadow-lg'
                                                 : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'
                                                 }`}
@@ -134,7 +134,7 @@ export default function NewActivityPage() {
                             type="text"
                             value={form.subject}
                             onChange={e => set('subject', e.target.value)}
-                            placeholder="e.g. Follow-up call with client"
+                            placeholder=""
                             className={inputCls}
                         />
                     </div>
@@ -146,7 +146,7 @@ export default function NewActivityPage() {
                             type="text"
                             value={form.regarding}
                             onChange={e => set('regarding', e.target.value)}
-                            placeholder="e.g. Account name or opportunity"
+                            placeholder=""
                             className={inputCls}
                         />
                     </div>
@@ -180,19 +180,19 @@ export default function NewActivityPage() {
                             rows={4}
                             value={form.notes}
                             onChange={e => set('notes', e.target.value)}
-                            placeholder="Additional details about this activity..."
+                            placeholder=""
                             className={`${inputCls} resize-none`}
                         />
                     </div>
 
                     <div className="pt-8 border-t border-border-subtle flex justify-end gap-3">
-                        <Link href="/dashboard/activities" className="px-6 py-2.5 text-sm font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
+                        <Link href="/dashboard/activities" className="px-6 py-2.5 text-xl font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
                             Cancel
                         </Link>
                         <button
                             type="submit"
                             disabled={saving}
-                            className="px-8 py-2.5 text-sm font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center min-w-[140px]"
+                            className="px-8 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center min-w-[140px]"
                         >
                             {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Activity'}
                         </button>

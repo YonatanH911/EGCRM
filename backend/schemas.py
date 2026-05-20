@@ -75,6 +75,7 @@ class ContactBase(BaseSchema):
     supplier: Optional[str] = None
     description: Optional[str] = None
     account_id: Optional[int] = None
+    account_ids: Optional[List[int]] = None
 
 class ContactCreate(ContactBase):
     pass
@@ -96,6 +97,7 @@ class LeadBase(BaseSchema):
     status: LeadStatus = LeadStatus.NEW
     value: float = 0.0
     contact_id: Optional[int] = None
+    contact_ids: Optional[List[int]] = None
     assigned_to_user_id: Optional[int] = None
 
 class LeadCreate(LeadBase):
@@ -126,7 +128,9 @@ class ContractBase(BaseSchema):
     supplier_financial_contact: Optional[str] = None
     paid_by: Optional[str] = None
     account_id: Optional[int] = None
+    account_ids: Optional[List[int]] = None
     deposit_id: Optional[int] = None
+    deposit_ids: Optional[List[int]] = None
     product_name: Optional[str] = None
     is_active: Optional[bool] = True
 
@@ -178,7 +182,9 @@ class DepositBase(BaseSchema):
     description: Optional[str] = None
     received_by: Optional[str] = None
     account_id: Optional[int] = None
+    account_ids: Optional[List[int]] = None
     vault_id: Optional[int] = None
+    vault_ids: Optional[List[int]] = None
 
 class DepositCreate(DepositBase):
     pass
@@ -195,7 +201,9 @@ class DepositUpdate(BaseModel):
     description: Optional[str] = None
     received_by: Optional[str] = None
     account_id: Optional[int] = None
+    account_ids: Optional[List[int]] = None
     vault_id: Optional[int] = None
+    vault_ids: Optional[List[int]] = None
 
 class DepositResponse(DepositBase):
     id: int
