@@ -12,6 +12,13 @@ interface Account {
     name: string;
 }
 
+interface Contact {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email?: string | null;
+}
+
 interface Vault {
     id: number;
     name: string;
@@ -22,6 +29,7 @@ export default function NewDepositPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [contacts, setContacts] = useState<Contact[]>([]);
     const [vaults, setVaults] = useState<Vault[]>([]);
 
     // Generate a random 8 char ref number for placeholder convenience
@@ -32,7 +40,7 @@ export default function NewDepositPage() {
         amount: 0,
         status: 'Pending',
         date: new Date().toISOString().split('T')[0],
-        account_ids: [] as string[],
+        contact_ids: [] as string[],
         vault_ids: [] as string[],
         supplier: [] as string[],
         product_name: '',
@@ -47,6 +55,8 @@ export default function NewDepositPage() {
             try {
                 const accountsRes = await api.get('/accounts');
                 setAccounts(accountsRes.data);
+                const contactsRes = await api.get('/contacts');
+                setContacts(contactsRes.data);
                 const vaultsRes = await api.get('/vaults');
                 setVaults(vaultsRes.data);
             } catch (err) {
@@ -65,8 +75,7 @@ export default function NewDepositPage() {
             const payload = {
                 ...formData,
                 amount: Number(formData.amount),
-                account_ids: formData.account_ids.map(Number),
-                account_id: formData.account_ids[0] ? Number(formData.account_ids[0]) : null,
+                contact_ids: formData.contact_ids.map(Number),
                 vault_ids: formData.vault_ids.map(Number),
                 vault_id: formData.vault_ids[0] ? Number(formData.vault_ids[0]) : null,
                 supplier: formData.supplier.join(', '),
@@ -114,7 +123,7 @@ export default function NewDepositPage() {
                             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
                                     <label htmlFor="reference_number" className="block text-xl font-medium text-foreground">
-                                        Reference Number *
+                                        Deposit Number *
                                     </label>
                                     <div className="mt-1">
                                         <input
@@ -130,18 +139,21 @@ export default function NewDepositPage() {
                                 </div>
 
                                 <div className="sm:col-span-2">
-                                    <label htmlFor="account_id" className="block text-xl font-medium text-foreground">
-                                        Billed Account
+                                    <label htmlFor="contact_id" className="block text-xl font-medium text-foreground">
+                                        Billed Contact
                                     </label>
                                     <div className="mt-1">
                                         <SearchableDropdown
                                             multiple
-                                            value={formData.account_ids}
-                                            onChange={(value) => setFormData({ ...formData, account_ids: value })}
-                                            placeholder="Select an account"
+                                            value={formData.contact_ids}
+                                            onChange={(value) => setFormData({ ...formData, contact_ids: value })}
+                                            placeholder="Select a contact"
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={[
-                                                ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
+                                                ...contacts.map(contact => ({
+                                                    value: String(contact.id),
+                                                    label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                                })),
                                             ]}
                                         />
                                     </div>

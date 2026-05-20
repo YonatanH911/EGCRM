@@ -2,80 +2,127 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Landmark, ArrowLeft, Loader2, Check } from 'lucide-react';
 import Link from 'next/link';
+import { ArrowLeft, Loader2, Landmark, Shield } from 'lucide-react';
 import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
-interface Vault { id: number; name: string; }
-interface Account { id: number; name: string; }
-interface DepositForm {
-    product_name: string; version: string; supplier: string[]; date: string;
-    vault_ids: string[]; is_confirmation_sent: boolean; reference_number: string; received_by: string; description: string;
+interface Account {
+    id: number;
+    name: string;
 }
 
-const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
-const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+interface Contact {
+    id: number;
+    first_name: string;
+    last_name: string;
+    email?: string | null;
+}
+
+interface Vault {
+    id: number;
+    name: string;
+}
+
+interface DepositForm {
+    reference_number: string;
+    amount: number;
+    status: string;
+    date: string;
+    contact_ids: string[];
+    vault_ids: string[];
+    supplier: string[];
+    product_name: string;
+    version: string;
+    description: string;
+    is_confirmation_sent: boolean;
+    received_by: string;
+}
 
 export default function EditDepositPage() {
     const { id } = useParams<{ id: string }>();
     const router = useRouter();
-
-    const [form, setForm] = useState<DepositForm>({
-        product_name: '', version: '', supplier: [], date: '',
-        vault_ids: [], is_confirmation_sent: false, reference_number: '', received_by: '', description: '',
-    });
-    const [vaults, setVaults] = useState<Vault[]>([]);
-    const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [vaults, setVaults] = useState<Vault[]>([]);
+
+    const [formData, setFormData] = useState<DepositForm>({
+        reference_number: '',
+        amount: 0,
+        status: 'Pending',
+        date: '',
+        contact_ids: [],
+        vault_ids: [],
+        supplier: [],
+        product_name: '',
+        version: '',
+        description: '',
+        is_confirmation_sent: false,
+        received_by: '',
+    });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [depositRes, vaultsRes, accountsRes] = await Promise.all([
+                const [depositRes, accountsRes, contactsRes, vaultsRes] = await Promise.all([
                     api.get(`/deposits/${id}`),
-                    api.get('/vaults'),
                     api.get('/accounts'),
+                    api.get('/contacts'),
+                    api.get('/vaults'),
                 ]);
-                const d = depositRes.data;
-                setForm({
-                    product_name: d.product_name || '', version: d.version || '',
-                    supplier: d.supplier ? d.supplier.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    date: d.date ? d.date.substring(0, 10) : '',
-                    vault_ids: (d.vault_ids?.length ? d.vault_ids : (d.vault_id ? [d.vault_id] : [])).map(String),
-                    is_confirmation_sent: d.is_confirmation_sent || false,
-                    reference_number: d.reference_number || '', received_by: d.received_by || '', description: d.description || '',
+                const deposit = depositRes.data;
+
+                setFormData({
+                    reference_number: deposit.reference_number || '',
+                    amount: Number(deposit.amount || 0),
+                    status: deposit.status || 'Pending',
+                    date: deposit.date ? deposit.date.substring(0, 10) : '',
+                    contact_ids: (deposit.contact_ids || []).map(String),
+                    vault_ids: (deposit.vault_ids?.length ? deposit.vault_ids : (deposit.vault_id ? [deposit.vault_id] : [])).map(String),
+                    supplier: deposit.supplier ? deposit.supplier.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    product_name: deposit.product_name || '',
+                    version: deposit.version || '',
+                    description: deposit.description || '',
+                    is_confirmation_sent: Boolean(deposit.is_confirmation_sent),
+                    received_by: deposit.received_by || '',
                 });
-                setVaults(vaultsRes.data);
                 setAccounts(accountsRes.data);
-            } catch {
-                setError('Failed to load deposit.');
+                setContacts(contactsRes.data);
+                setVaults(vaultsRes.data);
+            } catch (err: any) {
+                setError(err.response?.data?.detail || 'Failed to load deposit.');
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
+
+        if (id) fetchData();
     }, [id]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-        setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
-
-    const handleSave = async () => {
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
         setSaving(true);
         setError('');
+
         try {
-            await api.put(`/deposits/${id}`, {
-                ...form,
-                supplier: form.supplier.join(', '),
-                vault_ids: form.vault_ids.map(Number),
-                vault_id: form.vault_ids[0] ? Number(form.vault_ids[0]) : null,
-                date: form.date || null,
-            });
+            const payload = {
+                ...formData,
+                amount: Number(formData.amount),
+                contact_ids: formData.contact_ids.map(Number),
+                vault_ids: formData.vault_ids.map(Number),
+                vault_id: formData.vault_ids[0] ? Number(formData.vault_ids[0]) : null,
+                supplier: formData.supplier.join(', '),
+                date: formData.date ? new Date(formData.date).toISOString() : null,
+            };
+
+            await api.put(`/deposits/${id}`, payload);
             router.push('/dashboard/deposits');
-        } catch {
-            setError('Failed to save changes. Please try again.');
+            router.refresh();
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Failed to save changes. Please try again.');
             setSaving(false);
         }
     };
@@ -91,123 +138,248 @@ export default function EditDepositPage() {
         );
     }
 
-    const Field = ({ label, name, placeholder, type = 'text' }: {
-        label: string; name: keyof Omit<DepositForm, 'is_confirmation_sent' | 'description' | 'supplier' | 'vault_ids'>; placeholder?: string; type?: string;
-    }) => (
-        <div>
-            <label className={labelCls}>{label}</label>
-            <input name={name} type={type} value={form[name]} onChange={handleChange} placeholder={placeholder}
-                className={inputCls} />
-        </div>
-    );
-
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-3">
-                <Link href="/dashboard/deposits"
-                    className="p-2 rounded-xl text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 bg-black/5 dark:bg-white/5 transition-colors"
+        <div className="max-w-3xl mx-auto space-y-6">
+            <div className="flex items-center gap-4">
+                <Link
+                    href="/dashboard/deposits"
+                    className="p-2 text-muted-text hover:text-foreground hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors bg-black/5 dark:bg-white/5"
                 >
                     <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
                 </Link>
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-sky-500 to-indigo-500 shadow-lg"
-                    >
-                        <Landmark className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <h1 className="text-5xl font-bold text-foreground">Edit Deposit</h1>
-                        <p className="text-lg text-muted-text">Update deposit details below</p>
-                    </div>
+                <div>
+                    <h1 className="text-5xl font-bold text-foreground flex items-center gap-2">
+                        <Landmark className="w-6 h-6 text-crm-600" />
+                        Edit Deposit
+                    </h1>
+                    <p className="text-xl text-muted-text mt-1">Update an incoming financial transaction.</p>
                 </div>
             </div>
 
-            {/* Card */}
-            <div className="glass-card rounded-2xl p-6 space-y-5 border border-border-subtle"
-            >
-                {error && (
-                    <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl"
-                    >
-                        {error}
-                    </div>
-                )}
+            <form onSubmit={handleSubmit} className="glass-card shadow-sm rounded-xl border border-border-subtle overflow-hidden">
+                <div className="p-6 sm:p-8 space-y-8">
+                    {error && (
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-lg text-xl">
+                            {error}
+                        </div>
+                    )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <Field label="Product Name" name="product_name" placeholder="" />
-                    <Field label="Version" name="version" placeholder="" />
-                    
-                    <div>
-                        <label className={labelCls}>Supplier</label>
-                        <SearchableDropdown
-                            value={form.supplier}
-                            multiple
-                            onChange={(value) => setForm(prev => ({ ...prev, supplier: value }))}
-                            placeholder="Select Supplier"
-                            className={inputCls}
-                            options={[
-                                ...accounts.map(acc => ({ value: acc.name, label: acc.name })),
-                            ]}
-                        />
-                    </div>
+                    <div className="space-y-6">
+                        <div>
+                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Transaction Details</h3>
+                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="reference_number" className="block text-xl font-medium text-foreground">
+                                        Deposit Number *
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            name="reference_number"
+                                            id="reference_number"
+                                            required
+                                            value={formData.reference_number}
+                                            onChange={(e) => setFormData({ ...formData, reference_number: e.target.value })}
+                                            className="shadow-sm font-mono focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        />
+                                    </div>
+                                </div>
 
-                    <Field label="Date Received" name="date" type="date" />
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="contact_id" className="block text-xl font-medium text-foreground">
+                                        Billed Contact
+                                    </label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            multiple
+                                            value={formData.contact_ids}
+                                            onChange={(value) => setFormData({ ...formData, contact_ids: value })}
+                                            placeholder="Select a contact"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={contacts.map(contact => ({
+                                                value: String(contact.id),
+                                                label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                            }))}
+                                        />
+                                    </div>
+                                </div>
 
-                    <div>
-                        <label className={labelCls}>Vault</label>
-                        <SearchableDropdown
-                            multiple
-                            value={form.vault_ids}
-                            onChange={(value) => setForm(prev => ({ ...prev, vault_ids: value }))}
-                            placeholder="No Vault"
-                            className={inputCls}
-                            options={[
-                                ...vaults.map(v => ({ value: String(v.id), label: v.name })),
-                            ]}
-                        />
-                    </div>
+                                <div>
+                                    <label htmlFor="supplier" className="block text-xl font-medium text-foreground">Supplier</label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            value={formData.supplier}
+                                            multiple
+                                            onChange={(value) => setFormData({ ...formData, supplier: value })}
+                                            placeholder="Select Supplier"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={accounts.map(account => ({ value: account.name, label: account.name }))}
+                                        />
+                                    </div>
+                                </div>
 
-                    <div>
-                        <label className={labelCls}>Confirmation Sent?</label>
-                        <SearchableDropdown
-                            value={form.is_confirmation_sent ? 'true' : 'false'}
-                            onChange={(value) => setForm(prev => ({ ...prev, is_confirmation_sent: value === 'true' }))}
-                            className={inputCls}
-                            options={[
-                                { value: 'false', label: 'No' },
-                                { value: 'true', label: 'Yes' },
-                            ]}
-                        />
-                    </div>
-                    <Field label="Deposit Number" name="reference_number" placeholder="" />
-                    <Field label="Received By" name="received_by" placeholder="" />
-                    
-                    <div className="sm:col-span-2">
-                        <label className={labelCls}>Description</label>
-                        <textarea
-                            name="description"
-                            rows={3}
-                            value={form.description}
-                            onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
-                            className={inputCls}
-                            placeholder=""
-                        />
+                                <div>
+                                    <label htmlFor="product_name" className="block text-xl font-medium text-foreground">Product Name</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="product_name"
+                                            value={formData.product_name}
+                                            onChange={(e) => setFormData({ ...formData, product_name: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="version" className="block text-xl font-medium text-foreground">Version</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="version"
+                                            value={formData.version}
+                                            onChange={(e) => setFormData({ ...formData, version: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="is_confirmation_sent" className="block text-xl font-medium text-foreground">Confirmation Sent?</label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            value={formData.is_confirmation_sent ? 'true' : 'false'}
+                                            onChange={(value) => setFormData({ ...formData, is_confirmation_sent: value === 'true' })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: 'false', label: 'No' },
+                                                { value: 'true', label: 'Yes' },
+                                            ]}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="vault_id" className="block text-xl font-medium text-foreground flex items-center gap-1">
+                                        <Shield className="w-4 h-4 text-muted-text" />
+                                        Destination Vault
+                                    </label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            multiple
+                                            value={formData.vault_ids}
+                                            onChange={(value) => setFormData({ ...formData, vault_ids: value })}
+                                            placeholder="Select a storage vault"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={vaults.map(vault => ({ value: String(vault.id), label: vault.name }))}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="amount" className="block text-xl font-medium text-foreground">
+                                        Deposit Amount ($) *
+                                    </label>
+                                    <div className="mt-1 flex rounded-md shadow-sm">
+                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-border-subtle bg-black/5 dark:bg-white/5 text-muted-text sm:text-xl">
+                                            $
+                                        </span>
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            id="amount"
+                                            required
+                                            min="0.01"
+                                            step="0.01"
+                                            value={formData.amount}
+                                            onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                            className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-crm-500 focus:border-crm-500 sm:text-xl border-border-subtle border bg-black/5 dark:bg-white/5 text-foreground"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="status" className="block text-xl font-medium text-foreground">
+                                        Status
+                                    </label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            value={formData.status}
+                                            onChange={(value) => setFormData({ ...formData, status: value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: 'Pending', label: 'Pending' },
+                                                { value: 'Cleared', label: 'Cleared' },
+                                                { value: 'Failed', label: 'Failed' },
+                                            ]}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="date" className="block text-xl font-medium text-foreground">
+                                        Deposit Date
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="date"
+                                            name="date"
+                                            id="date"
+                                            value={formData.date}
+                                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="received_by" className="block text-xl font-medium text-foreground">Received By</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="text"
+                                            id="received_by"
+                                            value={formData.received_by}
+                                            onChange={(e) => setFormData({ ...formData, received_by: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                            placeholder=""
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="description" className="block text-xl font-medium text-foreground">Description</label>
+                                    <div className="mt-1">
+                                        <textarea
+                                            id="description"
+                                            rows={3}
+                                            value={formData.description}
+                                            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                            placeholder=""
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 pt-3 border-t border-border-subtle">
-                    <button onClick={handleSave} disabled={saving}
-                        className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl disabled:opacity-50 transition-transform hover:-translate-y-0.5 duration-200 shadow-xl"
-                        style={{ background: 'linear-gradient(135deg, #6366f1, #3b82f6)' }}>
-                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                        {saving ? 'Saving…' : 'Save Changes'}
-                    </button>
-                    <Link href="/dashboard/deposits"
-                        className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"
+                <div className="bg-black/5 dark:bg-white/5 md:bg-transparent px-6 py-4 border-t border-border-subtle flex items-center justify-end gap-3 sm:px-8">
+                    <Link
+                        href="/dashboard/deposits"
+                        className="px-4 py-2 border border-border-subtle shadow-sm text-xl font-medium rounded-md text-foreground bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-crm-500 transition-colors"
                     >
                         Cancel
                     </Link>
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="inline-flex justify-center px-4 py-2 border border-transparent shadow-sm text-xl font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors disabled:opacity-50"
+                    >
+                        {saving ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Save Changes'}
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

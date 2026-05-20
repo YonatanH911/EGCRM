@@ -46,6 +46,13 @@ deposit_vaults = Table(
     Column("vault_id", Integer, ForeignKey("vaults.id", ondelete="CASCADE"), primary_key=True),
 )
 
+deposit_contacts = Table(
+    "deposit_contacts",
+    Base.metadata,
+    Column("deposit_id", Integer, ForeignKey("deposits.id", ondelete="CASCADE"), primary_key=True),
+    Column("contact_id", Integer, ForeignKey("contacts.id", ondelete="CASCADE"), primary_key=True),
+)
+
 class LeadStatus(str, enum.Enum):
     NEW = "New"
     CONTACTED = "Contacted"
@@ -137,6 +144,7 @@ class Contact(Base):
     account = relationship("Account", back_populates="contacts")
     accounts = relationship("Account", secondary=contact_accounts)
     leads = relationship("Lead", back_populates="contact")
+    deposits = relationship("Deposit", secondary=deposit_contacts)
 
     @property
     def account_ids(self):
@@ -247,6 +255,7 @@ class Deposit(Base):
     vault = relationship("Vault", back_populates="deposits")
     accounts = relationship("Account", secondary=deposit_accounts)
     vaults = relationship("Vault", secondary=deposit_vaults)
+    contacts = relationship("Contact", secondary=deposit_contacts)
 
     @property
     def account_ids(self):
@@ -261,6 +270,10 @@ class Deposit(Base):
         if self.vault_id and self.vault_id not in ids:
             ids.insert(0, self.vault_id)
         return ids
+
+    @property
+    def contact_ids(self):
+        return [contact.id for contact in self.contacts]
 
 class Activity(Base):
     __tablename__ = "activities"

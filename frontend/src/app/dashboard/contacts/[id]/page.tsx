@@ -9,6 +9,15 @@ import SearchableDropdown from '@/components/SearchableDropdown';
 
 const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
+const roleOptions = [
+    { value: 'Beneficiary', label: 'Beneficiary' },
+    { value: 'Supplier', label: 'Supplier' },
+    { value: 'Lawyer', label: 'Lawyer' },
+];
+const israeliOptions = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+];
 
 export default function EditContactPage() {
     const router = useRouter();
@@ -22,7 +31,7 @@ export default function EditContactPage() {
 
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', job_title: '', email: '',
-        phone: '', company_name: '', supplier: '', description: '', account_ids: [] as string[],
+        phone: '', company_name: '', supplier: '', is_israeli: '', description: '', account_ids: [] as string[],
     });
 
     useEffect(() => {
@@ -37,7 +46,8 @@ export default function EditContactPage() {
                     first_name: data.first_name || '', last_name: data.last_name || '',
                     job_title: data.job_title || '', email: data.email || '',
                     phone: data.phone || '', company_name: data.company_name || '',
-                    supplier: data.supplier || '', description: data.description || '',
+                    supplier: data.supplier || '', is_israeli: data.is_israeli === null || data.is_israeli === undefined ? '' : (data.is_israeli ? 'yes' : 'no'),
+                    description: data.description || '',
                     account_ids: (data.account_ids?.length ? data.account_ids : (data.account_id ? [data.account_id] : [])).map(String)
                 });
                 setAccounts(accountsRes.data);
@@ -57,6 +67,7 @@ export default function EditContactPage() {
         try {
             await api.put(`/contacts/${contactId}`, {
                 ...formData,
+                is_israeli: formData.is_israeli === '' ? null : formData.is_israeli === 'yes',
                 account_ids: formData.account_ids.map(Number),
                 account_id: formData.account_ids[0] ? parseInt(formData.account_ids[0]) : null,
             });
@@ -160,7 +171,27 @@ export default function EditContactPage() {
                             />
                         </div>
 
-                        <Field label="Supplier" field="supplier" placeholder="" />
+                        <div>
+                            <label className={labelCls}>Role</label>
+                            <SearchableDropdown
+                                value={formData.supplier}
+                                onChange={(value) => setFormData({ ...formData, supplier: value })}
+                                placeholder="Select Role"
+                                className={inputCls}
+                                options={roleOptions}
+                            />
+                        </div>
+
+                        <div>
+                            <label className={labelCls}>Is Israeli?</label>
+                            <SearchableDropdown
+                                value={formData.is_israeli}
+                                onChange={(value) => setFormData({ ...formData, is_israeli: value })}
+                                placeholder="Select"
+                                className={inputCls}
+                                options={israeliOptions}
+                            />
+                        </div>
 
                         <div className="col-span-1 md:col-span-2">
                             <label className={labelCls}>Description / Notes</label>

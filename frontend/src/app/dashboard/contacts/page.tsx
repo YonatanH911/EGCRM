@@ -102,7 +102,7 @@ export default function ContactsPage() {
                         <table className="min-w-full">
                             <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                                 <tr>
-                                    {['Name', 'Email', 'Phone', 'Created'].map(h => (
+                                    {['Name', 'Email', 'Phone', 'Role', 'Is Israeli?', 'Created'].map(h => (
                                         <th key={h} scope="col" className={thCls}>{h}</th>
                                     ))}
                                 </tr>
@@ -126,6 +126,8 @@ export default function ContactsPage() {
                                         </td>
                                         <td className={tdCls}><span className="text-xl text-muted-text">{contact.email || '—'}</span></td>
                                         <td className={tdCls}><span className="text-xl text-foreground">{contact.phone || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-xl text-muted-text">{contact.supplier || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-xl text-muted-text">{contact.is_israeli === null || contact.is_israeli === undefined ? '—' : (contact.is_israeli ? 'Yes' : 'No')}</span></td>
                                         <td className={`${tdCls} ltr:text-right rtl:text-left text-xl text-muted-text`}>
                                             {new Date(contact.created_at).toLocaleDateString()}
                                         </td>

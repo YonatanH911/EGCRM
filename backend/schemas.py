@@ -183,6 +183,7 @@ class DepositBase(BaseSchema):
     received_by: Optional[str] = None
     account_id: Optional[int] = None
     account_ids: Optional[List[int]] = None
+    contact_ids: Optional[List[int]] = None
     vault_id: Optional[int] = None
     vault_ids: Optional[List[int]] = None
 
@@ -202,6 +203,7 @@ class DepositUpdate(BaseModel):
     received_by: Optional[str] = None
     account_id: Optional[int] = None
     account_ids: Optional[List[int]] = None
+    contact_ids: Optional[List[int]] = None
     vault_id: Optional[int] = None
     vault_ids: Optional[List[int]] = None
 

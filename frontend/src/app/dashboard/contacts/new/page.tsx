@@ -7,6 +7,17 @@ import api from '@/lib/api';
 import { Users2, ArrowLeft, Loader2 } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
+const roleOptions = [
+    { value: 'Beneficiary', label: 'Beneficiary' },
+    { value: 'Supplier', label: 'Supplier' },
+    { value: 'Lawyer', label: 'Lawyer' },
+];
+
+const israeliOptions = [
+    { value: 'yes', label: 'Yes' },
+    { value: 'no', label: 'No' },
+];
+
 export default function NewContactPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
@@ -21,6 +32,7 @@ export default function NewContactPage() {
         phone: '',
         company_name: '',
         supplier: '',
+        is_israeli: '',
         description: '',
         account_ids: [] as string[],
     });
@@ -45,6 +57,7 @@ export default function NewContactPage() {
 
         const payload = {
             ...formData,
+            is_israeli: formData.is_israeli === '' ? null : formData.is_israeli === 'yes',
             account_ids: formData.account_ids.map(Number),
             account_id: formData.account_ids[0] ? parseInt(formData.account_ids[0]) : null,
         };
@@ -167,13 +180,24 @@ export default function NewContactPage() {
                         </div>
 
                         <div>
-                            <label className="block text-xl font-medium text-foreground mb-1">Supplier</label>
-                            <input
-                                type="text"
+                            <label className="block text-xl font-medium text-foreground mb-1">Role</label>
+                            <SearchableDropdown
                                 value={formData.supplier}
-                                placeholder=""
-                                onChange={(e) => setFormData({ ...formData, supplier: e.target.value })}
+                                onChange={(value) => setFormData({ ...formData, supplier: value })}
+                                placeholder="Select Role"
                                 className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm placeholder-muted-text"
+                                options={roleOptions}
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xl font-medium text-foreground mb-1">Is Israeli?</label>
+                            <SearchableDropdown
+                                value={formData.is_israeli}
+                                onChange={(value) => setFormData({ ...formData, is_israeli: value })}
+                                placeholder="Select"
+                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm placeholder-muted-text"
+                                options={israeliOptions}
                             />
                         </div>
 

@@ -206,6 +206,7 @@ def create_deposit(db: Session, deposit: schemas.DepositCreate):
     db_deposit = models.Deposit()
     _sync_multi_relationships(db, db_deposit, data, {
         "account_ids": ("accounts", models.Account, "account_id"),
+        "contact_ids": ("contacts", models.Contact, None),
         "vault_ids": ("vaults", models.Vault, "vault_id"),
     })
     for key, value in data.items():
@@ -221,6 +222,7 @@ def update_deposit(db: Session, deposit_id: int, deposit_update: schemas.Deposit
         update_data = deposit_update.model_dump(exclude_unset=True)
         _sync_multi_relationships(db, db_deposit, update_data, {
             "account_ids": ("accounts", models.Account, "account_id"),
+            "contact_ids": ("contacts", models.Contact, None),
             "vault_ids": ("vaults", models.Vault, "vault_id"),
         })
         for key, value in update_data.items():
