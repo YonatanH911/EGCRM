@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import ScrollableTable from '@/components/ScrollableTable';
 
 interface Account { id: number; name: string; }
 interface Contract {
@@ -125,7 +126,7 @@ export default function ContractsPage() {
                 </div>
 
                 {/* Table */}
-                <div className="overflow-x-auto">
+                <ScrollableTable>
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
@@ -205,7 +206,7 @@ export default function ContractsPage() {
                             )}
                         </tbody>
                     </table>
-                </div>
+                </ScrollableTable>
             </div>
         </div>
     );

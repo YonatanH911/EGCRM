@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
+import ScrollableTable from '@/components/ScrollableTable';
 import { Plus, Trash2, Activity, Loader2, Settings, Check, X } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 
@@ -157,7 +158,7 @@ export default function ActivitiesPage() {
 
             {/* Table */}
             <div className="rounded-2xl overflow-hidden glass-card">
-                <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-border-subtle">
+                <ScrollableTable>
                     {loading ? (
                         <div className="flex items-center justify-center h-48">
                             <Loader2 className="w-8 h-8 animate-spin text-crm-500" />
@@ -217,7 +218,7 @@ export default function ActivitiesPage() {
                             </tbody>
                         </table>
                     )}
-                </div>
+                </ScrollableTable>
             </div>
 
             {/* Manage Task Types Modal */}

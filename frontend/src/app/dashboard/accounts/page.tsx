@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import ScrollableTable from '@/components/ScrollableTable';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -38,7 +39,6 @@ export default function AccountsPage() {
         return matchesSearch && matchesFilter;
     });
 
-    // Sort accounts: active first, deactivated last, then by created_at descending
     const sortedAccounts = [...filteredAccounts].sort((a, b) => {
         const aActive = a.is_active !== false;
         const bActive = b.is_active !== false;
@@ -59,7 +59,6 @@ export default function AccountsPage() {
 
     return (
         <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center"
@@ -78,13 +77,11 @@ export default function AccountsPage() {
                 </Link>
             </div>
 
-            {/* Card */}
             <div className="rounded-2xl overflow-hidden glass-card">
-                {/* Toolbar */}
                 <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
-                        <input type="text" placeholder="Search names or websites…"
+                        <input type="text" placeholder="Search names or websites..."
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
@@ -103,10 +100,9 @@ export default function AccountsPage() {
                     </div>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto">
+                <ScrollableTable>
                     {loading ? (
-                        <div className="p-12 text-center text-muted-text text-xl">Loading accounts…</div>
+                        <div className="p-12 text-center text-muted-text text-xl">Loading accounts...</div>
                     ) : sortedAccounts.length === 0 ? (
                         <div className="p-16 flex flex-col items-center justify-center">
                             <Building className="w-10 h-10 text-muted-text mb-3 opacity-50" />
@@ -130,46 +126,47 @@ export default function AccountsPage() {
                                     const isActive = account.is_active !== false;
                                     const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     return (
-                                    <tr key={account.id}
-                                        onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                                        className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
-                                        style={rowStyle}
-                                    >
-                                        <td className={tdCls}>
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg uppercase shadow-sm"
-                                                    style={{ background: isActive ? 'linear-gradient(135deg, #6366f1, #3b82f6)' : '#64748b' }}>
-                                                    {account.name?.charAt(0) || '?'}
+                                        <tr key={account.id}
+                                            onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
+                                            className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                                            style={rowStyle}
+                                        >
+                                            <td className={tdCls}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg uppercase shadow-sm"
+                                                        style={{ background: isActive ? 'linear-gradient(135deg, #6366f1, #3b82f6)' : '#64748b' }}>
+                                                        {account.name?.charAt(0) || '?'}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-xl font-medium text-foreground">{account.name || 'Unnamed'}</span>
+                                                        {!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}
+                                                    </div>
                                                 </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-xl font-medium text-foreground">{account.name || 'Unnamed'}</span>
-                                                    {!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}
+                                            </td>
+                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.website || '—'}</span></td>
+                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.street || '—'}</span></td>
+                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.city || '—'}</span></td>
+                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.country || '—'}</span></td>
+                                            <td className={tdCls}>
+                                                <div className="flex items-center gap-2">
+                                                    {!isActive && (
+                                                        <button onClick={(e) => handleReactivate(e, account.id)}
+                                                            className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                            Reactivate
+                                                        </button>
+                                                    )}
+                                                    <span className="text-lg text-muted-text">
+                                                        {new Date(account.created_at).toLocaleDateString()}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{account.website || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{account.street || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{account.city || '—'}</span></td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{account.country || '—'}</span></td>
-                                        <td className={tdCls}>
-                                            <div className="flex items-center gap-2">
-                                                {!isActive && (
-                                                    <button onClick={(e) => handleReactivate(e, account.id)}
-                                                        className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
-                                                        Reactivate
-                                                    </button>
-                                                )}
-                                                <span className="text-lg text-muted-text">
-                                                    {new Date(account.created_at).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )})}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     )}
-                </div>
+                </ScrollableTable>
             </div>
         </div>
     );

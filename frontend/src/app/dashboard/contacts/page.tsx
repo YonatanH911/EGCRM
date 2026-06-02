@@ -6,6 +6,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Users, Plus, Search } from 'lucide-react'; /* ── shared dark-table helpers ── */
 import SearchableDropdown from '@/components/SearchableDropdown';
+import ScrollableTable from '@/components/ScrollableTable';
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
@@ -86,7 +87,7 @@ export default function ContactsPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <ScrollableTable>
                     {loading ? (
                         <div className="p-12 text-center text-muted-text text-xl">Loading contacts…</div>
                     ) : filteredContacts.length === 0 ? (
@@ -136,7 +137,7 @@ export default function ContactsPage() {
                             </tbody>
                         </table>
                     )}
-                </div>
+                </ScrollableTable>
             </div>
         </div>
     );

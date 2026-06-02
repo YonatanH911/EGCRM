@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Landmark, Plus, Search, Shield, Calendar, Package, Tag, User, Box } from 'lucide-react';
 import api from '@/lib/api';
+import ScrollableTable from '@/components/ScrollableTable';
 
 interface Vault { id: number; name: string; }
 interface Deposit {
@@ -75,7 +76,7 @@ export default function DepositsPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <ScrollableTable>
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
@@ -138,7 +139,7 @@ export default function DepositsPage() {
                             )}
                         </tbody>
                     </table>
-                </div>
+                </ScrollableTable>
             </div>
         </div>
     );

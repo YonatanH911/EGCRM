@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Shield, Plus, Search, MapPin, Database } from 'lucide-react';
 import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import ScrollableTable from '@/components/ScrollableTable';
 
 interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; }
 
@@ -89,7 +90,7 @@ export default function VaultsPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                <ScrollableTable>
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
@@ -149,7 +150,7 @@ export default function VaultsPage() {
                             )}
                         </tbody>
                     </table>
-                </div>
+                </ScrollableTable>
             </div>
         </div>
     );
