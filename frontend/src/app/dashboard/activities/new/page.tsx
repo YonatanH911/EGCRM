@@ -1,16 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { ArrowLeft, Loader2, Activity, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
 interface TaskType { id: number; name: string; color: string; }
+interface Account { id: number; name: string; }
 
 export default function NewActivityPage() {
     const router = useRouter();
@@ -19,6 +21,8 @@ export default function NewActivityPage() {
     const [error, setError] = useState('');
     const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
     const [fetchingTypes, setFetchingTypes] = useState(true);
+    const [accounts, setAccounts] = useState<Account[]>([]);
+    const [fetchingAccounts, setFetchingAccounts] = useState(true);
     const [form, setForm] = useState({
         task_type_id: '' as number | '',
         subject: '',
@@ -28,16 +32,36 @@ export default function NewActivityPage() {
         notes: '',
     });
 
-    // Fetch dynamic task types
-    useState(() => {
-        api.get('/task-types').then(res => {
-            setTaskTypes(res.data);
-            if (res.data.length > 0) setForm(prev => ({ ...prev, task_type_id: res.data[0].id }));
-        }).finally(() => setFetchingTypes(false));
-    });
+    useEffect(() => {
+        let mounted = true;
+        Promise.all([
+            api.get('/task-types'),
+            api.get('/accounts'),
+        ]).then(([typesRes, accountsRes]) => {
+            if (!mounted) return;
+            setTaskTypes(typesRes.data);
+            setAccounts(accountsRes.data);
+            if (typesRes.data.length > 0) {
+                setForm(prev => ({ ...prev, task_type_id: typesRes.data[0].id }));
+            }
+        }).catch(err => {
+            console.error('Failed to load activity form data', err);
+        }).finally(() => {
+            if (!mounted) return;
+            setFetchingTypes(false);
+            setFetchingAccounts(false);
+        });
+
+        return () => { mounted = false; };
+    }, []);
 
     const set = (field: string, value: string | number) =>
         setForm(prev => ({ ...prev, [field]: value }));
+
+    const accountOptions = [
+        { value: '', label: 'None' },
+        ...accounts.map(account => ({ value: account.name, label: account.name })),
+    ];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -142,11 +166,14 @@ export default function NewActivityPage() {
                     {/* Regarding */}
                     <div>
                         <label className={labelCls}>Regarding</label>
-                        <input
-                            type="text"
+                        <SearchableDropdown
                             value={form.regarding}
-                            onChange={e => set('regarding', e.target.value)}
-                            placeholder=""
+                            onChange={value => set('regarding', value)}
+                            options={accountOptions}
+                            placeholder={fetchingAccounts ? 'Loading accounts...' : 'Select account'}
+                            searchPlaceholder="Search accounts..."
+                            emptyText="No accounts found"
+                            disabled={fetchingAccounts}
                             className={inputCls}
                         />
                     </div>

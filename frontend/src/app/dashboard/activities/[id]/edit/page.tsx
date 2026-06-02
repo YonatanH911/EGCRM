@@ -6,8 +6,10 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Activity, ArrowLeft, Loader2, Check, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
+import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface TaskType { id: number; name: string; color: string; }
+interface Account { id: number; name: string; }
 
 function toDateInput(iso: string | null) {
     if (!iso) return '';
@@ -28,6 +30,7 @@ export default function EditActivityPage() {
     const [error, setError] = useState('');
     const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
     const [fetchingTypes, setFetchingTypes] = useState(true);
+    const [accounts, setAccounts] = useState<Account[]>([]);
     const [form, setForm] = useState({
         task_type_id: '' as number | '', subject: '', regarding: '',
         start_date: '', due_date: '', notes: '',
@@ -39,12 +42,14 @@ export default function EditActivityPage() {
     useEffect(() => {
         const fetch = async () => {
             try {
-                const [actRes, typesRes] = await Promise.all([
+                const [actRes, typesRes, accountsRes] = await Promise.all([
                     api.get(`/activities/${id}`),
-                    api.get('/task-types')
+                    api.get('/task-types'),
+                    api.get('/accounts')
                 ]);
                 const a = actRes.data;
                 setTaskTypes(typesRes.data);
+                setAccounts(accountsRes.data);
                 
                 setForm({
                     task_type_id: a.task_type_id || (typesRes.data.length > 0 ? typesRes.data[0].id : ''), 
@@ -81,6 +86,11 @@ export default function EditActivityPage() {
             setSaving(false);
         }
     };
+
+    const accountOptions = [
+        { value: '', label: 'None' },
+        ...accounts.map(account => ({ value: account.name, label: account.name })),
+    ];
 
     if (loading) {
         return (
@@ -170,8 +180,15 @@ export default function EditActivityPage() {
                     {/* Regarding */}
                     <div>
                         <label className={labelCls}>Regarding</label>
-                        <input type="text" value={form.regarding} onChange={e => set('regarding', e.target.value)}
-                            className={inputCls} placeholder="" />
+                        <SearchableDropdown
+                            value={form.regarding}
+                            onChange={value => set('regarding', value)}
+                            options={accountOptions}
+                            placeholder="Select account"
+                            searchPlaceholder="Search accounts..."
+                            emptyText="No accounts found"
+                            className={inputCls}
+                        />
                     </div>
 
                     {/* Dates */}
