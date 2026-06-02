@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, X, Sparkles, CheckCircle2, Layout, Boxes, Database } from 'lucide-react';
+import { Bell, X, Sparkles, CheckCircle2, Activity, Building2, PanelTop } from 'lucide-react';
 
 export default function ReleaseNotesDropdown() {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,32 +20,25 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
-            title: 'Deactivate Feature',
-            description: 'You can now soft-delete Accounts and Contracts. Deactivated items are styled gray and moved to the bottom of the list with a one-click reactivate button.',
-            icon: Sparkles,
+            title: 'Compact Tables',
+            description: 'Dashboard tables now use tighter row spacing, truncated long values, and a horizontal scrollbar at the top so wide lists are easier to scan.',
+            icon: PanelTop,
             color: 'text-indigo-500',
             bg: 'bg-indigo-500/10',
         },
         {
-            title: 'Refined Deposit Fields',
-            description: 'The "Box" field has been removed and replaced with an "Is Confirmation Sent?" indicator. You can also now track a custom "Description" for every deposit.',
-            icon: Layout,
+            title: 'Activity Account Dropdown',
+            description: 'The Activity Regarding field is now a searchable account dropdown on both new and edit activity forms.',
+            icon: Activity,
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
         },
         {
-            title: 'Automatic Account Linking',
-            description: 'The Related Contacts and Related Deposits sections on Accounts now automatically link records where the company name or supplier matches the account name.',
-            icon: Boxes,
-            color: 'text-purple-500',
-            bg: 'bg-purple-500/10',
-        },
-        {
-            title: 'Contract Cross-Linking',
-            description: 'Contracts now support specifying the Product Name directly on the contract, and you can cross-link a "Related Deposit" dropdown in the Billing Information section.',
-            icon: Database,
-            color: 'text-blue-500',
-            bg: 'bg-blue-500/10',
+            title: 'Related Activities',
+            description: 'Account detail pages now show a Related Activities section above Related Contacts, listing activities connected to that account.',
+            icon: Building2,
+            color: 'text-amber-500',
+            bg: 'bg-amber-500/10',
         }
     ];
 
