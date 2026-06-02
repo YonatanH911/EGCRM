@@ -15,7 +15,7 @@ export default function AccountsPage() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterIndustry, setFilterIndustry] = useState('');
+    const [websiteFilter, setWebsiteFilter] = useState('');
 
     useEffect(() => {
         const fetchAccounts = async () => {
@@ -31,12 +31,10 @@ export default function AccountsPage() {
         fetchAccounts();
     }, []);
 
-    const uniqueIndustries = Array.from(new Set(accounts.map(a => a.industry).filter(Boolean)));
-
     const filteredAccounts = accounts.filter(account => {
         const matchesSearch = account.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (account.industry && account.industry.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesFilter = filterIndustry ? account.industry === filterIndustry : true;
+            (account.website && account.website.toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesFilter = websiteFilter === 'has_website' ? !!account.website : true;
         return matchesSearch && matchesFilter;
     });
 
@@ -86,20 +84,20 @@ export default function AccountsPage() {
                 <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
                     <div className="relative flex-1 max-w-sm">
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
-                        <input type="text" placeholder="Search names or industries…"
+                        <input type="text" placeholder="Search names or websites…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
                     <div className="sm:w-48">
                         <SearchableDropdown
-                            value={filterIndustry}
-                            onChange={setFilterIndustry}
-                            placeholder="All Industries..."
+                            value={websiteFilter}
+                            onChange={setWebsiteFilter}
+                            placeholder="All Accounts"
                             className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                             options={[
-                                { value: '', label: 'All Industries...' },
-                                ...uniqueIndustries.map(ind => ({ value: String(ind), label: String(ind) })),
+                                { value: '', label: 'All Accounts' },
+                                { value: 'has_website', label: 'Has Website' },
                             ]}
                         />
                     </div>
@@ -122,7 +120,7 @@ export default function AccountsPage() {
                         <table className="min-w-full">
                             <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                                 <tr>
-                                    {['Account Name', 'Industry', 'Street', 'City', 'Country', 'Actions'].map(h => (
+                                    {['Account Name', 'Website', 'Street', 'City', 'Country', 'Actions'].map(h => (
                                         <th key={h} scope="col" className={thCls}>{h}</th>
                                     ))}
                                 </tr>
@@ -149,7 +147,7 @@ export default function AccountsPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{account.industry || '—'}</span></td>
+                                        <td className={tdCls}><span className="text-xl text-muted-text">{account.website || '—'}</span></td>
                                         <td className={tdCls}><span className="text-xl text-muted-text">{account.street || '—'}</span></td>
                                         <td className={tdCls}><span className="text-xl text-muted-text">{account.city || '—'}</span></td>
                                         <td className={tdCls}><span className="text-xl text-muted-text">{account.country || '—'}</span></td>

@@ -16,15 +16,7 @@ section() { echo -e "\n${BOLD}═══ $1 ═══${NC}"; }
 
 # ── Config — EDIT THESE ───────────────────────────────────────────────────────
 REPO_URL="https://github.com/YonatanH911/EGCRM.git"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# If this script is already being run from a cloned EGCRM checkout, deploy that
-# checkout instead of cloning a second copy into /home/egcrm.
-if [[ -d "${SCRIPT_DIR}/.git" && -d "${SCRIPT_DIR}/backend" && -d "${SCRIPT_DIR}/frontend" ]]; then
-    APP_DIR="$SCRIPT_DIR"
-else
-    APP_DIR="/home/egcrm"
-fi
+APP_DIR="/home/egcrm"
 SERVER_IP=$(hostname -I | awk '{print $1}')   # auto-detected
 
 DB_NAME="crm_db"
@@ -124,12 +116,10 @@ info "Database '${DB_NAME}' and user '${DB_USER}' ready."
 
 
 # =============================================================================
-section "5. Prepare Repository"
+section "5. Clone / Update Repository"
 # =============================================================================
 
-if [[ "$APP_DIR" == "$SCRIPT_DIR" ]]; then
-    info "Using existing cloned repository at $APP_DIR."
-elif [ -d "$APP_DIR" ]; then
+if [ -d "$APP_DIR" ]; then
     warn "Directory $APP_DIR already exists. Syncing with latest from GitHub..."
     sudo chown -R "$USER":"$USER" "$APP_DIR"
     cd "$APP_DIR"
