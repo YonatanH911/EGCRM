@@ -6,7 +6,7 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import {
     Building2, ArrowLeft, Loader2, Check, Trash2, PowerOff, Power,
-    ChevronDown, ChevronUp, User, Package, Mail, Phone, Banknote, Search, X
+    ChevronDown, ChevronUp, User, Package, Mail, Phone, Banknote, Search, X, Activity, Calendar
 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import SearchableDropdown from '@/components/SearchableDropdown';
@@ -39,6 +39,19 @@ interface Deposit {
     account_ids?: number[];
 }
 
+interface ActivityRecord {
+    id: number;
+    subject: string;
+    regarding?: string | null;
+    start_date?: string | null;
+    due_date?: string | null;
+    task_type?: {
+        id: number;
+        name: string;
+        color: string;
+    } | null;
+}
+
 function RelatedSection({
     title, icon: Icon, count, open, onToggle, children, color = 'crm'
 }: {
@@ -53,6 +66,7 @@ function RelatedSection({
     const colorMap: Record<string, string> = {
         crm: 'text-crm-500 bg-crm-500/10',
         emerald: 'text-emerald-500 bg-emerald-500/10',
+        amber: 'text-amber-500 bg-amber-500/10',
     };
     const cls = colorMap[color] || colorMap.crm;
 
@@ -103,7 +117,9 @@ export default function EditAccountPage() {
 
     const [allContacts, setAllContacts] = useState<Contact[]>([]);
     const [allDeposits, setAllDeposits] = useState<Deposit[]>([]);
+    const [allActivities, setAllActivities] = useState<ActivityRecord[]>([]);
     
+    const [activitiesOpen, setActivitiesOpen] = useState(false);
     const [contactsOpen, setContactsOpen] = useState(false);
     const [depositsOpen, setDepositsOpen] = useState(false);
     
@@ -113,10 +129,11 @@ export default function EditAccountPage() {
     useEffect(() => {
         const fetchAll = async () => {
             try {
-                const [accRes, contactsRes, depositsRes] = await Promise.all([
+                const [accRes, contactsRes, depositsRes, activitiesRes] = await Promise.all([
                     api.get(`/accounts/${accountId}`),
                     api.get(`/contacts`),
                     api.get(`/deposits`),
+                    api.get(`/activities`),
                 ]);
                 const d = accRes.data;
                 setIsActive(d.is_active !== false);
@@ -128,6 +145,7 @@ export default function EditAccountPage() {
 
                 setAllContacts(contactsRes.data);
                 setAllDeposits(depositsRes.data);
+                setAllActivities(activitiesRes.data);
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to fetch account details');
             } finally {
@@ -243,6 +261,10 @@ export default function EditAccountPage() {
     const linkedDepositIds = new Set(linkedDeposits.map(d => d.id));
     const unlinkedDepositsList = allDeposits.filter(d => !linkedDepositIds.has(d.id));
 
+    const linkedActivities = allActivities.filter(activity =>
+        formData.name && activity.regarding?.toLowerCase() === formData.name.toLowerCase()
+    );
+
     const Field = ({ label, field, type = 'text', placeholder, colSpan2 = false }: {
         label: string; field: keyof typeof formData; type?: string; placeholder?: string; colSpan2?: boolean;
     }) => (
@@ -313,6 +335,47 @@ export default function EditAccountPage() {
                             <Field label="Country / Region" field="country" placeholder="" />
                         </div>
                     </div>
+
+                    {/* Related Activities */}
+                    <RelatedSection
+                        title="Related Activities"
+                        icon={Activity}
+                        count={linkedActivities.length}
+                        open={activitiesOpen}
+                        onToggle={() => setActivitiesOpen(v => !v)}
+                        color="amber"
+                    >
+                        {linkedActivities.length === 0 ? (
+                            <p className="px-6 py-5 text-xl text-muted-text">No activities currently linked to this account.</p>
+                        ) : (
+                            <div className="divide-y divide-border-subtle bg-background/30">
+                                {linkedActivities.map(activity => (
+                                    <Link key={activity.id} href={`/dashboard/activities/${activity.id}/edit`}
+                                        className="flex items-center gap-4 px-6 py-3 hover:bg-background-subtle/60 transition-colors group">
+                                        <div className="w-9 h-9 rounded-full flex items-center justify-center bg-amber-500/10 text-amber-500 text-xl font-bold shrink-0">
+                                            <Activity className="w-4 h-4" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-xl font-semibold text-foreground group-hover:text-amber-500 transition-colors">
+                                                {activity.subject}
+                                            </p>
+                                            <p className="text-lg text-muted-text">
+                                                {activity.task_type?.name || 'Activity'}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-4 text-lg text-muted-text shrink-0">
+                                            {activity.start_date && (
+                                                <span className="flex items-center gap-1">
+                                                    <Calendar className="w-3 h-3" />
+                                                    {new Date(activity.start_date).toLocaleDateString()}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </RelatedSection>
 
                     {/* Related Contacts */}
                     <RelatedSection
