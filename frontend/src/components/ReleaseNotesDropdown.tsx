@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, X, Sparkles, CheckCircle2, Activity, Building2, PanelTop } from 'lucide-react';
+import { Bell, X, Sparkles, CheckCircle2, Activity, Building2, PanelTop, Users, Landmark, Type } from 'lucide-react';
 
 export default function ReleaseNotesDropdown() {
     const [isOpen, setIsOpen] = useState(false);
@@ -19,6 +19,27 @@ export default function ReleaseNotesDropdown() {
     }, []);
 
     const notes = [
+        {
+            title: 'Contact Fields',
+            description: 'On the Contacts page, Supplier was renamed to Role and a new Is Israeli? field was added to the contact list and forms.',
+            icon: Users,
+            color: 'text-blue-500',
+            bg: 'bg-blue-500/10',
+        },
+        {
+            title: 'Deposit Updates',
+            description: 'The Deposits page now includes the missing fields, and Billed Account was changed to Billed Contact.',
+            icon: Landmark,
+            color: 'text-cyan-500',
+            bg: 'bg-cyan-500/10',
+        },
+        {
+            title: 'General Cleanup',
+            description: 'Placeholder examples were removed for clarity, and font sizes were increased across the CRM for easier reading.',
+            icon: Type,
+            color: 'text-purple-500',
+            bg: 'bg-purple-500/10',
+        },
         {
             title: 'Compact Tables',
             description: 'Dashboard tables now use tighter row spacing, truncated long values, and a horizontal scrollbar at the top so wide lists are easier to scan.',
