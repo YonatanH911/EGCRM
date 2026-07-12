@@ -10,11 +10,11 @@ type ScrollableTableProps = {
 const compactTableClass = [
     'overflow-x-auto scrollbar-thin scrollbar-thumb-border-subtle hover:scrollbar-thumb-muted-text',
     '[&_table]:w-full [&_table]:min-w-max',
-    '[&_th]:!px-4 [&_th]:!py-2 [&_th]:!text-xs [&_th]:!tracking-wide',
-    '[&_td]:!px-4 [&_td]:!py-2.5 [&_td]:!text-sm',
-    '[&_td_span]:!text-sm [&_td_div]:!text-sm [&_td_button]:!text-xs',
-    '[&_td>span]:block [&_td>span]:max-w-48 [&_td>span]:truncate',
-    '[&_td_.text-lg]:!text-sm [&_td_.text-xl]:!text-sm',
+    '[&_th]:!px-6 [&_th]:!py-3.5 [&_th]:!text-base [&_th]:!tracking-wide',
+    '[&_td]:!px-6 [&_td]:!py-4 [&_td]:!text-xl',
+    '[&_td_span]:!text-xl [&_td_div]:!text-xl [&_td_button]:!text-sm',
+    '[&_td>span]:block [&_td>span]:max-w-80 [&_td>span]:truncate',
+    '[&_td_.text-lg]:!text-lg [&_td_.text-xl]:!text-xl',
 ].join(' ');
 
 export default function ScrollableTable({ children, className = '' }: ScrollableTableProps) {
