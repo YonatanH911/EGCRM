@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Users2, ArrowLeft, Loader2, Check, Trash2 } from 'lucide-react';
+import { Users2, ArrowLeft, Loader2, Check, Trash2, PowerOff, Power } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
 const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
@@ -28,6 +28,7 @@ export default function EditContactPage() {
     const [initialLoading, setInitialLoading] = useState(true);
     const [error, setError] = useState('');
     const [accounts, setAccounts] = useState<any[]>([]);
+    const [isActive, setIsActive] = useState(true);
 
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', job_title: '', email: '',
@@ -42,6 +43,7 @@ export default function EditContactPage() {
                     api.get('/accounts'),
                 ]);
                 const data = contactRes.data;
+                setIsActive(data.is_active !== false);
                 setFormData({
                     first_name: data.first_name || '', last_name: data.last_name || '',
                     job_title: data.job_title || '', email: data.email || '',
@@ -91,6 +93,21 @@ export default function EditContactPage() {
         }
     };
 
+    const handleToggleActive = async () => {
+        const action = isActive ? 'deactivate' : 'reactivate';
+        if (isActive && !confirm('Deactivate this contact? It will be moved to the bottom of the list and greyed out.')) return;
+        setLoading(true);
+        setError('');
+        try {
+            await api.patch(`/contacts/${contactId}/${action}`);
+            setIsActive(!isActive);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || `Failed to ${action} contact`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (initialLoading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -121,12 +138,19 @@ export default function EditContactPage() {
                     <ArrowLeft className="w-5 h-5 ltr:mr-0 rtl:rotate-180" />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-purple-500 to-indigo-500 shadow-lg"
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isActive ? 'bg-gradient-to-br from-purple-500 to-indigo-500' : 'bg-slate-600'}`}
                     >
                         <Users2 className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-5xl font-bold text-foreground">Edit Contact</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className={`text-5xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>Edit Contact</h1>
+                            {!isActive && (
+                                <span className="text-base font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                    Inactive
+                                </span>
+                            )}
+                        </div>
                         <p className="text-lg text-muted-text">Update detailed contact information</p>
                     </div>
                 </div>
@@ -204,11 +228,23 @@ export default function EditContactPage() {
                     </div>
 
                     <div className="flex justify-between items-center gap-3 pt-4 border-t border-border-subtle">
-                        <button type="button" onClick={handleDelete} disabled={loading}
-                            className="flex items-center gap-2 px-4 py-2.5 text-xl font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
-                        >
-                            <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contact</span>
-                        </button>
+                        <div className="flex flex-wrap gap-3">
+                            <button type="button" onClick={handleDelete} disabled={loading}
+                                className="flex items-center gap-2 px-4 py-2.5 text-xl font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50"
+                            >
+                                <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Contact</span>
+                            </button>
+                            <button type="button" onClick={handleToggleActive} disabled={loading}
+                                className={`flex items-center gap-2 px-4 py-2.5 text-xl font-semibold rounded-xl border transition-colors disabled:opacity-50 ${
+                                    isActive
+                                        ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
+                                        : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                                }`}
+                            >
+                                {isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isActive ? 'Deactivate' : 'Reactivate'}</span>
+                            </button>
+                        </div>
                         <div className="flex gap-3">
                             <Link href="/dashboard/contacts"
                                 className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-black/5 dark:bg-white/5 border border-border-subtle hover:bg-black/10 dark:hover:bg-white/10 transition-colors rounded-xl"

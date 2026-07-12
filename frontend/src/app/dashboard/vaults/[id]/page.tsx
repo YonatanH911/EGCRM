@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Shield, ArrowLeft, Loader2, Check } from 'lucide-react';
+import { Shield, ArrowLeft, Loader2, Check, Trash2, PowerOff, Power } from 'lucide-react';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { usePreferences } from '@/components/PreferencesProvider';
@@ -21,6 +21,7 @@ export default function EditVaultPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [isActive, setIsActive] = useState(true);
 
     const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
     const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl bg-background-subtle border border-border-subtle text-foreground placeholder-muted-text focus:outline-none focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 transition-all";
@@ -30,6 +31,7 @@ export default function EditVaultPage() {
             try {
                 const res = await api.get(`/vaults/${id}`);
                 const v = res.data;
+                setIsActive(v.is_active !== false);
                 setForm({ name: v.name || '', location: v.location || '', capacity: v.capacity || '', status: v.status || 'Open' });
             } catch {
                 setError('Failed to load vault.');
@@ -55,6 +57,35 @@ export default function EditVaultPage() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this vault?')) return;
+        setSaving(true);
+        setError('');
+        try {
+            await api.delete(`/vaults/${id}`);
+            router.push('/dashboard/vaults');
+            router.refresh();
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Failed to delete vault');
+            setSaving(false);
+        }
+    };
+
+    const handleToggleActive = async () => {
+        const action = isActive ? 'deactivate' : 'reactivate';
+        if (isActive && !confirm('Deactivate this vault? It will be moved to the bottom of the list and greyed out.')) return;
+        setSaving(true);
+        setError('');
+        try {
+            await api.patch(`/vaults/${id}/${action}`);
+            setIsActive(!isActive);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || `Failed to ${action} vault`);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -75,11 +106,18 @@ export default function EditVaultPage() {
                     <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-crm-500 to-crm-600 shadow-lg shadow-crm-500/20">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isActive ? 'bg-gradient-to-br from-crm-500 to-crm-600 shadow-crm-500/20' : 'bg-slate-600'}`}>
                         <Shield className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-5xl font-bold text-foreground">Edit Vault</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className={`text-5xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>Edit Vault</h1>
+                            {!isActive && (
+                                <span className="text-base font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                    Inactive
+                                </span>
+                            )}
+                        </div>
                         <p className="text-lg text-muted-text">Update vault details below</p>
                     </div>
                 </div>
@@ -121,16 +159,33 @@ export default function EditVaultPage() {
                         className={inputCls} placeholder="" />
                 </div>
 
-                <div className="flex items-center gap-3 pt-3 border-t border-border-subtle">
-                    <button onClick={handleSave} disabled={saving || !form.name}
-                        className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all disabled:opacity-50">
-                        {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                        {saving ? 'Saving…' : 'Save Changes'}
-                    </button>
-                    <Link href="/dashboard/vaults"
-                        className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-background-subtle border border-border-subtle rounded-xl transition-all">
-                        Cancel
-                    </Link>
+                <div className="flex justify-between items-center gap-3 pt-3 border-t border-border-subtle">
+                    <div className="flex flex-wrap gap-3">
+                        <button type="button" onClick={handleDelete} disabled={saving}
+                            className="flex items-center gap-2 px-4 py-2.5 text-xl font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
+                            <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Vault</span>
+                        </button>
+                        <button type="button" onClick={handleToggleActive} disabled={saving}
+                            className={`flex items-center gap-2 px-4 py-2.5 text-xl font-semibold rounded-xl border transition-colors disabled:opacity-50 ${
+                                isActive
+                                    ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
+                                    : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                            }`}>
+                            {isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                            <span className="hidden sm:inline">{isActive ? 'Deactivate' : 'Reactivate'}</span>
+                        </button>
+                    </div>
+                    <div className="flex gap-3">
+                        <Link href="/dashboard/vaults"
+                            className="px-5 py-2.5 text-xl font-semibold text-muted-text hover:text-foreground bg-background-subtle border border-border-subtle rounded-xl transition-all">
+                            Cancel
+                        </Link>
+                        <button onClick={handleSave} disabled={saving || !form.name}
+                            className="flex items-center gap-2 px-5 py-2.5 text-xl font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all disabled:opacity-50">
+                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                            {saving ? 'Saving...' : 'Update Vault'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

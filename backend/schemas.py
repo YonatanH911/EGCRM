@@ -76,6 +76,7 @@ class ContactBase(BaseSchema):
     description: Optional[str] = None
     account_id: Optional[int] = None
     account_ids: Optional[List[int]] = None
+    is_active: Optional[bool] = True
 
 class ContactCreate(ContactBase):
     pass
@@ -85,6 +86,7 @@ class ContactUpdate(ContactBase):
 
 class ContactResponse(ContactBase):
     id: int
+    is_active: bool
     created_at: datetime
     account: Optional[AccountResponse] = None
 
@@ -152,6 +154,7 @@ class VaultBase(BaseSchema):
     location: Optional[str] = None
     capacity: Optional[str] = None
     status: VaultStatus = VaultStatus.OPEN
+    is_active: Optional[bool] = True
 
 class VaultCreate(VaultBase):
     pass
@@ -161,9 +164,11 @@ class VaultUpdate(BaseModel):
     location: Optional[str] = None
     capacity: Optional[str] = None
     status: Optional[VaultStatus] = None
+    is_active: Optional[bool] = None
 
 class VaultResponse(VaultBase):
     id: int
+    is_active: bool
     created_at: datetime
 
     class Config:
@@ -186,6 +191,7 @@ class DepositBase(BaseSchema):
     contact_ids: Optional[List[int]] = None
     vault_id: Optional[int] = None
     vault_ids: Optional[List[int]] = None
+    is_active: Optional[bool] = True
 
 class DepositCreate(DepositBase):
     pass
@@ -206,9 +212,11 @@ class DepositUpdate(BaseModel):
     contact_ids: Optional[List[int]] = None
     vault_id: Optional[int] = None
     vault_ids: Optional[List[int]] = None
+    is_active: Optional[bool] = None
 
 class DepositResponse(DepositBase):
     id: int
+    is_active: bool
     created_at: datetime
     account: Optional[AccountResponse] = None
     vault: Optional[VaultResponse] = None
@@ -224,6 +232,7 @@ class ActivityBase(BaseSchema):
     start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     notes: Optional[str] = None
+    is_active: Optional[bool] = True
 
 class ActivityCreate(ActivityBase):
     pass
@@ -235,9 +244,11 @@ class ActivityUpdate(BaseModel):
     start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     notes: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class ActivityResponse(ActivityBase):
     id: int
+    is_active: bool
     created_at: datetime
     task_type: Optional["TaskTypeResponse"] = None
 

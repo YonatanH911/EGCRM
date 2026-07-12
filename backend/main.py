@@ -148,6 +148,26 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db), current_user:
     except Exception as e:
         raise HTTPException(status_code=400, detail="Cannot delete contact that is linked to existing records.")
 
+@app.patch("/contacts/{contact_id}/deactivate", response_model=schemas.ContactResponse)
+def deactivate_contact(contact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_contact = crud.get_contact(db, contact_id=contact_id)
+    if db_contact is None:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    db_contact.is_active = False
+    db.commit()
+    db.refresh(db_contact)
+    return db_contact
+
+@app.patch("/contacts/{contact_id}/reactivate", response_model=schemas.ContactResponse)
+def reactivate_contact(contact_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_contact = crud.get_contact(db, contact_id=contact_id)
+    if db_contact is None:
+        raise HTTPException(status_code=404, detail="Contact not found")
+    db_contact.is_active = True
+    db.commit()
+    db.refresh(db_contact)
+    return db_contact
+
 # --- Leads API ---
 @app.post("/leads", response_model=schemas.LeadResponse)
 def create_lead(lead: schemas.LeadCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
@@ -240,6 +260,35 @@ def update_vault(vault_id: int, vault: schemas.VaultUpdate, db: Session = Depend
         raise HTTPException(status_code=404, detail="Vault not found")
     return db_vault
 
+@app.delete("/vaults/{vault_id}")
+def delete_vault(vault_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_vault = crud.get_vault(db, vault_id=vault_id)
+    if not db_vault:
+        raise HTTPException(status_code=404, detail="Vault not found")
+    db.delete(db_vault)
+    db.commit()
+    return {"message": "Vault deleted successfully"}
+
+@app.patch("/vaults/{vault_id}/deactivate", response_model=schemas.VaultResponse)
+def deactivate_vault(vault_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_vault = crud.get_vault(db, vault_id=vault_id)
+    if db_vault is None:
+        raise HTTPException(status_code=404, detail="Vault not found")
+    db_vault.is_active = False
+    db.commit()
+    db.refresh(db_vault)
+    return db_vault
+
+@app.patch("/vaults/{vault_id}/reactivate", response_model=schemas.VaultResponse)
+def reactivate_vault(vault_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_vault = crud.get_vault(db, vault_id=vault_id)
+    if db_vault is None:
+        raise HTTPException(status_code=404, detail="Vault not found")
+    db_vault.is_active = True
+    db.commit()
+    db.refresh(db_vault)
+    return db_vault
+
 # --- Deposits API ---
 @app.post("/deposits", response_model=schemas.DepositResponse)
 def create_deposit(deposit: schemas.DepositCreate, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
@@ -261,6 +310,35 @@ def update_deposit(deposit_id: int, deposit: schemas.DepositUpdate, db: Session 
     db_deposit = crud.update_deposit(db, deposit_id=deposit_id, deposit_update=deposit)
     if db_deposit is None:
         raise HTTPException(status_code=404, detail="Deposit not found")
+    return db_deposit
+
+@app.delete("/deposits/{deposit_id}")
+def delete_deposit(deposit_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_deposit = crud.get_deposit(db, deposit_id=deposit_id)
+    if not db_deposit:
+        raise HTTPException(status_code=404, detail="Deposit not found")
+    db.delete(db_deposit)
+    db.commit()
+    return {"message": "Deposit deleted successfully"}
+
+@app.patch("/deposits/{deposit_id}/deactivate", response_model=schemas.DepositResponse)
+def deactivate_deposit(deposit_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_deposit = crud.get_deposit(db, deposit_id=deposit_id)
+    if db_deposit is None:
+        raise HTTPException(status_code=404, detail="Deposit not found")
+    db_deposit.is_active = False
+    db.commit()
+    db.refresh(db_deposit)
+    return db_deposit
+
+@app.patch("/deposits/{deposit_id}/reactivate", response_model=schemas.DepositResponse)
+def reactivate_deposit(deposit_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_deposit = crud.get_deposit(db, deposit_id=deposit_id)
+    if db_deposit is None:
+        raise HTTPException(status_code=404, detail="Deposit not found")
+    db_deposit.is_active = True
+    db.commit()
+    db.refresh(db_deposit)
     return db_deposit
 
 # --- Activities API ---
@@ -292,6 +370,26 @@ def delete_activity(activity_id: int, db: Session = Depends(get_db), current_use
     if not db_activity:
         raise HTTPException(status_code=404, detail="Activity not found")
     return {"message": "Activity deleted successfully"}
+
+@app.patch("/activities/{activity_id}/deactivate", response_model=schemas.ActivityResponse)
+def deactivate_activity(activity_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_activity = crud.get_activity(db, activity_id=activity_id)
+    if db_activity is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    db_activity.is_active = False
+    db.commit()
+    db.refresh(db_activity)
+    return db_activity
+
+@app.patch("/activities/{activity_id}/reactivate", response_model=schemas.ActivityResponse)
+def reactivate_activity(activity_id: int, db: Session = Depends(get_db), current_user: models.User = Depends(get_current_user)):
+    db_activity = crud.get_activity(db, activity_id=activity_id)
+    if db_activity is None:
+        raise HTTPException(status_code=404, detail="Activity not found")
+    db_activity.is_active = True
+    db.commit()
+    db.refresh(db_activity)
+    return db_activity
 
 # --- Task Types API ---
 @app.get("/task-types", response_model=List[schemas.TaskTypeResponse])

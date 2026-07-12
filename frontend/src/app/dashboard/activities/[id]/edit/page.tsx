@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
-import { Activity, ArrowLeft, Loader2, Check, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
+import { Activity, ArrowLeft, Loader2, Check, Trash2, PowerOff, Power } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
@@ -28,6 +28,7 @@ export default function EditActivityPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
+    const [isActive, setIsActive] = useState(true);
     const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
     const [fetchingTypes, setFetchingTypes] = useState(true);
     const [accounts, setAccounts] = useState<Account[]>([]);
@@ -48,6 +49,7 @@ export default function EditActivityPage() {
                     api.get('/accounts')
                 ]);
                 const a = actRes.data;
+                setIsActive(a.is_active !== false);
                 setTaskTypes(typesRes.data);
                 setAccounts(accountsRes.data);
                 
@@ -87,6 +89,35 @@ export default function EditActivityPage() {
         }
     };
 
+    const handleDelete = async () => {
+        if (!confirm('Are you sure you want to delete this activity?')) return;
+        setSaving(true);
+        setError('');
+        try {
+            await api.delete(`/activities/${id}`);
+            router.push('/dashboard/activities');
+            router.refresh();
+        } catch (err: any) {
+            setError(err.response?.data?.detail || 'Failed to delete activity');
+            setSaving(false);
+        }
+    };
+
+    const handleToggleActive = async () => {
+        const action = isActive ? 'deactivate' : 'reactivate';
+        if (isActive && !confirm('Deactivate this activity? It will be moved to the bottom of the list and greyed out.')) return;
+        setSaving(true);
+        setError('');
+        try {
+            await api.patch(`/activities/${id}/${action}`);
+            setIsActive(!isActive);
+        } catch (err: any) {
+            setError(err.response?.data?.detail || `Failed to ${action} activity`);
+        } finally {
+            setSaving(false);
+        }
+    };
+
     const accountOptions = [
         { value: '', label: 'None' },
         ...accounts.map(account => ({ value: account.name, label: account.name })),
@@ -110,11 +141,18 @@ export default function EditActivityPage() {
                     <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
                 </Link>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-500 shadow-lg shadow-indigo-500/20">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${isActive ? 'bg-gradient-to-br from-indigo-500 to-purple-500 shadow-indigo-500/20' : 'bg-slate-600'}`}>
                         <Activity className="w-5 h-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-5xl font-bold text-foreground">Edit Activity</h1>
+                        <div className="flex items-center gap-2">
+                            <h1 className={`text-5xl font-bold ${isActive ? 'text-foreground' : 'text-muted-text'}`}>Edit Activity</h1>
+                            {!isActive && (
+                                <span className="text-base font-bold px-2 py-0.5 rounded-full bg-slate-500/20 text-slate-400 border border-slate-500/30 uppercase tracking-widest">
+                                    Inactive
+                                </span>
+                            )}
+                        </div>
                         <p className="text-lg text-muted-text">Update the activity details below.</p>
                     </div>
                 </div>
@@ -213,16 +251,33 @@ export default function EditActivityPage() {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-8 border-t border-border-subtle">
-                        <Link href="/dashboard/activities"
-                            className="px-6 py-2.5 text-xl font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
-                            Cancel
-                        </Link>
-                        <button type="submit" disabled={saving}
-                            className="flex items-center gap-2 px-8 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
-                            {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                            Update Activity
-                        </button>
+                    <div className="flex justify-between items-center gap-3 pt-8 border-t border-border-subtle">
+                        <div className="flex flex-wrap gap-3">
+                            <button type="button" onClick={handleDelete} disabled={saving}
+                                className="flex items-center gap-2 px-4 py-2.5 text-xl font-bold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
+                                <Trash2 className="w-4 h-4" /> <span className="hidden sm:inline">Delete Activity</span>
+                            </button>
+                            <button type="button" onClick={handleToggleActive} disabled={saving}
+                                className={`flex items-center gap-2 px-4 py-2.5 text-xl font-bold rounded-xl border transition-colors disabled:opacity-50 ${
+                                    isActive
+                                        ? 'text-amber-500 bg-amber-500/10 border-amber-500/20 hover:bg-amber-500/20'
+                                        : 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20'
+                                }`}>
+                                {isActive ? <PowerOff className="w-4 h-4" /> : <Power className="w-4 h-4" />}
+                                <span className="hidden sm:inline">{isActive ? 'Deactivate' : 'Reactivate'}</span>
+                            </button>
+                        </div>
+                        <div className="flex gap-3">
+                            <Link href="/dashboard/activities"
+                                className="px-6 py-2.5 text-xl font-bold text-muted-text bg-background-subtle border border-border-subtle rounded-xl hover:bg-background-subtle/80 hover:text-foreground transition-all">
+                                Cancel
+                            </Link>
+                            <button type="submit" disabled={saving}
+                                className="flex items-center gap-2 px-8 py-2.5 text-xl font-bold text-white bg-crm-500 rounded-xl hover:bg-crm-600 shadow-lg shadow-crm-500/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 min-w-[140px] justify-center text-center">
+                                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                                Update Activity
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

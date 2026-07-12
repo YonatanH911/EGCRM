@@ -139,6 +139,7 @@ class Contact(Base):
     supplier = Column(String(255), nullable=True)
     description = Column(String(1000), nullable=True)
     account_id = Column(Integer, ForeignKey("accounts.id"))
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     account = relationship("Account", back_populates="contacts")
@@ -228,6 +229,7 @@ class Vault(Base):
     location = Column(String(255))
     capacity = Column(String(255))
     status = Column(Enum(VaultStatus), default=VaultStatus.OPEN)
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     deposits = relationship("Deposit", back_populates="vault")
@@ -249,6 +251,7 @@ class Deposit(Base):
     
     account_id = Column(Integer, ForeignKey("accounts.id"))
     vault_id = Column(Integer, ForeignKey("vaults.id"))
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     account = relationship("Account", back_populates="deposits")
@@ -285,6 +288,7 @@ class Activity(Base):
     start_date = Column(DateTime, nullable=True)
     due_date = Column(DateTime, nullable=True)
     notes = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     task_type = relationship("TaskType", back_populates="activities")
