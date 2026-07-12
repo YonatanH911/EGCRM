@@ -173,6 +173,8 @@ export default function EditDepositPage() {
         );
     }
 
+    console.log('[DEBUG] EditDepositPage rendering. isVaulted:', isVaulted, 'vault_ids:', formData.vault_ids, 'vaults:', vaults);
+
     return (
         <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
