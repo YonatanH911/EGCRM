@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Landmark, Plus, Search, Shield, Calendar, Package, Tag, User, Box } from 'lucide-react';
+import { Landmark, Plus, Search, Shield, Calendar, Package, Tag, User, Box, CheckSquare } from 'lucide-react';
 import api from '@/lib/api';
 import ScrollableTable from '@/components/ScrollableTable';
 
@@ -11,7 +11,7 @@ interface Vault { id: number; name: string; }
 interface Deposit {
     id: number; reference_number: string; date: string | null;
     vault: Vault | null; is_confirmation_sent: boolean | null; version: string | null;
-    supplier: string | null; received_by: string | null; product_name: string | null;
+    supplier: string | null; received_by: string | null; product_name: string | null; status: string;
 }
 
 const thCls = "px-3 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
@@ -85,16 +85,16 @@ export default function DepositsPage() {
                                 <th className={thCls}><div className="flex items-center gap-1"><User className="w-3 h-3" />Supplier</div></th>
                                 <th className={thCls}><div className="flex items-center gap-1"><Calendar className="w-3 h-3" />Date</div></th>
                                 <th className={thCls}><div className="flex items-center gap-1"><Shield className="w-3 h-3" />Vault</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Box className="w-3 h-3" />Confirmed?</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Landmark className="w-3 h-3" />Ref #</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><User className="w-3 h-3" />Received By</div></th>
+                                <th className={thCls}><div className="flex items-center gap-1"><Landmark className="w-3 h-3" />Deposit number</div></th>
+                                <th className={thCls}><div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" />Verification Status</div></th>
+
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={8} className="px-3 py-12 text-center text-muted-text text-xl">Loading deposits…</td></tr>
+                                <tr><td colSpan={7} className="px-3 py-12 text-center text-muted-text text-xl">Loading deposits…</td></tr>
                             ) : filteredDeposits.length === 0 ? (
-                                <tr><td colSpan={8} className="px-3 py-16 text-center">
+                                <tr><td colSpan={7} className="px-3 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <Landmark className="h-10 w-10 text-muted-text mb-3" />
                                         <p className="text-foreground text-xl font-semibold">No deposits found.</p>
@@ -123,17 +123,20 @@ export default function DepositsPage() {
                                             </div>
                                         </td>
                                         <td className={tdCls}>
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-semibold ${deposit.is_confirmation_sent ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`} style={{ border: '1px solid' }}>
-                                                {deposit.is_confirmation_sent ? 'Yes' : 'No'}
-                                            </span>
-                                        </td>
-                                        <td className={tdCls}>
                                             <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-mono font-semibold"
                                                 style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
                                                 {deposit.reference_number}
                                             </span>
                                         </td>
-                                        <td className={tdCls}><div className="text-xl text-muted-text whitespace-nowrap">{deposit.received_by || dash}</div></td>
+                                        <td className={tdCls}>
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-semibold ${
+                                                deposit.status === 'Cleared' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                                deposit.status === 'Pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                                'bg-red-500/10 text-red-500 border-red-500/20'
+                                            }`} style={{ border: '1px solid' }}>
+                                                {deposit.status || 'Pending'}
+                                            </span>
+                                        </td>
                                     </tr>
                                 ))
                             )}
