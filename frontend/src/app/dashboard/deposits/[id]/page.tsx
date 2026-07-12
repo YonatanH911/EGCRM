@@ -299,20 +299,6 @@ export default function EditDepositPage() {
                         </div>
 
                         <div>
-                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">General Information</h3>
-                            <div className="mt-1">
-                                <textarea
-                                    id="description"
-                                    rows={4}
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
-                                    placeholder="Enter general information..."
-                                />
-                            </div>
-                        </div>
-
-                        <div>
                             <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4 flex items-center gap-2">
                                 <Shield className="w-5 h-5 text-muted-text" />
                                 Vault Information
@@ -387,6 +373,20 @@ export default function EditDepositPage() {
                                         />
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Description</h3>
+                            <div className="mt-1">
+                                <textarea
+                                    id="description"
+                                    rows={4}
+                                    value={formData.description}
+                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                    placeholder="Enter description..."
+                                />
                             </div>
                         </div>
                     </div>
