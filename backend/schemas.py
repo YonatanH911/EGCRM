@@ -232,6 +232,8 @@ class ActivityBase(BaseSchema):
     start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     notes: Optional[str] = None
+    invoice_number: Optional[str] = None
+    contact_id: Optional[int] = None
     is_active: Optional[bool] = True
 
 class ActivityCreate(ActivityBase):
@@ -244,6 +246,8 @@ class ActivityUpdate(BaseModel):
     start_date: Optional[datetime] = None
     due_date: Optional[datetime] = None
     notes: Optional[str] = None
+    invoice_number: Optional[str] = None
+    contact_id: Optional[int] = None
     is_active: Optional[bool] = None
 
 class ActivityResponse(ActivityBase):
@@ -251,6 +255,7 @@ class ActivityResponse(ActivityBase):
     is_active: bool
     created_at: datetime
     task_type: Optional["TaskTypeResponse"] = None
+    contact: Optional[ContactResponse] = None
 
     class Config:
         from_attributes = True

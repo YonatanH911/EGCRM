@@ -179,7 +179,7 @@ export default function ActivitiesPage() {
                         <table className="w-full text-xl">
                             <thead className="border-b border-border-subtle bg-background-subtle/30">
                                 <tr>
-                                    {['Type', 'Subject', 'Regarding', 'Start Date', 'Due Date', ''].map((h, i) => (
+                                    {['Type', 'Subject', 'Regarding', 'Sent on', 'Due Date', ''].map((h, i) => (
                                         <th key={i} className={thCls}>{h}</th>
                                     ))}
                                 </tr>

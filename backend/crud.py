@@ -233,10 +233,16 @@ def update_deposit(db: Session, deposit_id: int, deposit_update: schemas.Deposit
 
 # --- Activities ---
 def get_activity(db: Session, activity_id: int):
-    return db.query(models.Activity).options(joinedload(models.Activity.task_type)).filter(models.Activity.id == activity_id).first()
+    return db.query(models.Activity).options(
+        joinedload(models.Activity.task_type),
+        joinedload(models.Activity.contact)
+    ).filter(models.Activity.id == activity_id).first()
 
 def get_activities(db: Session, skip: int = 0, limit: int = 500):
-    return db.query(models.Activity).options(joinedload(models.Activity.task_type)).order_by(models.Activity.created_at.desc()).offset(skip).limit(limit).all()
+    return db.query(models.Activity).options(
+        joinedload(models.Activity.task_type),
+        joinedload(models.Activity.contact)
+    ).order_by(models.Activity.created_at.desc()).offset(skip).limit(limit).all()
 
 def create_activity(db: Session, activity: schemas.ActivityCreate):
     db_activity = models.Activity(**activity.model_dump())

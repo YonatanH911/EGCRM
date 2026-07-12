@@ -10,6 +10,7 @@ import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface TaskType { id: number; name: string; color: string; }
 interface Account { id: number; name: string; }
+interface Contact { id: number; first_name: string; last_name: string; }
 
 function toDateInput(iso: string | null) {
     if (!iso) return '';
@@ -32,9 +33,12 @@ export default function EditActivityPage() {
     const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
     const [fetchingTypes, setFetchingTypes] = useState(true);
     const [accounts, setAccounts] = useState<Account[]>([]);
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [fetchingContacts, setFetchingContacts] = useState(true);
     const [form, setForm] = useState({
         task_type_id: '' as number | '', subject: '', regarding: '',
         start_date: '', due_date: '', notes: '',
+        invoice_number: '', contact_id: '' as number | '',
     });
 
     const set = (field: string, value: string | number) =>
@@ -43,27 +47,32 @@ export default function EditActivityPage() {
     useEffect(() => {
         const fetch = async () => {
             try {
-                const [actRes, typesRes, accountsRes] = await Promise.all([
+                const [actRes, typesRes, accountsRes, contactsRes] = await Promise.all([
                     api.get(`/activities/${id}`),
                     api.get('/task-types'),
-                    api.get('/accounts')
+                    api.get('/accounts'),
+                    api.get('/contacts')
                 ]);
                 const a = actRes.data;
                 setIsActive(a.is_active !== false);
                 setTaskTypes(typesRes.data);
                 setAccounts(accountsRes.data);
+                setContacts(contactsRes.data);
                 
                 setForm({
                     task_type_id: a.task_type_id || (typesRes.data.length > 0 ? typesRes.data[0].id : ''), 
                     subject: a.subject || '',
                     regarding: a.regarding || '', start_date: toDateInput(a.start_date),
                     due_date: toDateInput(a.due_date), notes: a.notes || '',
+                    invoice_number: a.invoice_number || '',
+                    contact_id: a.contact_id || '',
                 });
             } catch (err) {
                 setError('Could not load activity or task types');
             } finally {
                 setLoading(false);
                 setFetchingTypes(false);
+                setFetchingContacts(false);
             }
         };
         fetch();
@@ -79,6 +88,8 @@ export default function EditActivityPage() {
                 regarding: form.regarding || null, notes: form.notes || null,
                 start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
                 due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
+                invoice_number: form.invoice_number || null,
+                contact_id: form.contact_id ? Number(form.contact_id) : null,
             });
             router.push('/dashboard/activities');
         } catch (err: any) {
@@ -121,6 +132,11 @@ export default function EditActivityPage() {
     const accountOptions = [
         { value: '', label: 'None' },
         ...accounts.map(account => ({ value: account.name, label: account.name })),
+    ];
+
+    const contactOptions = [
+        { value: '', label: 'None' },
+        ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}` })),
     ];
 
     if (loading) {
@@ -215,16 +231,43 @@ export default function EditActivityPage() {
                             className={inputCls} placeholder="" />
                     </div>
 
-                    {/* Regarding */}
+                    {/* Regarding & Follow up with */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label className={labelCls}>Regarding</label>
+                            <SearchableDropdown
+                                value={form.regarding}
+                                onChange={value => set('regarding', value)}
+                                options={accountOptions}
+                                placeholder="Select account"
+                                searchPlaceholder="Search accounts..."
+                                emptyText="No accounts found"
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Follow up with</label>
+                            <SearchableDropdown
+                                value={String(form.contact_id)}
+                                onChange={value => set('contact_id', value ? Number(value) : '')}
+                                options={contactOptions}
+                                placeholder={fetchingContacts ? 'Loading contacts...' : 'Select contact'}
+                                searchPlaceholder="Search contacts..."
+                                emptyText="No contacts found"
+                                disabled={fetchingContacts}
+                                className={inputCls}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Invoice Number */}
                     <div>
-                        <label className={labelCls}>Regarding</label>
-                        <SearchableDropdown
-                            value={form.regarding}
-                            onChange={value => set('regarding', value)}
-                            options={accountOptions}
-                            placeholder="Select account"
-                            searchPlaceholder="Search accounts..."
-                            emptyText="No accounts found"
+                        <label className={labelCls}>Invoice Number</label>
+                        <input
+                            type="text"
+                            value={form.invoice_number}
+                            onChange={e => set('invoice_number', e.target.value)}
+                            placeholder=""
                             className={inputCls}
                         />
                     </div>
@@ -232,7 +275,7 @@ export default function EditActivityPage() {
                     {/* Dates */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                            <label className={labelCls}>Start Date</label>
+                            <label className={labelCls}>Sent on</label>
                             <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)}
                                 className={inputCls} />
                         </div>

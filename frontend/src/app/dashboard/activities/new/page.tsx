@@ -13,6 +13,7 @@ const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placehol
 
 interface TaskType { id: number; name: string; color: string; }
 interface Account { id: number; name: string; }
+interface Contact { id: number; first_name: string; last_name: string; }
 
 export default function NewActivityPage() {
     const router = useRouter();
@@ -23,6 +24,8 @@ export default function NewActivityPage() {
     const [fetchingTypes, setFetchingTypes] = useState(true);
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [fetchingAccounts, setFetchingAccounts] = useState(true);
+    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [fetchingContacts, setFetchingContacts] = useState(true);
     const [form, setForm] = useState({
         task_type_id: '' as number | '',
         subject: '',
@@ -30,6 +33,8 @@ export default function NewActivityPage() {
         start_date: '',
         due_date: '',
         notes: '',
+        invoice_number: '',
+        contact_id: '' as number | '',
     });
 
     useEffect(() => {
@@ -37,10 +42,12 @@ export default function NewActivityPage() {
         Promise.all([
             api.get('/task-types'),
             api.get('/accounts'),
-        ]).then(([typesRes, accountsRes]) => {
+            api.get('/contacts'),
+        ]).then(([typesRes, accountsRes, contactsRes]) => {
             if (!mounted) return;
             setTaskTypes(typesRes.data);
             setAccounts(accountsRes.data);
+            setContacts(contactsRes.data);
             if (typesRes.data.length > 0) {
                 setForm(prev => ({ ...prev, task_type_id: typesRes.data[0].id }));
             }
@@ -50,6 +57,7 @@ export default function NewActivityPage() {
             if (!mounted) return;
             setFetchingTypes(false);
             setFetchingAccounts(false);
+            setFetchingContacts(false);
         });
 
         return () => { mounted = false; };
@@ -63,18 +71,25 @@ export default function NewActivityPage() {
         ...accounts.map(account => ({ value: account.name, label: account.name })),
     ];
 
+    const contactOptions = [
+        { value: '', label: 'None' },
+        ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}` })),
+    ];
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setSaving(true);
         setError('');
         try {
-            const payload: Record<string, string | number | null> = {
+            const payload: Record<string, any> = {
                 task_type_id: form.task_type_id || null,
                 subject: form.subject,
                 regarding: form.regarding || null,
                 notes: form.notes || null,
                 start_date: form.start_date ? new Date(form.start_date).toISOString() : null,
                 due_date: form.due_date ? new Date(form.due_date).toISOString() : null,
+                invoice_number: form.invoice_number || null,
+                contact_id: form.contact_id ? Number(form.contact_id) : null,
             };
             await api.post('/activities', payload);
             router.push('/dashboard/activities');
@@ -163,17 +178,44 @@ export default function NewActivityPage() {
                         />
                     </div>
 
-                    {/* Regarding */}
+                    {/* Regarding & Follow up with */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label className={labelCls}>Regarding</label>
+                            <SearchableDropdown
+                                value={form.regarding}
+                                onChange={value => set('regarding', value)}
+                                options={accountOptions}
+                                placeholder={fetchingAccounts ? 'Loading accounts...' : 'Select account'}
+                                searchPlaceholder="Search accounts..."
+                                emptyText="No accounts found"
+                                disabled={fetchingAccounts}
+                                className={inputCls}
+                            />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Follow up with</label>
+                            <SearchableDropdown
+                                value={String(form.contact_id)}
+                                onChange={value => set('contact_id', value ? Number(value) : '')}
+                                options={contactOptions}
+                                placeholder={fetchingContacts ? 'Loading contacts...' : 'Select contact'}
+                                searchPlaceholder="Search contacts..."
+                                emptyText="No contacts found"
+                                disabled={fetchingContacts}
+                                className={inputCls}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Invoice Number */}
                     <div>
-                        <label className={labelCls}>Regarding</label>
-                        <SearchableDropdown
-                            value={form.regarding}
-                            onChange={value => set('regarding', value)}
-                            options={accountOptions}
-                            placeholder={fetchingAccounts ? 'Loading accounts...' : 'Select account'}
-                            searchPlaceholder="Search accounts..."
-                            emptyText="No accounts found"
-                            disabled={fetchingAccounts}
+                        <label className={labelCls}>Invoice Number</label>
+                        <input
+                            type="text"
+                            value={form.invoice_number}
+                            onChange={e => set('invoice_number', e.target.value)}
+                            placeholder=""
                             className={inputCls}
                         />
                     </div>
@@ -181,7 +223,7 @@ export default function NewActivityPage() {
                     {/* Dates */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <div>
-                            <label className={labelCls}>Start Date</label>
+                            <label className={labelCls}>Sent on</label>
                             <input
                                 type="date"
                                 value={form.start_date}

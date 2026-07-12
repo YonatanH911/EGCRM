@@ -17,6 +17,9 @@ def migrate():
         # 2. Activities
         "ALTER TABLE activities ADD COLUMN IF NOT EXISTS task_type_id INT NULL;",
         "ALTER TABLE activities ADD CONSTRAINT fk_activities_task_type FOREIGN KEY (task_type_id) REFERENCES task_types(id);",
+        "ALTER TABLE activities ADD COLUMN IF NOT EXISTS invoice_number VARCHAR(255) NULL;",
+        "ALTER TABLE activities ADD COLUMN IF NOT EXISTS contact_id INT NULL;",
+        "ALTER TABLE activities ADD CONSTRAINT fk_activities_contact FOREIGN KEY (contact_id) REFERENCES contacts(id);",
         
         # 3. Contracts
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_management_contact VARCHAR(255) NULL;",

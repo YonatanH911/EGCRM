@@ -146,6 +146,7 @@ class Contact(Base):
     accounts = relationship("Account", secondary=contact_accounts)
     leads = relationship("Lead", back_populates="contact")
     deposits = relationship("Deposit", secondary=deposit_contacts)
+    activities = relationship("Activity", back_populates="contact")
 
     @property
     def account_ids(self):
@@ -289,6 +290,9 @@ class Activity(Base):
     due_date = Column(DateTime, nullable=True)
     notes = Column(Text, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
+    invoice_number = Column(String(255), nullable=True)
+    contact_id = Column(Integer, ForeignKey("contacts.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     task_type = relationship("TaskType", back_populates="activities")
+    contact = relationship("Contact", back_populates="activities")
