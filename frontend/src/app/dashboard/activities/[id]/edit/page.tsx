@@ -42,7 +42,20 @@ export default function EditActivityPage() {
     });
 
     const set = (field: string, value: string | number) =>
-        setForm(prev => ({ ...prev, [field]: value }));
+        setForm(prev => {
+            const next = { ...prev, [field]: value };
+            if (field === 'start_date' && value) {
+                const date = new Date(value as string);
+                if (!isNaN(date.getTime())) {
+                    date.setDate(date.getDate() + 30);
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, '0');
+                    const dd = String(date.getDate()).padStart(2, '0');
+                    next.due_date = `${yyyy}-${mm}-${dd}`;
+                }
+            }
+            return next;
+        });
 
     useEffect(() => {
         const fetch = async () => {
