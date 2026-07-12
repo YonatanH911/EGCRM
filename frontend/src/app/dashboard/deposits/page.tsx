@@ -43,6 +43,12 @@ export default function DepositsPage() {
         );
     });
 
+    const sortedDeposits = [...filteredDeposits].sort((a, b) => {
+        const dateA = a.date ? new Date(a.date).getTime() : 0;
+        const dateB = b.date ? new Date(b.date).getTime() : 0;
+        return dateB - dateA;
+    });
+
     const filterInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
     const dash = <span className="text-slate-600 italic">—</span>;
 
@@ -93,7 +99,7 @@ export default function DepositsPage() {
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
                                 <tr><td colSpan={7} className="px-3 py-12 text-center text-muted-text text-xl">Loading deposits…</td></tr>
-                            ) : filteredDeposits.length === 0 ? (
+                            ) : sortedDeposits.length === 0 ? (
                                 <tr><td colSpan={7} className="px-3 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <Landmark className="h-10 w-10 text-muted-text mb-3" />
@@ -101,7 +107,7 @@ export default function DepositsPage() {
                                     </div>
                                 </td></tr>
                             ) : (
-                                filteredDeposits.map((deposit) => (
+                                sortedDeposits.map((deposit) => (
                                     <tr key={deposit.id} className="cursor-pointer transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5"
                                         onClick={() => router.push(`/dashboard/deposits/${deposit.id}`)}
                                     >
