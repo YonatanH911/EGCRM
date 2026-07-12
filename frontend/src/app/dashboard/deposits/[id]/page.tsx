@@ -172,9 +172,6 @@ export default function EditDepositPage() {
             </div>
         );
     }
-
-    console.log('[DEBUG] EditDepositPage rendering. isVaulted:', isVaulted, 'vault_ids:', formData.vault_ids, 'vaults:', vaults);
-
     return (
         <div className="max-w-3xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
@@ -343,16 +340,14 @@ export default function EditDepositPage() {
                                         />
                                     </div>
                                 </div>
-
-                                <div>
+                                <div className={!isVaulted ? "opacity-50 pointer-events-none" : ""}>
                                     <label htmlFor="vault_select" className="block text-xl font-medium text-foreground">Vault</label>
                                     <div className="mt-1">
                                         <SearchableDropdown
                                             value={formData.vault_ids[0] || ''}
-                                            disabled={!isVaulted}
                                             onChange={(val) => setFormData(prev => ({ ...prev, vault_ids: val ? [val] : [] }))}
                                             placeholder="Select a storage vault"
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border disabled:opacity-50"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={vaults.map(vault => ({ value: String(vault.id), label: vault.name }))}
                                         />
                                     </div>
