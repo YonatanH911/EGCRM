@@ -231,6 +231,25 @@ export default function EditDepositPage() {
                                     </div>
                                 </div>
 
+                                <div className="sm:col-span-2">
+                                    <label htmlFor="contact_ids" className="block text-xl font-medium text-foreground">
+                                        Billed Contact
+                                    </label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            multiple
+                                            value={formData.contact_ids}
+                                            onChange={(value) => setFormData({ ...formData, contact_ids: value })}
+                                            placeholder="Select a contact"
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={contacts.map(contact => ({
+                                                value: String(contact.id),
+                                                label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                            }))}
+                                        />
+                                    </div>
+                                </div>
+
                                 <div>
                                     <label htmlFor="supplier" className="block text-xl font-medium text-foreground">Supplier</label>
                                     <div className="mt-1">
@@ -241,6 +260,28 @@ export default function EditDepositPage() {
                                             placeholder="Select Supplier"
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={accounts.map(account => ({ value: account.name, label: account.name }))}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="amount" className="block text-xl font-medium text-foreground">
+                                        Deposit Amount ($) *
+                                    </label>
+                                    <div className="mt-1 flex rounded-md shadow-sm">
+                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-border-subtle bg-black/5 dark:bg-white/5 text-muted-text sm:text-xl">
+                                            $
+                                        </span>
+                                        <input
+                                            type="number"
+                                            name="amount"
+                                            id="amount"
+                                            required
+                                            min="0.01"
+                                            step="0.01"
+                                            value={formData.amount}
+                                            onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                            className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-crm-500 focus:border-crm-500 sm:text-xl border-border-subtle border bg-black/5 dark:bg-white/5 text-foreground"
                                         />
                                     </div>
                                 </div>
@@ -287,7 +328,7 @@ export default function EditDepositPage() {
                                     </div>
                                 </div>
 
-                                <div className="sm:col-span-2">
+                                <div>
                                     <label htmlFor="received_by" className="block text-xl font-medium text-foreground">Received By</label>
                                     <div className="mt-1">
                                         <input
@@ -300,6 +341,7 @@ export default function EditDepositPage() {
                                         />
                                     </div>
                                 </div>
+
                             </div>
                         </div>
 
