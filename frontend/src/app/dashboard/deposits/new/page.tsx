@@ -122,7 +122,7 @@ export default function NewDepositPage() {
 
                     <div className="space-y-8">
                         <div>
-                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Transaction Details</h3>
+                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">General Information</h3>
                             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                                 <div className="sm:col-span-2">
                                     <label htmlFor="reference_number" className="block text-xl font-medium text-foreground">
