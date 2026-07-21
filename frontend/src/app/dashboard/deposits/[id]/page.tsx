@@ -88,7 +88,12 @@ export default function EditDepositPage() {
                     date: deposit.date ? deposit.date.substring(0, 10) : '',
                     contact_ids: (deposit.contact_ids || []).map(String),
                     vault_ids: mappedVaultIds,
-                    supplier: deposit.supplier ? deposit.supplier.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier: Array.isArray(deposit.supplier)
+                        ? deposit.supplier
+                        : typeof deposit.supplier === 'string'
+                        ? deposit.supplier.split(',').map((item: string) => item.trim()).filter(Boolean)
+                        : [],
+
                     product_name: deposit.product_name || '',
                     version: deposit.version || '',
                     description: deposit.description || '',

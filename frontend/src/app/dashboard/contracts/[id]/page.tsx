@@ -94,13 +94,14 @@ export default function EditContractPage() {
                     deposit_id: (c.deposit_ids?.length ? c.deposit_ids : (c.deposit_id ? [c.deposit_id] : [])).map(String),
                     start_date: c.start_date ? c.start_date.slice(0, 10) : '',
                     end_date:   c.end_date   ? c.end_date.slice(0, 10)   : '',
-                    beneficiary_management_contact: c.beneficiary_management_contact ? c.beneficiary_management_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    beneficiary_technical_contact:  c.beneficiary_technical_contact  ? c.beneficiary_technical_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    beneficiary_financial_contact:  c.beneficiary_financial_contact  ? c.beneficiary_financial_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    supplier_management_contact:    c.supplier_management_contact    ? c.supplier_management_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    supplier_technical_contact:     c.supplier_technical_contact     ? c.supplier_technical_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    supplier_financial_contact:     c.supplier_financial_contact     ? c.supplier_financial_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
-                    paid_by:                        c.paid_by                        ? c.paid_by.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    beneficiary_management_contact: Array.isArray(c.beneficiary_management_contact) ? c.beneficiary_management_contact : typeof c.beneficiary_management_contact === 'string' ? c.beneficiary_management_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    beneficiary_technical_contact:  Array.isArray(c.beneficiary_technical_contact)  ? c.beneficiary_technical_contact  : typeof c.beneficiary_technical_contact  === 'string' ? c.beneficiary_technical_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    beneficiary_financial_contact:  Array.isArray(c.beneficiary_financial_contact)  ? c.beneficiary_financial_contact  : typeof c.beneficiary_financial_contact  === 'string' ? c.beneficiary_financial_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier_management_contact:    Array.isArray(c.supplier_management_contact)    ? c.supplier_management_contact    : typeof c.supplier_management_contact    === 'string' ? c.supplier_management_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier_technical_contact:     Array.isArray(c.supplier_technical_contact)     ? c.supplier_technical_contact     : typeof c.supplier_technical_contact     === 'string' ? c.supplier_technical_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    supplier_financial_contact:     Array.isArray(c.supplier_financial_contact)     ? c.supplier_financial_contact     : typeof c.supplier_financial_contact     === 'string' ? c.supplier_financial_contact.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+                    paid_by:                        Array.isArray(c.paid_by)                        ? c.paid_by                        : typeof c.paid_by                        === 'string' ? c.paid_by.split(',').map((item: string) => item.trim()).filter(Boolean) : [],
+
                 });
                 setContacts(contactsRes.data);
                 setDeposits(depositsRes.data);
