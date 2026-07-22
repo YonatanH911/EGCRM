@@ -37,6 +37,7 @@ def migrate():
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS supplier VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS box VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS received_by VARCHAR(255) NULL;",
+        "ALTER TABLE accounts ADD COLUMN IF NOT EXISTS description TEXT NULL;",
 
         # 5. Active / Inactive records
         "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",

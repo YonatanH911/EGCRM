@@ -40,6 +40,7 @@ class AccountBase(BaseSchema):
     industry: Optional[str] = None
     website: Optional[str] = None
     phone: Optional[str] = None
+    description: Optional[str] = None
     street: Optional[str] = None
     city: Optional[str] = None
     state_or_province: Optional[str] = None

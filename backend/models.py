@@ -108,6 +108,7 @@ class Account(Base):
     industry = Column(String(255), nullable=True)
     website = Column(String(255), nullable=True)
     phone = Column(String(50), nullable=True)
+    description = Column(Text, nullable=True)
     
     # Address fields
     street = Column(String(255), nullable=True)

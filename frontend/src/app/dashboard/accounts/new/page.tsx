@@ -21,6 +21,7 @@ export default function NewAccountPage() {
         industry: '',
         website: '',
         phone: '',
+        description: '',
         street: '',
         city: '',
         state_or_province: '',
@@ -81,7 +82,7 @@ export default function NewAccountPage() {
                             />
                         </div>
 
-                        <div>
+                        <div className="col-span-1 md:col-span-2">
                             <label className={labelCls}>Industry</label>
                             <input
                                 type="text"
@@ -92,23 +93,12 @@ export default function NewAccountPage() {
                             />
                         </div>
 
-                        <div>
-                            <label className={labelCls}>Phone Number</label>
-                            <input
-                                type="text"
-                                value={formData.phone}
-                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className={inputCls}
-                                placeholder=""
-                            />
-                        </div>
-
                         <div className="col-span-1 md:col-span-2">
-                            <label className={labelCls}>Website</label>
-                            <input
-                                type="url"
-                                value={formData.website}
-                                onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                            <label className={labelCls}>Description</label>
+                            <textarea
+                                rows={3}
+                                value={formData.description}
+                                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                 className={inputCls}
                                 placeholder=""
                             />
@@ -118,9 +108,31 @@ export default function NewAccountPage() {
                     <div className="pt-6 border-t border-border-subtle">
                         <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest mb-5 flex items-center gap-2">
                             <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
-                            Address Information
+                            Account Information
                         </h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div>
+                                <label className={labelCls}>Phone Number</label>
+                                <input
+                                    type="text"
+                                    value={formData.phone}
+                                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                    className={inputCls}
+                                    placeholder=""
+                                />
+                            </div>
+
+                            <div>
+                                <label className={labelCls}>Website</label>
+                                <input
+                                    type="url"
+                                    value={formData.website}
+                                    onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                                    className={inputCls}
+                                    placeholder=""
+                                />
+                            </div>
+
                             <div className="col-span-1 md:col-span-2">
                                 <label className={labelCls}>Street</label>
                                 <input

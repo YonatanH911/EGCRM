@@ -111,7 +111,7 @@ export default function EditAccountPage() {
     const [isActive, setIsActive] = useState(true);
 
     const [formData, setFormData] = useState({
-        name: '', website: '', phone: '',
+        name: '', website: '', phone: '', description: '',
         street: '', city: '', state_or_province: '', zip_code: '', country: '',
     });
 
@@ -138,7 +138,7 @@ export default function EditAccountPage() {
                 const d = accRes.data;
                 setIsActive(d.is_active !== false);
                 setFormData({
-                    name: d.name || '', website: d.website || '',
+                    name: d.name || '', website: d.website || '', description: d.description || '',
                     phone: d.phone || '', street: d.street || '', city: d.city || '',
                     state_or_province: d.state_or_province || '', zip_code: d.zip_code || '', country: d.country || '',
                 });
@@ -317,22 +317,15 @@ export default function EditAccountPage() {
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <Field label="Account Name *" field="name" placeholder="" colSpan2 />
-                        <Field label="Phone Number" field="phone" placeholder="" />
-                        <Field label="Website" field="website" type="url" placeholder="" />
-                    </div>
-
-                    {/* Address Section */}
-                    <div className="pt-6 border-t border-border-subtle">
-                        <div className="flex items-center gap-2 mb-5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
-                            <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Address Information</h3>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <Field label="Street" field="street" placeholder="" colSpan2 />
-                            <Field label="City" field="city" placeholder="" />
-                            <Field label="State / Province" field="state_or_province" placeholder="" />
-                            <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />
-                            <Field label="Country / Region" field="country" placeholder="" />
+                        <div className="col-span-1 md:col-span-2">
+                            <label className={labelCls}>Description</label>
+                            <textarea
+                                rows={3}
+                                value={formData.description}
+                                onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                className={inputCls}
+                                placeholder=""
+                            />
                         </div>
                     </div>
 
@@ -522,6 +515,23 @@ export default function EditAccountPage() {
                             </div>
                         </div>
                     </RelatedSection>
+
+                    {/* Account Information Section */}
+                    <div className="pt-6 border-t border-border-subtle">
+                        <div className="flex items-center gap-2 mb-5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
+                            <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Account Information</h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <Field label="Phone Number" field="phone" placeholder="" />
+                            <Field label="Website" field="website" type="url" placeholder="" />
+                            <Field label="Street" field="street" placeholder="" colSpan2 />
+                            <Field label="City" field="city" placeholder="" />
+                            <Field label="State / Province" field="state_or_province" placeholder="" />
+                            <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />
+                            <Field label="Country / Region" field="country" placeholder="" />
+                        </div>
+                    </div>
 
                     {/* Actions */}
                     <div className="flex justify-between items-center gap-3 pt-8 border-t border-border-subtle">
