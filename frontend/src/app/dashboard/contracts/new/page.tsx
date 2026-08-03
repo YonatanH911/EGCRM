@@ -10,7 +10,7 @@ import SearchableDropdown from '@/components/SearchableDropdown';
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
 interface Account { id: number; name: string; }
 
-const CONTRACT_STATUSES = ['Draft', 'Active', 'Expired', 'Terminated'];
+const CONTRACT_TYPES = ['3-party', 'frame'];
 const CURRENCIES = [
     { value: 'USD', label: 'USD - US Dollar' },
     { value: 'EUR', label: 'EUR - Euro' },
@@ -26,7 +26,7 @@ const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wid
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
-    'title' | 'beneficiary_title' | 'supplier_title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' | 'account_id' |
+    'title' | 'beneficiary_title' | 'supplier_title' | 'status' | 'contact_type' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' | 'account_id' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
     'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
 
@@ -58,7 +58,7 @@ const CUBES = [
 ];
 
 const emptyForm: Record<FormField, string | string[]> = {
-    title: '', beneficiary_title: '', supplier_title: '', status: 'Draft', value: '0', currency: 'USD', account_id: [],
+    title: '', beneficiary_title: '', supplier_title: '', status: 'Draft', contact_type: '3-party', value: '0', currency: 'USD', account_id: [],
     start_date: '', end_date: '', paid_by: '',
     beneficiary_management_contact: [], beneficiary_technical_contact: [], beneficiary_financial_contact: [],
     supplier_management_contact: [],   supplier_technical_contact: [],   supplier_financial_contact: [],
@@ -191,23 +191,15 @@ export default function NewContractPage() {
                             />
                         </div>
                         <div>
-                            <label className={labelCls}>Status</label>
+                            <label className={labelCls}>Contact Type</label>
                             <SearchableDropdown
-                                value={form.status as string}
-                                onChange={(value) => setForm(prev => ({ ...prev, status: value }))}
+                                value={form.contact_type as string}
+                                onChange={(value) => setForm(prev => ({ ...prev, contact_type: value }))}
                                 className={inputCls}
-                                options={CONTRACT_STATUSES.map(s => ({ value: s, label: s }))}
+                                options={CONTRACT_TYPES.map(type => ({ value: type, label: type }))}
                             />
                         </div>
                         <div />
-                        <div>
-                            <label className={labelCls}>Date Contract Signed</label>
-                            <input type="date" value={form.start_date as string} onChange={set('start_date')} className={inputCls} />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Date Contract Ends</label>
-                            <input type="date" value={form.end_date as string} onChange={set('end_date')} className={inputCls} />
-                        </div>
                     </div>
                 </div>
 
@@ -236,6 +228,24 @@ export default function NewContractPage() {
                             </div>
                         </div>
                     ))}
+                </div>
+
+                {/* Contract Dates */}
+                <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
+                    <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-indigo-500" />
+                        <h2 className="text-xl font-semibold text-foreground">Contract Dates</h2>
+                    </div>
+                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label className={labelCls}>Date Contract Signed</label>
+                            <input type="date" value={form.start_date as string} onChange={set('start_date')} className={inputCls} />
+                        </div>
+                        <div>
+                            <label className={labelCls}>Date Contract Ends</label>
+                            <input type="date" value={form.end_date as string} onChange={set('end_date')} className={inputCls} />
+                        </div>
+                    </div>
                 </div>
 
                 {/* Billing */}

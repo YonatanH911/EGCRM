@@ -120,6 +120,7 @@ class ContractBase(BaseSchema):
     title: str
     beneficiary_title: Optional[str] = None
     supplier_title: Optional[str] = None
+    contact_type: Optional[str] = None
     status: ContractStatus = ContractStatus.DRAFT
     value: float = 0.0
     currency: Optional[str] = "USD"

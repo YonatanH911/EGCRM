@@ -186,6 +186,7 @@ class Contract(Base):
     title = Column(String(255), nullable=False)
     beneficiary_title = Column(String(255), nullable=True)
     supplier_title = Column(String(255), nullable=True)
+    contact_type = Column(String(50), nullable=True)
     status = Column(Enum(ContractStatus), default=ContractStatus.DRAFT)
     start_date = Column(DateTime)
     end_date = Column(DateTime)

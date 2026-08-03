@@ -13,22 +13,15 @@ import ScrollableTable from '@/components/ScrollableTable';
 interface Account { id: number; name: string; }
 interface Contract {
     id: number; title: string; beneficiary_title?: string | null; supplier_title?: string | null;
-    status: string; value: number; currency: string | null;
+    status: string; contact_type?: string | null; value: number; currency: string | null;
     start_date: string | null; end_date: string | null; account: Account | null; created_at: string;
     is_active?: boolean;
 }
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 
-const getStatusColor = (status: string) => {
-    switch (status) {
-        case 'Active': return { bg: 'rgba(16,185,129,0.15)', color: '#6ee7b7', border: 'rgba(16,185,129,0.25)' };
-        case 'Draft': return { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8', border: 'rgba(100,116,139,0.25)' };
-        case 'Expired': return { bg: 'rgba(245,158,11,0.15)', color: '#fcd34d', border: 'rgba(245,158,11,0.25)' };
-        case 'Terminated': return { bg: 'rgba(239,68,68,0.15)', color: '#fca5a5', border: 'rgba(239,68,68,0.25)' };
-        default: return { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8', border: 'rgba(100,116,139,0.25)' };
-    }
-};
+const CONTRACT_TYPES = ['3-party', 'frame'];
+const contactTypeBadge = { bg: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: 'rgba(99,102,241,0.25)' };
 
 const formatDate = (d: string | null) =>
     d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : null;
@@ -59,7 +52,7 @@ export default function ContractsPage() {
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState('');
+    const [filterContactType, setFilterContactType] = useState('');
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -72,14 +65,13 @@ export default function ContractsPage() {
         fetchAll();
     }, []);
 
-    const uniqueStatuses = Array.from(new Set(contracts.map(c => c.status).filter(Boolean)));
     const filteredContracts = contracts.filter(contract => {
         const titleParts = splitContractTitle(contract);
         const query = searchQuery.toLowerCase();
         const matchesSearch = titleParts.beneficiaryTitle.toLowerCase().includes(query) ||
             titleParts.supplierTitle.toLowerCase().includes(query) ||
             (contract.account?.name && contract.account.name.toLowerCase().includes(query));
-        const matchesFilter = filterStatus ? contract.status === filterStatus : true;
+        const matchesFilter = filterContactType ? (contract.contact_type || '3-party') === filterContactType : true;
         return matchesSearch && matchesFilter;
     });
 
@@ -132,13 +124,13 @@ export default function ContractsPage() {
                     </div>
                     <div className="sm:w-44">
                         <SearchableDropdown
-                            value={filterStatus}
-                            onChange={setFilterStatus}
-                            placeholder="All Statuses"
+                            value={filterContactType}
+                            onChange={setFilterContactType}
+                            placeholder="All Contact Types"
                             className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                             options={[
-                                { value: '', label: 'All Statuses' },
-                                ...uniqueStatuses.map(s => ({ value: String(s), label: String(s) })),
+                                { value: '', label: 'All Contact Types' },
+                                ...CONTRACT_TYPES.map(type => ({ value: type, label: type })),
                             ]}
                         />
                     </div>
@@ -149,7 +141,7 @@ export default function ContractsPage() {
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
-                                {['Beneficiary', 'Supplier', 'Status', 'Account', 'Value', 'Dates', 'Actions'].map((h, i) => (
+                                {['Beneficiary', 'Supplier', 'Contact Type', 'Account', 'Value', 'Dates', 'Actions'].map((h, i) => (
                                     <th key={i} scope="col" className={thCls}>{h}</th>
                                 ))}
                             </tr>
@@ -166,7 +158,6 @@ export default function ContractsPage() {
                                 </td></tr>
                             ) : (
                                 sortedContracts.map((contract) => {
-                                    const sc = getStatusColor(contract.status);
                                     const isActive = contract.is_active !== false;
                                     const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     const titleParts = splitContractTitle(contract);
@@ -192,8 +183,8 @@ export default function ContractsPage() {
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
-                                                    style={{ background: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}>
-                                                    {contract.status}
+                                                    style={{ background: contactTypeBadge.bg, color: contactTypeBadge.color, border: `1px solid ${contactTypeBadge.border}` }}>
+                                                    {contract.contact_type || '3-party'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">

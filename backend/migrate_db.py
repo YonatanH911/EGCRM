@@ -32,6 +32,8 @@ def migrate():
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'USD';",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_title VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_title VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS contact_type VARCHAR(50) NULL;",
+        "UPDATE contracts SET contact_type = '3-party' WHERE contact_type IS NULL OR contact_type = '';",
         """
         UPDATE contracts
         SET
