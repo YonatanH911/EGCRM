@@ -124,6 +124,16 @@ class ContractBase(BaseSchema):
     status: ContractStatus = ContractStatus.DRAFT
     value: float = 0.0
     currency: Optional[str] = "USD"
+    beneficiary_currency: Optional[str] = "USD"
+    beneficiary_set_up_fee: Optional[str] = None
+    beneficiary_annual_fee: Optional[str] = None
+    beneficiary_updates: Optional[str] = None
+    beneficiary_ext_verification: Optional[str] = None
+    supplier_currency: Optional[str] = "USD"
+    supplier_set_up_fee: Optional[str] = None
+    supplier_annual_fee: Optional[str] = None
+    supplier_updates: Optional[str] = None
+    supplier_ext_verification: Optional[str] = None
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     beneficiary_management_contact: Optional[str] = None

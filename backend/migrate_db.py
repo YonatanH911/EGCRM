@@ -33,7 +33,21 @@ def migrate():
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_title VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_title VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS contact_type VARCHAR(50) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_currency VARCHAR(10) DEFAULT 'USD';",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_set_up_fee VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_annual_fee VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_updates VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_ext_verification VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_currency VARCHAR(10) DEFAULT 'USD';",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_set_up_fee VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_annual_fee VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_updates VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_ext_verification VARCHAR(255) NULL;",
         "UPDATE contracts SET contact_type = '3-party' WHERE contact_type IS NULL OR contact_type = '';",
+        "UPDATE contracts SET beneficiary_currency = currency WHERE (beneficiary_currency IS NULL OR beneficiary_currency = '') AND currency IS NOT NULL;",
+        "UPDATE contracts SET beneficiary_currency = 'USD' WHERE beneficiary_currency IS NULL OR beneficiary_currency = '';",
+        "UPDATE contracts SET supplier_currency = 'USD' WHERE supplier_currency IS NULL OR supplier_currency = '';",
+        "UPDATE contracts SET beneficiary_annual_fee = CAST(value AS CHAR) WHERE (beneficiary_annual_fee IS NULL OR beneficiary_annual_fee = '') AND value IS NOT NULL;",
         """
         UPDATE contracts
         SET

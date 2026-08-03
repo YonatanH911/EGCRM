@@ -8,19 +8,9 @@ import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
 
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
-interface Deposit { id: number; reference_number: string; product_name?: string; }
 
 const CONTRACT_TYPES = ['3-party', 'frame'];
-const CURRENCIES = [
-    { value: 'USD', label: 'USD - US Dollar' },
-    { value: 'EUR', label: 'EUR - Euro' },
-    { value: 'GBP', label: 'GBP - British Pound' },
-    { value: 'ILS', label: 'ILS - Israeli Shekel' },
-    { value: 'JPY', label: 'JPY - Japanese Yen' },
-    { value: 'CAD', label: 'CAD - Canadian Dollar' },
-    { value: 'AUD', label: 'AUD - Australian Dollar' },
-    { value: 'CHF', label: 'CHF - Swiss Franc' },
-];
+const BILLING_CURRENCIES = ['EUR', 'USD', 'NIS', 'BP'].map(currency => ({ value: currency, label: currency }));
 
 const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wider mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
@@ -28,6 +18,8 @@ const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placehol
 type FormField =
     'title' | 'beneficiary_title' | 'supplier_title' | 'status' | 'contact_type' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
     'product_name' | 'deposit_id' |
+    'beneficiary_currency' | 'beneficiary_set_up_fee' | 'beneficiary_annual_fee' | 'beneficiary_updates' | 'beneficiary_ext_verification' |
+    'supplier_currency' | 'supplier_set_up_fee' | 'supplier_annual_fee' | 'supplier_updates' | 'supplier_ext_verification' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
     'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
 
@@ -60,10 +52,37 @@ const CUBES = [
 
 const emptyForm: Record<FormField, string | string[]> = {
     title: '', beneficiary_title: '', supplier_title: '', status: 'Draft', contact_type: '3-party', value: '0', currency: 'USD',
+    beneficiary_currency: 'USD', beneficiary_set_up_fee: '', beneficiary_annual_fee: '', beneficiary_updates: '', beneficiary_ext_verification: '',
+    supplier_currency: 'USD', supplier_set_up_fee: '', supplier_annual_fee: '', supplier_updates: '', supplier_ext_verification: '',
     start_date: '', end_date: '', paid_by: [], product_name: '', deposit_id: [],
     beneficiary_management_contact: [], beneficiary_technical_contact: [], beneficiary_financial_contact: [],
     supplier_management_contact: [],   supplier_technical_contact: [],   supplier_financial_contact: [],
 };
+
+const BILLING_COLUMNS = [
+    {
+        key: 'beneficiary',
+        label: 'Beneficiary',
+        currencyField: 'beneficiary_currency' as FormField,
+        fields: [
+            { field: 'beneficiary_set_up_fee' as FormField, label: 'Beneficiary Set Up Fee' },
+            { field: 'beneficiary_annual_fee' as FormField, label: 'Beneficiary Annual Fee' },
+            { field: 'beneficiary_updates' as FormField, label: 'Beneficiary Updates' },
+            { field: 'beneficiary_ext_verification' as FormField, label: 'Beneficiary Ext Verification' },
+        ],
+    },
+    {
+        key: 'supplier',
+        label: 'Supplier',
+        currencyField: 'supplier_currency' as FormField,
+        fields: [
+            { field: 'supplier_set_up_fee' as FormField, label: 'Supplier Set Up Fee' },
+            { field: 'supplier_annual_fee' as FormField, label: 'Supplier Annual Fee' },
+            { field: 'supplier_updates' as FormField, label: 'Supplier Updates' },
+            { field: 'supplier_ext_verification' as FormField, label: 'Supplier Ext Verification' },
+        ],
+    },
+];
 
 const splitContractTitle = (title: string) => {
     const [beneficiary, ...supplierParts] = title.split(' - ');
@@ -83,17 +102,15 @@ export default function EditContractPage() {
     const [saving, setSaving]                 = useState(false);
     const [error, setError]                   = useState('');
     const [contacts, setContacts]             = useState<Contact[]>([]);
-    const [deposits, setDeposits]             = useState<Deposit[]>([]);
     const [isActive, setIsActive]             = useState(true);
     const [form, setForm]                     = useState<Record<FormField, string | string[]>>(emptyForm);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [contractRes, contactsRes, depositsRes] = await Promise.all([
+                const [contractRes, contactsRes] = await Promise.all([
                     api.get(`/contracts/${id}`),
                     api.get('/contacts'),
-                    api.get('/deposits'),
                 ]);
                 const c = contractRes.data;
                 const parsedTitle = splitContractTitle(c.title || '');
@@ -106,6 +123,16 @@ export default function EditContractPage() {
                     contact_type: c.contact_type || '3-party',
                     value:    c.value != null ? String(c.value) : '0',
                     currency: c.currency || 'USD',
+                    beneficiary_currency: c.beneficiary_currency || c.currency || 'USD',
+                    beneficiary_set_up_fee: c.beneficiary_set_up_fee || '',
+                    beneficiary_annual_fee: c.beneficiary_annual_fee || (c.value != null ? String(c.value) : ''),
+                    beneficiary_updates: c.beneficiary_updates || '',
+                    beneficiary_ext_verification: c.beneficiary_ext_verification || '',
+                    supplier_currency: c.supplier_currency || 'USD',
+                    supplier_set_up_fee: c.supplier_set_up_fee || '',
+                    supplier_annual_fee: c.supplier_annual_fee || '',
+                    supplier_updates: c.supplier_updates || '',
+                    supplier_ext_verification: c.supplier_ext_verification || '',
                     product_name: c.product_name || '',
                     deposit_id: (c.deposit_ids?.length ? c.deposit_ids : (c.deposit_id ? [c.deposit_id] : [])).map(String),
                     start_date: c.start_date ? c.start_date.slice(0, 10) : '',
@@ -120,7 +147,6 @@ export default function EditContractPage() {
 
                 });
                 setContacts(contactsRes.data);
-                setDeposits(depositsRes.data);
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to load contract');
             } finally {
@@ -149,7 +175,8 @@ export default function EditContractPage() {
                 title: `${beneficiaryTitle} - ${supplierTitle}`,
                 beneficiary_title: beneficiaryTitle,
                 supplier_title: supplierTitle,
-                value:      Number(form.value) || 0,
+                value:      Number(form.beneficiary_annual_fee) || 0,
+                currency:   form.beneficiary_currency || 'USD',
                 account_id: null,
                 deposit_ids: (form.deposit_id as string[]).map(Number),
                 deposit_id: (form.deposit_id as string[])[0] ? Number((form.deposit_id as string[])[0]) : null,
@@ -329,46 +356,27 @@ export default function EditContractPage() {
                         <h2 className="text-xl font-semibold text-foreground">Billing Information</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div>
-                            <label className={labelCls}>Currency</label>
-                            <SearchableDropdown
-                                value={form.currency as string}
-                                onChange={(value) => setForm(prev => ({ ...prev, currency: value }))}
-                                className={inputCls}
-                                options={CURRENCIES}
-                            />
-                        </div>
-                        <div>
-                            <label className={labelCls}>Annual Fee</label>
-                            <div className="flex rounded-xl overflow-hidden border border-border-subtle bg-black/5 dark:bg-white/5 focus-within:border-crm-500 focus-within:ring-4 focus-within:ring-crm-500/10 transition-all">
-                                <span className="flex items-center px-3 text-lg font-semibold text-muted-text border-r border-border-subtle bg-black/5 dark:bg-white/5">
-                                    {form.currency as string}
-                                </span>
-                                <input type="number" min="0" step="0.01" value={form.value as string}
-                                    onChange={e => setForm(prev => ({ ...prev, value: e.target.value }))}
-                                    className="flex-1 px-4 py-2.5 text-xl text-foreground focus:outline-none bg-transparent" />
+                        {BILLING_COLUMNS.map(column => (
+                            <div key={column.key} className="space-y-4">
+                                <h3 className="text-2xl font-semibold text-foreground">{column.label}</h3>
+                                <div>
+                                    <label className={labelCls}>{column.label} Currency</label>
+                                    <SearchableDropdown
+                                        value={form[column.currencyField] as string}
+                                        onChange={(value) => setForm(prev => ({ ...prev, [column.currencyField]: value }))}
+                                        className={inputCls}
+                                        options={BILLING_CURRENCIES}
+                                    />
+                                </div>
+                                {column.fields.map(({ field, label }) => (
+                                    <div key={field}>
+                                        <label className={labelCls}>{label}</label>
+                                        <input type="text" value={form[field] as string} onChange={set(field)}
+                                            placeholder="" className={inputCls} />
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                        <div className="col-span-1 sm:col-span-2">
-                            <label className={labelCls}>Paid By</label>
-                            <ContactDropdown field="paid_by" />
-                        </div>
-                        <div className="col-span-1 sm:col-span-2">
-                            <label className={labelCls}>Related Deposit</label>
-                            <SearchableDropdown
-                                multiple
-                                value={form.deposit_id as string[]}
-                                onChange={(value) => setForm(prev => ({ ...prev, deposit_id: value }))}
-                                placeholder="None"
-                                className={inputCls}
-                                options={[
-                                    ...deposits.map(d => ({
-                                        value: String(d.id),
-                                        label: `${d.reference_number}${d.product_name ? ` - ${d.product_name}` : ''}`,
-                                    })),
-                                ]}
-                            />
-                        </div>
+                        ))}
                     </div>
                 </div>
 
