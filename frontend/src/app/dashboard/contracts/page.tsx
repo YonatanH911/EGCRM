@@ -12,7 +12,8 @@ import ScrollableTable from '@/components/ScrollableTable';
 
 interface Account { id: number; name: string; }
 interface Contract {
-    id: number; title: string; status: string; value: number; currency: string | null;
+    id: number; title: string; beneficiary_title?: string | null; supplier_title?: string | null;
+    status: string; value: number; currency: string | null;
     start_date: string | null; end_date: string | null; account: Account | null; created_at: string;
     is_active?: boolean;
 }
@@ -38,6 +39,21 @@ const formatCurrency = (value: number, currency: string | null) => {
     catch { return `${cur} ${value.toLocaleString(undefined, { minimumFractionDigits: 2 })}`; }
 };
 
+const splitContractTitle = (contract: Contract) => {
+    if (contract.beneficiary_title || contract.supplier_title) {
+        return {
+            beneficiaryTitle: contract.beneficiary_title || '-',
+            supplierTitle: contract.supplier_title || '-',
+        };
+    }
+
+    const [beneficiary, ...supplierParts] = contract.title.split(' - ');
+    return {
+        beneficiaryTitle: beneficiary?.trim() || '-',
+        supplierTitle: supplierParts.join(' - ').trim() || '-',
+    };
+};
+
 export default function ContractsPage() {
     const router = useRouter();
     const [contracts, setContracts] = useState<Contract[]>([]);
@@ -58,8 +74,11 @@ export default function ContractsPage() {
 
     const uniqueStatuses = Array.from(new Set(contracts.map(c => c.status).filter(Boolean)));
     const filteredContracts = contracts.filter(contract => {
-        const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (contract.account?.name && contract.account.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        const titleParts = splitContractTitle(contract);
+        const query = searchQuery.toLowerCase();
+        const matchesSearch = titleParts.beneficiaryTitle.toLowerCase().includes(query) ||
+            titleParts.supplierTitle.toLowerCase().includes(query) ||
+            (contract.account?.name && contract.account.name.toLowerCase().includes(query));
         const matchesFilter = filterStatus ? contract.status === filterStatus : true;
         return matchesSearch && matchesFilter;
     });
@@ -130,16 +149,16 @@ export default function ContractsPage() {
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
-                                {['Title', 'Status', 'Account', 'Value', 'Dates', 'Actions'].map((h, i) => (
+                                {['Beneficiary', 'Supplier', 'Status', 'Account', 'Value', 'Dates', 'Actions'].map((h, i) => (
                                     <th key={i} scope="col" className={thCls}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-text text-xl">Loading contracts…</td></tr>
+                                <tr><td colSpan={7} className="px-6 py-12 text-center text-muted-text text-xl">Loading contracts…</td></tr>
                             ) : sortedContracts.length === 0 ? (
-                                <tr><td colSpan={6} className="px-6 py-16 text-center">
+                                <tr><td colSpan={7} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <FileText className="h-10 w-10 text-muted-text mb-3" />
                                         <p className="text-foreground text-xl font-semibold">No contracts found.</p>
@@ -150,6 +169,7 @@ export default function ContractsPage() {
                                     const sc = getStatusColor(contract.status);
                                     const isActive = contract.is_active !== false;
                                     const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
+                                    const titleParts = splitContractTitle(contract);
                                     return (
                                         <tr key={contract.id}
                                             className={`cursor-pointer group transition-colors duration-150 ${isActive ? 'hover:bg-black/5 dark:hover:bg-white/5' : 'hover:bg-black/10 dark:hover:bg-white/10'}`}
@@ -162,10 +182,13 @@ export default function ContractsPage() {
                                                         <FileText className={`h-4 w-4 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
                                                     </div>
                                                     <div className="flex flex-col">
-                                                        <span className="text-xl font-medium text-foreground">{contract.title}</span>
+                                                        <span className="text-xl font-medium text-foreground">{titleParts.beneficiaryTitle}</span>
                                                         {!isActive && <span className="text-base text-slate-400 uppercase tracking-wider">Inactive</span>}
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className="text-xl font-medium text-foreground">{titleParts.supplierTitle}</span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"

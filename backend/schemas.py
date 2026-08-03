@@ -118,6 +118,8 @@ class LeadResponse(LeadBase):
 # ----------------- Contract Schemas -----------------
 class ContractBase(BaseSchema):
     title: str
+    beneficiary_title: Optional[str] = None
+    supplier_title: Optional[str] = None
     status: ContractStatus = ContractStatus.DRAFT
     value: float = 0.0
     currency: Optional[str] = "USD"

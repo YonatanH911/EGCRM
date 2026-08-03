@@ -30,6 +30,16 @@ def migrate():
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_financial_contact VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS paid_by VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS currency VARCHAR(10) DEFAULT 'USD';",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_title VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_title VARCHAR(255) NULL;",
+        """
+        UPDATE contracts
+        SET
+            beneficiary_title = NULLIF(TRIM(SUBSTRING_INDEX(title, ' - ', 1)), ''),
+            supplier_title = NULLIF(TRIM(SUBSTRING_INDEX(title, ' - ', -1)), '')
+        WHERE (beneficiary_title IS NULL OR supplier_title IS NULL)
+          AND title LIKE '% - %';
+        """,
 
         # 4. Deposits
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS product_name VARCHAR(255) NULL;",

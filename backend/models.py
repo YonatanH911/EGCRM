@@ -146,7 +146,7 @@ class Contact(Base):
     account = relationship("Account", back_populates="contacts")
     accounts = relationship("Account", secondary=contact_accounts)
     leads = relationship("Lead", back_populates="contact")
-    deposits = relationship("Deposit", secondary=deposit_contacts)
+    deposits = relationship("Deposit", secondary=deposit_contacts, back_populates="contacts")
     activities = relationship("Activity", back_populates="contact")
 
     @property
@@ -184,6 +184,8 @@ class Contract(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(255), nullable=False)
+    beneficiary_title = Column(String(255), nullable=True)
+    supplier_title = Column(String(255), nullable=True)
     status = Column(Enum(ContractStatus), default=ContractStatus.DRAFT)
     start_date = Column(DateTime)
     end_date = Column(DateTime)
@@ -260,7 +262,7 @@ class Deposit(Base):
     vault = relationship("Vault", back_populates="deposits")
     accounts = relationship("Account", secondary=deposit_accounts)
     vaults = relationship("Vault", secondary=deposit_vaults)
-    contacts = relationship("Contact", secondary=deposit_contacts)
+    contacts = relationship("Contact", secondary=deposit_contacts, back_populates="deposits")
 
     @property
     def account_ids(self):

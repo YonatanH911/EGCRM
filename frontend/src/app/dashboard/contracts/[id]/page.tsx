@@ -26,7 +26,7 @@ const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wid
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
-    'title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
+    'title' | 'beneficiary_title' | 'supplier_title' | 'status' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
     'product_name' | 'deposit_id' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
     'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
@@ -36,6 +36,8 @@ const CUBES = [
         key: 'beneficiary',
         label: 'Beneficiary',
         gradient: 'from-purple-500 to-indigo-500',
+        titleField: 'beneficiary_title' as FormField,
+        titleLabel: 'Beneficiary Title',
         fields: [
             { field: 'beneficiary_management_contact' as FormField, label: 'Management Contact' },
             { field: 'beneficiary_technical_contact'  as FormField, label: 'Technical Contact' },
@@ -46,6 +48,8 @@ const CUBES = [
         key: 'supplier',
         label: 'Supplier',
         gradient: 'from-emerald-500 to-teal-500',
+        titleField: 'supplier_title' as FormField,
+        titleLabel: 'Supplier Title',
         fields: [
             { field: 'supplier_management_contact' as FormField, label: 'Management Contact' },
             { field: 'supplier_technical_contact'  as FormField, label: 'Technical Contact' },
@@ -55,10 +59,18 @@ const CUBES = [
 ];
 
 const emptyForm: Record<FormField, string | string[]> = {
-    title: '', status: 'Draft', value: '0', currency: 'USD',
+    title: '', beneficiary_title: '', supplier_title: '', status: 'Draft', value: '0', currency: 'USD',
     start_date: '', end_date: '', paid_by: [], product_name: '', deposit_id: [],
     beneficiary_management_contact: [], beneficiary_technical_contact: [], beneficiary_financial_contact: [],
     supplier_management_contact: [],   supplier_technical_contact: [],   supplier_financial_contact: [],
+};
+
+const splitContractTitle = (title: string) => {
+    const [beneficiary, ...supplierParts] = title.split(' - ');
+    return {
+        beneficiaryTitle: beneficiary?.trim() || '',
+        supplierTitle: supplierParts.join(' - ').trim(),
+    };
 };
 
 export default function EditContractPage() {
@@ -84,9 +96,12 @@ export default function EditContractPage() {
                     api.get('/deposits'),
                 ]);
                 const c = contractRes.data;
+                const parsedTitle = splitContractTitle(c.title || '');
                 setIsActive(c.is_active !== false);
                 setForm({
                     title:    c.title    || '',
+                    beneficiary_title: c.beneficiary_title || parsedTitle.beneficiaryTitle,
+                    supplier_title: c.supplier_title || parsedTitle.supplierTitle,
                     status:   c.status   || 'Draft',
                     value:    c.value != null ? String(c.value) : '0',
                     currency: c.currency || 'USD',
@@ -119,16 +134,25 @@ export default function EditContractPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const beneficiaryTitle = String(form.beneficiary_title || '').trim();
+        const supplierTitle = String(form.supplier_title || '').trim();
+        if (!beneficiaryTitle || !supplierTitle) {
+            setError('Beneficiary Title and Supplier Title are required');
+            return;
+        }
         setSaving(true);
         setError('');
         try {
             await api.put(`/contracts/${id}`, {
                 ...form,
+                title: `${beneficiaryTitle} - ${supplierTitle}`,
+                beneficiary_title: beneficiaryTitle,
+                supplier_title: supplierTitle,
                 value:      Number(form.value) || 0,
                 account_id: null,
                 deposit_ids: (form.deposit_id as string[]).map(Number),
                 deposit_id: (form.deposit_id as string[])[0] ? Number((form.deposit_id as string[])[0]) : null,
-                product_name: form.product_name || null,
+                product_name: null,
                 start_date: form.start_date ? new Date(form.start_date as string).toISOString() : null,
                 end_date:   form.end_date   ? new Date(form.end_date as string).toISOString()   : null,
                 beneficiary_management_contact: (form.beneficiary_management_contact as string[]).join(', ') || null,
@@ -222,7 +246,7 @@ export default function EditContractPage() {
                                 </span>
                             )}
                         </div>
-                        <p className="text-lg text-muted-text">{form.title as string || 'Update contract details below'}</p>
+                        <p className="text-lg text-muted-text">{`${form.beneficiary_title || ''}${form.supplier_title ? ` - ${form.supplier_title}` : ''}` || 'Update contract details below'}</p>
                     </div>
                 </div>
             </div>
@@ -239,11 +263,6 @@ export default function EditContractPage() {
                         <h2 className="text-xl font-semibold text-foreground">Contract Details</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div className="col-span-1 sm:col-span-2">
-                            <label className={labelCls}>Contract Title *</label>
-                            <input type="text" value={form.title as string} onChange={set('title')}
-                                placeholder="" className={inputCls} />
-                        </div>
                         <div>
                             <label className={labelCls}>Status</label>
                             <SearchableDropdown
@@ -253,10 +272,7 @@ export default function EditContractPage() {
                                 options={CONTRACT_STATUSES.map(s => ({ value: s, label: s }))}
                             />
                         </div>
-                        <div>
-                            <label className={labelCls}>Product Name</label>
-                            <input type="text" value={form.product_name as string} onChange={set('product_name')} placeholder="" className={inputCls} />
-                        </div>
+                        <div />
                         <div>
                             <label className={labelCls}>Date Contract Signed</label>
                             <input type="date" value={form.start_date as string} onChange={set('start_date')} className={inputCls} />
@@ -279,6 +295,11 @@ export default function EditContractPage() {
                                 <h2 className="text-xl font-semibold text-foreground">{cube.label}</h2>
                             </div>
                             <div className="p-5 space-y-4">
+                                <div>
+                                    <label className={labelCls}>{cube.titleLabel} *</label>
+                                    <input type="text" value={form[cube.titleField] as string} onChange={set(cube.titleField)}
+                                        placeholder="" className={inputCls} />
+                                </div>
                                 {cube.fields.map(({ field, label }) => (
                                     <div key={field}>
                                         <label className={labelCls}>{label}</label>
