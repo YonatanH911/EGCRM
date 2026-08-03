@@ -57,6 +57,46 @@ def parse_date(val):
 
 
 # ── 1. Accounts ───────────────────────────────────────────────────────────────
+def row_val(row, col, *names, default_index=None):
+    for name in names:
+        idx = col.get(name)
+        if idx is not None and idx < len(row):
+            value = str_val(row[idx])
+            if value is not None:
+                return value
+    if default_index is not None and default_index < len(row):
+        return str_val(row[default_index])
+    return None
+
+def split_contract_title(title: str):
+    beneficiary, *supplier_parts = title.split(' - ')
+    return (
+        beneficiary.strip() if beneficiary else None,
+        ' - '.join(supplier_parts).strip() if supplier_parts else None,
+    )
+
+def normalize_currency(value):
+    currency = str_val(value)
+    if not currency:
+        return None
+    currency = currency.upper()
+    aliases = {
+        'GBP': 'BP',
+        'BRITISH POUND': 'BP',
+        'ILS': 'NIS',
+        'SHEKEL': 'NIS',
+        'SHEKELS': 'NIS',
+    }
+    return aliases.get(currency, currency)
+
+def set_if_present(obj, field, value, overwrite=True):
+    if value is None:
+        return False
+    if overwrite or not getattr(obj, field, None):
+        setattr(obj, field, value)
+        return True
+    return False
+
 def import_accounts(db: Session):
     print("\n--- Importing Accounts ---")
     path = os.path.join(EXPORTS_DIR, 'Active Accounts 26-Feb-26 1-28-48 PM.xlsx')
@@ -294,30 +334,82 @@ def import_contracts(db: Session):
     headers = [cell.value for cell in ws[1]]
     col = {h: i for i, h in enumerate(headers)}
 
-    imported = skipped = 0
+    imported = updated = skipped = 0
 
     for row in ws.iter_rows(min_row=2, values_only=True):
-        title = str_val(row[col.get('Name', 3)])
+        title = row_val(row, col, 'Name', 'Contract Title', 'Title', default_index=3)
         if not title:
             skipped += 1
             continue
 
-        if db.query(models.Contract).filter(models.Contract.title == title).first():
-            skipped += 1
+        beneficiary_title, supplier_title = split_contract_title(title)
+        start_date = parse_date(row[col.get('Date Contract Signed', 4)])
+        end_date = parse_date(row[col.get('Date Contract Ends', 5)])
+        beneficiary_currency = normalize_currency(row_val(row, col, 'Beneficiary Currency', 'Currency'))
+        supplier_currency = normalize_currency(row_val(row, col, 'Supplier Currency'))
+        annual_fee = row_val(row, col, 'Beneficiary Annual Fee', 'Annual Fee')
+        try:
+            value = float(annual_fee) if annual_fee else 0.0
+        except ValueError:
+            value = 0.0
+
+        contract_data = {
+            'beneficiary_title': beneficiary_title,
+            'supplier_title': supplier_title,
+            'contact_type': row_val(row, col, 'Contact Type', 'Contract Type'),
+            'start_date': start_date,
+            'end_date': end_date,
+            'currency': beneficiary_currency,
+            'value': value if annual_fee else None,
+            'beneficiary_currency': beneficiary_currency,
+            'beneficiary_set_up_fee': row_val(row, col, 'Beneficiary Set Up Fee', 'Set Up Fee'),
+            'beneficiary_annual_fee': annual_fee,
+            'beneficiary_updates': row_val(row, col, 'Beneficiary Updates', 'Updates'),
+            'beneficiary_ext_verification': row_val(row, col, 'Beneficiary Ext Verification', 'Ext Verification'),
+            'supplier_currency': supplier_currency,
+            'supplier_set_up_fee': row_val(row, col, 'Supplier Set Up Fee'),
+            'supplier_annual_fee': row_val(row, col, 'Supplier Annual Fee'),
+            'supplier_updates': row_val(row, col, 'Supplier Updates'),
+            'supplier_ext_verification': row_val(row, col, 'Supplier Ext Verification'),
+        }
+
+        existing = db.query(models.Contract).filter(models.Contract.title == title).first()
+        if existing:
+            changed = False
+            for field, value in contract_data.items():
+                changed = set_if_present(existing, field, value) or changed
+            if changed:
+                updated += 1
+            else:
+                skipped += 1
             continue
 
         db.add(models.Contract(
             title=title,
+            beneficiary_title=beneficiary_title,
+            supplier_title=supplier_title,
+            contact_type=contract_data['contact_type'] or '3-party',
             status=models.ContractStatus.ACTIVE,
-            start_date=parse_date(row[col.get('Date Contract Signed', 4)]),
-            end_date=parse_date(row[col.get('Date Contract Ends', 5)]),
-            value=0.0,
+            start_date=start_date,
+            end_date=end_date,
+            value=value,
+            currency=beneficiary_currency or 'USD',
+            beneficiary_currency=beneficiary_currency or 'USD',
+            beneficiary_set_up_fee=contract_data['beneficiary_set_up_fee'],
+            beneficiary_annual_fee=annual_fee,
+            beneficiary_updates=contract_data['beneficiary_updates'],
+            beneficiary_ext_verification=contract_data['beneficiary_ext_verification'],
+            supplier_currency=supplier_currency or 'USD',
+            supplier_set_up_fee=contract_data['supplier_set_up_fee'],
+            supplier_annual_fee=contract_data['supplier_annual_fee'],
+            supplier_updates=contract_data['supplier_updates'],
+            supplier_ext_verification=contract_data['supplier_ext_verification'],
         ))
         imported += 1
 
     db.commit()
     wb.close()
-    print(f"  Contracts: imported={imported}, skipped={skipped}")
+    print(f"  Contracts: imported={imported}, updated={updated}, skipped={skipped}")
 
 
 # ── 6. Deposits ───────────────────────────────────────────────────────────────

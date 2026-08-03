@@ -197,6 +197,7 @@ class DepositBase(BaseSchema):
     product_name: Optional[str] = None
     version: Optional[str] = None
     supplier: Optional[str] = None
+    box: Optional[str] = None
     is_confirmation_sent: Optional[bool] = False
     description: Optional[str] = None
     received_by: Optional[str] = None
@@ -218,6 +219,7 @@ class DepositUpdate(BaseModel):
     product_name: Optional[str] = None
     version: Optional[str] = None
     supplier: Optional[str] = None
+    box: Optional[str] = None
     is_confirmation_sent: Optional[bool] = None
     description: Optional[str] = None
     received_by: Optional[str] = None
