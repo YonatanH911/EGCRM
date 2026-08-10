@@ -41,6 +41,7 @@ class AccountBase(BaseSchema):
     website: Optional[str] = None
     phone: Optional[str] = None
     description: Optional[str] = None
+    primary_contact_id: Optional[int] = None
     street: Optional[str] = None
     city: Optional[str] = None
     state_or_province: Optional[str] = None

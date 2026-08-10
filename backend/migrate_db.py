@@ -21,7 +21,11 @@ def migrate():
         "ALTER TABLE activities ADD COLUMN IF NOT EXISTS contact_id INT NULL;",
         "ALTER TABLE activities ADD CONSTRAINT fk_activities_contact FOREIGN KEY (contact_id) REFERENCES contacts(id);",
         
-        # 3. Contracts
+        # 3. Accounts
+        "ALTER TABLE accounts ADD COLUMN IF NOT EXISTS primary_contact_id INT NULL;",
+        "ALTER TABLE accounts ADD CONSTRAINT fk_accounts_primary_contact FOREIGN KEY (primary_contact_id) REFERENCES contacts(id) ON DELETE SET NULL;",
+
+        # 4. Contracts
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_management_contact VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_technical_contact VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS beneficiary_financial_contact VARCHAR(255) NULL;",
@@ -57,7 +61,7 @@ def migrate():
           AND title LIKE '% - %';
         """,
 
-        # 4. Deposits
+        # 5. Deposits
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS product_name VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS version VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS supplier VARCHAR(255) NULL;",
@@ -65,7 +69,7 @@ def migrate():
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS received_by VARCHAR(255) NULL;",
         "ALTER TABLE accounts ADD COLUMN IF NOT EXISTS description TEXT NULL;",
 
-        # 5. Active / Inactive records
+        # 6. Active / Inactive records
         "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
         "ALTER TABLE activities ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
         "ALTER TABLE vaults ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",

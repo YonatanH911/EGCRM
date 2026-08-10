@@ -111,7 +111,7 @@ export default function EditAccountPage() {
     const [isActive, setIsActive] = useState(true);
 
     const [formData, setFormData] = useState({
-        name: '', website: '', phone: '', description: '',
+        name: '', primary_contact_id: '', website: '', phone: '', description: '',
         street: '', city: '', state_or_province: '', zip_code: '', country: '',
     });
 
@@ -138,7 +138,8 @@ export default function EditAccountPage() {
                 const d = accRes.data;
                 setIsActive(d.is_active !== false);
                 setFormData({
-                    name: d.name || '', website: d.website || '', description: d.description || '',
+                    name: d.name || '', primary_contact_id: d.primary_contact_id ? String(d.primary_contact_id) : '',
+                    website: d.website || '', description: d.description || '',
                     phone: d.phone || '', street: d.street || '', city: d.city || '',
                     state_or_province: d.state_or_province || '', zip_code: d.zip_code || '', country: d.country || '',
                 });
@@ -160,7 +161,10 @@ export default function EditAccountPage() {
         setLoading(true);
         setError('');
         try {
-            await api.put(`/accounts/${accountId}`, formData);
+            await api.put(`/accounts/${accountId}`, {
+                ...formData,
+                primary_contact_id: formData.primary_contact_id ? Number(formData.primary_contact_id) : null,
+            });
             router.push('/dashboard/accounts');
             router.refresh();
         } catch (err: any) {
@@ -322,6 +326,22 @@ export default function EditAccountPage() {
                                 <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">General Information</h3>
                             </div>
                             <Field label="Account Name *" field="name" placeholder="" />
+                            <div>
+                                <label className={labelCls}>Primary Contact</label>
+                                <SearchableDropdown
+                                    value={formData.primary_contact_id}
+                                    onChange={(value) => setFormData({ ...formData, primary_contact_id: value })}
+                                    placeholder="Select a primary contact"
+                                    className={inputCls}
+                                    options={[
+                                        { value: '', label: 'No primary contact' },
+                                        ...allContacts.map(contact => ({
+                                            value: String(contact.id),
+                                            label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                        })),
+                                    ]}
+                                />
+                            </div>
                             <div>
                                 <label className={labelCls}>Description</label>
                                 <textarea

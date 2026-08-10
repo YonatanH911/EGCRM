@@ -109,6 +109,7 @@ class Account(Base):
     website = Column(String(255), nullable=True)
     phone = Column(String(50), nullable=True)
     description = Column(Text, nullable=True)
+    primary_contact_id = Column(Integer, ForeignKey("contacts.id", ondelete="SET NULL"), nullable=True)
     
     # Address fields
     street = Column(String(255), nullable=True)
@@ -120,7 +121,8 @@ class Account(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    contacts = relationship("Contact", back_populates="account")
+    contacts = relationship("Contact", back_populates="account", foreign_keys="Contact.account_id")
+    primary_contact = relationship("Contact", foreign_keys=[primary_contact_id], post_update=True)
     contracts = relationship("Contract", back_populates="account")
     deposits = relationship("Deposit", back_populates="account")
 
@@ -143,7 +145,7 @@ class Contact(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    account = relationship("Account", back_populates="contacts")
+    account = relationship("Account", back_populates="contacts", foreign_keys=[account_id])
     accounts = relationship("Account", secondary=contact_accounts)
     leads = relationship("Lead", back_populates="contact")
     deposits = relationship("Deposit", secondary=deposit_contacts, back_populates="contacts")
