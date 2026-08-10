@@ -254,7 +254,7 @@ export default function EditContractPage() {
     );
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full max-w-[1600px] mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/contracts"
@@ -290,7 +290,7 @@ export default function EditContractPage() {
                         <FileText className="w-4 h-4 text-indigo-500" />
                         <h2 className="text-xl font-semibold text-foreground">Contract Details</h2>
                     </div>
-                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                         <div>
                             <label className={labelCls}>Contact Type</label>
                             <SearchableDropdown
@@ -300,7 +300,6 @@ export default function EditContractPage() {
                                 options={CONTRACT_TYPES.map(type => ({ value: type, label: type }))}
                             />
                         </div>
-                        <div />
                     </div>
                 </div>
 
@@ -314,8 +313,8 @@ export default function EditContractPage() {
                                 </div>
                                 <h2 className="text-xl font-semibold text-foreground">{cube.label}</h2>
                             </div>
-                            <div className="p-5 space-y-4">
-                                <div>
+                            <div className="p-5 grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                <div className="xl:col-span-2">
                                     <label className={labelCls}>{cube.titleLabel} *</label>
                                     <input type="text" value={form[cube.titleField] as string} onChange={set(cube.titleField)}
                                         placeholder="" className={inputCls} />
@@ -357,8 +356,8 @@ export default function EditContractPage() {
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         {BILLING_COLUMNS.map(column => (
-                            <div key={column.key} className="space-y-4">
-                                <h3 className="text-2xl font-semibold text-foreground">{column.label}</h3>
+                            <div key={column.key} className="grid grid-cols-1 xl:grid-cols-2 gap-4 content-start">
+                                <h3 className="text-2xl font-semibold text-foreground xl:col-span-2">{column.label}</h3>
                                 <div>
                                     <label className={labelCls}>{column.label} Currency</label>
                                     <SearchableDropdown

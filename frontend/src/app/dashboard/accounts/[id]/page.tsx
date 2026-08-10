@@ -265,10 +265,10 @@ export default function EditAccountPage() {
         formData.name && activity.regarding?.toLowerCase() === formData.name.toLowerCase()
     );
 
-    const Field = ({ label, field, type = 'text', placeholder, colSpan2 = false }: {
-        label: string; field: keyof typeof formData; type?: string; placeholder?: string; colSpan2?: boolean;
+    const Field = ({ label, field, type = 'text', placeholder }: {
+        label: string; field: keyof typeof formData; type?: string; placeholder?: string;
     }) => (
-        <div className={colSpan2 ? 'col-span-1 md:col-span-2' : ''}>
+        <div>
             <label className={labelCls}>{label}</label>
             <input type={type} value={formData[field]} placeholder={placeholder}
                 onChange={e => setFormData({ ...formData, [field]: e.target.value })}
@@ -277,7 +277,7 @@ export default function EditAccountPage() {
     );
 
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full max-w-[1600px] mx-auto space-y-6">
             {/* Header */}
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/accounts"
@@ -315,12 +315,12 @@ export default function EditAccountPage() {
                     <h2 className="text-lg font-bold text-foreground uppercase tracking-widest">Account Details</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <Field label="Account Name *" field="name" placeholder="" colSpan2 />
-                        <div className="col-span-1 md:col-span-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                        <Field label="Account Name *" field="name" placeholder="" />
+                        <div className="md:col-span-1 xl:col-span-2">
                             <label className={labelCls}>Description</label>
                             <textarea
-                                rows={3}
+                                rows={2}
                                 value={formData.description}
                                 onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 className={inputCls}
@@ -522,10 +522,10 @@ export default function EditAccountPage() {
                             <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
                             <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Account Information</h3>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                             <Field label="Phone Number" field="phone" placeholder="" />
                             <Field label="Website" field="website" type="url" placeholder="" />
-                            <Field label="Street" field="street" placeholder="" colSpan2 />
+                            <Field label="Street" field="street" placeholder="" />
                             <Field label="City" field="city" placeholder="" />
                             <Field label="State / Province" field="state_or_province" placeholder="" />
                             <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />

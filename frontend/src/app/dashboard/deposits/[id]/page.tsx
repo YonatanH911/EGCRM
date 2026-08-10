@@ -178,7 +178,7 @@ export default function EditDepositPage() {
         );
     }
     return (
-        <div className="max-w-3xl mx-auto space-y-6">
+        <div className="w-full max-w-[1600px] mx-auto space-y-6">
             <div className="flex items-center gap-4">
                 <Link
                     href="/dashboard/deposits"
@@ -213,8 +213,8 @@ export default function EditDepositPage() {
                     <div className="space-y-8">
                         <div>
                             <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">General Information</h3>
-                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                                <div className="sm:col-span-2">
+                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 xl:grid-cols-3">
+                                <div className="sm:col-span-2 xl:col-span-1">
                                     <label htmlFor="reference_number" className="block text-xl font-medium text-foreground">
                                         Deposit Number *
                                     </label>
@@ -231,7 +231,7 @@ export default function EditDepositPage() {
                                     </div>
                                 </div>
 
-                                <div className="sm:col-span-2">
+                                <div className="sm:col-span-2 xl:col-span-2">
                                     <label htmlFor="contact_ids" className="block text-xl font-medium text-foreground">
                                         Billed Contact
                                     </label>
@@ -345,79 +345,81 @@ export default function EditDepositPage() {
                             </div>
                         </div>
 
-                        <div>
-                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4 flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-muted-text" />
-                                Vault Information
-                            </h3>
-                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                                <div>
-                                    <label htmlFor="is_vaulted" className="block text-xl font-medium text-foreground">Is Vaulted</label>
-                                    <div className="mt-1">
-                                        <SearchableDropdown
-                                            value={isVaulted ? 'Yes' : 'No'}
-                                            onChange={(val) => {
-                                                const yes = val === 'Yes';
-                                                setIsVaulted(yes);
-                                                if (!yes) {
-                                                    setFormData(prev => ({ ...prev, vault_ids: [] }));
-                                                } else if (formData.vault_ids.length === 0 && vaults.length > 0) {
-                                                    setFormData(prev => ({ ...prev, vault_ids: [String(vaults[0].id)] }));
-                                                }
-                                            }}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
-                                            options={[
-                                                { value: 'No', label: 'No' },
-                                                { value: 'Yes', label: 'Yes' },
-                                            ]}
-                                        />
+                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                            <div>
+                                <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4 flex items-center gap-2">
+                                    <Shield className="w-5 h-5 text-muted-text" />
+                                    Vault Information
+                                </h3>
+                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                                    <div>
+                                        <label htmlFor="is_vaulted" className="block text-xl font-medium text-foreground">Is Vaulted</label>
+                                        <div className="mt-1">
+                                            <SearchableDropdown
+                                                value={isVaulted ? 'Yes' : 'No'}
+                                                onChange={(val) => {
+                                                    const yes = val === 'Yes';
+                                                    setIsVaulted(yes);
+                                                    if (!yes) {
+                                                        setFormData(prev => ({ ...prev, vault_ids: [] }));
+                                                    } else if (formData.vault_ids.length === 0 && vaults.length > 0) {
+                                                        setFormData(prev => ({ ...prev, vault_ids: [String(vaults[0].id)] }));
+                                                    }
+                                                }}
+                                                className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                                options={[
+                                                    { value: 'No', label: 'No' },
+                                                    { value: 'Yes', label: 'Yes' },
+                                                ]}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                <div className={!isVaulted ? "opacity-50 pointer-events-none" : ""}>
-                                    <label htmlFor="vault_select" className="block text-xl font-medium text-foreground">Vault</label>
-                                    <div className="mt-1">
-                                        <SearchableDropdown
-                                            value={formData.vault_ids[0] || ''}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, vault_ids: val ? [val] : [] }))}
-                                            placeholder="Select a storage vault"
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
-                                            options={vaults.map(vault => ({ value: String(vault.id), label: vault.name }))}
-                                        />
+                                    <div className={!isVaulted ? "opacity-50 pointer-events-none" : ""}>
+                                        <label htmlFor="vault_select" className="block text-xl font-medium text-foreground">Vault</label>
+                                        <div className="mt-1">
+                                            <SearchableDropdown
+                                                value={formData.vault_ids[0] || ''}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, vault_ids: val ? [val] : [] }))}
+                                                placeholder="Select a storage vault"
+                                                className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                                options={vaults.map(vault => ({ value: String(vault.id), label: vault.name }))}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Verification Information</h3>
-                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
-                                <div>
-                                    <label htmlFor="verification_status" className="block text-xl font-medium text-foreground">Verification Status</label>
-                                    <div className="mt-1">
-                                        <SearchableDropdown
-                                            value={formData.status === 'Cleared' ? 'Verified' : 'Not Verified'}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, status: val === 'Verified' ? 'Cleared' : 'Pending' }))}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
-                                            options={[
-                                                { value: 'Not Verified', label: 'Not Verified' },
-                                                { value: 'Verified', label: 'Verified' },
-                                            ]}
-                                        />
+                            <div>
+                                <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Verification Information</h3>
+                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                                    <div>
+                                        <label htmlFor="verification_status" className="block text-xl font-medium text-foreground">Verification Status</label>
+                                        <div className="mt-1">
+                                            <SearchableDropdown
+                                                value={formData.status === 'Cleared' ? 'Verified' : 'Not Verified'}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, status: val === 'Verified' ? 'Cleared' : 'Pending' }))}
+                                                className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                                options={[
+                                                    { value: 'Not Verified', label: 'Not Verified' },
+                                                    { value: 'Verified', label: 'Verified' },
+                                                ]}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div>
-                                    <label htmlFor="is_report_sent" className="block text-xl font-medium text-foreground">Is Report Sent</label>
-                                    <div className="mt-1">
-                                        <SearchableDropdown
-                                            value={formData.is_confirmation_sent ? 'Yes' : 'No'}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, is_confirmation_sent: val === 'Yes' }))}
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
-                                            options={[
-                                                { value: 'No', label: 'No' },
-                                                { value: 'Yes', label: 'Yes' },
-                                            ]}
-                                        />
+                                    <div>
+                                        <label htmlFor="is_report_sent" className="block text-xl font-medium text-foreground">Is Report Sent</label>
+                                        <div className="mt-1">
+                                            <SearchableDropdown
+                                                value={formData.is_confirmation_sent ? 'Yes' : 'No'}
+                                                onChange={(val) => setFormData(prev => ({ ...prev, is_confirmation_sent: val === 'Yes' }))}
+                                                className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                                options={[
+                                                    { value: 'No', label: 'No' },
+                                                    { value: 'Yes', label: 'Yes' },
+                                                ]}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -428,7 +430,7 @@ export default function EditDepositPage() {
                             <div className="mt-1">
                                 <textarea
                                     id="description"
-                                    rows={4}
+                                    rows={3}
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
