@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Landmark, Plus, Search, Shield, Calendar, Package, Tag, User, Box, CheckSquare } from 'lucide-react';
 import api from '@/lib/api';
 import ScrollableTable from '@/components/ScrollableTable';
+import CopyButton from '@/components/CopyButton';
 
 interface Vault { id: number; name: string; }
 interface Deposit {
@@ -129,10 +130,13 @@ export default function DepositsPage() {
                                             </div>
                                         </td>
                                         <td className={tdCls}>
-                                            <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-mono font-semibold"
-                                                style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
-                                                {deposit.reference_number}
-                                            </span>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-mono font-semibold"
+                                                    style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
+                                                    {deposit.reference_number}
+                                                </span>
+                                                <CopyButton value={deposit.reference_number} label="Copy deposit number" />
+                                            </div>
                                         </td>
                                         <td className={tdCls}>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-semibold ${

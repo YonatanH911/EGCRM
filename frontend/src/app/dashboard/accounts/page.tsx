@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import ScrollableTable from '@/components/ScrollableTable';
+import CopyButton from '@/components/CopyButton';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -143,7 +144,12 @@ export default function AccountsPage() {
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.website || '—'}</span></td>
+                                            <td className={tdCls}>
+                                                <div className="flex items-center gap-1.5">
+                                                    <span className="text-xl text-muted-text">{account.website || '—'}</span>
+                                                    <CopyButton value={account.website} label="Copy website" />
+                                                </div>
+                                            </td>
                                             <td className={tdCls}><span className="text-xl text-muted-text">{account.street || '—'}</span></td>
                                             <td className={tdCls}><span className="text-xl text-muted-text">{account.city || '—'}</span></td>
                                             <td className={tdCls}><span className="text-xl text-muted-text">{account.country || '—'}</span></td>

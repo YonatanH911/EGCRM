@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import CopyButton from '@/components/CopyButton';
 
 const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
@@ -439,8 +440,9 @@ export default function EditAccountPage() {
                                             </p>
                                             {c.job_title && <p className="text-lg text-muted-text">{c.job_title}</p>}
                                         </div>
-                                        <div className="flex items-center gap-4 text-lg text-muted-text shrink-0">
+                                        <div className="flex items-center gap-1 text-lg text-muted-text shrink-0">
                                             {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>}
+                                            <CopyButton value={c.email} label="Copy email" />
                                         </div>
                                         <button type="button" onClick={(e) => handleUnlinkContact(e, c)}
                                             className="p-2 ml-2 text-muted-text hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
@@ -507,7 +509,10 @@ export default function EditAccountPage() {
                                             <p className="text-xl font-semibold text-foreground group-hover:text-emerald-500 transition-colors">
                                                 {d.product_name || d.reference_number}
                                             </p>
-                                            <p className="text-lg text-muted-text">Ref: {d.reference_number}</p>
+                                            <div className="flex items-center gap-1 text-lg text-muted-text">
+                                                <span>Ref: {d.reference_number}</span>
+                                                <CopyButton value={d.reference_number} label="Copy deposit number" />
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-3 shrink-0">
                                             <span className={`text-lg font-semibold px-2.5 py-1 rounded-full ${

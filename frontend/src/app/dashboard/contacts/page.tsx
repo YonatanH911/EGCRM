@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { Users, Plus, Search } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import ScrollableTable from '@/components/ScrollableTable';
+import CopyButton from '@/components/CopyButton';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -147,8 +148,18 @@ export default function ContactsPage() {
                                             </div>
                                         </td>
                                         <td className={tdCls}><span className="text-xl text-muted-text">{getAccountNames(contact)}</span></td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{contact.email || dash}</span></td>
-                                        <td className={tdCls}><span className="text-xl text-foreground">{contact.phone || dash}</span></td>
+                                        <td className={tdCls}>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-xl text-muted-text">{contact.email || dash}</span>
+                                                <CopyButton value={contact.email} label="Copy email" />
+                                            </div>
+                                        </td>
+                                        <td className={tdCls}>
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="text-xl text-foreground">{contact.phone || dash}</span>
+                                                <CopyButton value={contact.phone} label="Copy phone number" />
+                                            </div>
+                                        </td>
                                         <td className={tdCls}><span className="text-xl text-muted-text">{contact.is_israeli === null || contact.is_israeli === undefined ? dash : (contact.is_israeli ? 'Yes' : 'No')}</span></td>
                                         <td className={`${tdCls} ltr:text-right rtl:text-left text-xl text-muted-text`}>
                                             {new Date(contact.created_at).toLocaleDateString()}
