@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { ArrowLeft, Loader2, Activity, Calendar, CheckSquare, Phone, Mail } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 
 const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
@@ -258,12 +259,11 @@ export default function NewActivityPage() {
                     {/* Notes */}
                     <div>
                         <label className={labelCls}>Notes</label>
-                        <textarea
-                            rows={4}
+                        <AutoResizeTextarea
                             value={form.notes}
-                            onChange={e => set('notes', e.target.value)}
+                            onChange={value => set('notes', value)}
                             placeholder=""
-                            className={`${inputCls} resize-none`}
+                            className={inputCls}
                         />
                     </div>
 

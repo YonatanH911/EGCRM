@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import ScrollableTable from '@/components/ScrollableTable';
 import ColumnFilter from '@/components/ColumnFilter';
-import { Plus, Trash2, Activity, Loader2, Settings, Check, X } from 'lucide-react';
+import { Plus, Trash2, Activity, Loader2, Settings, Check, X, Search } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
@@ -39,6 +39,7 @@ export default function ActivitiesPage() {
     const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<number | 'All'>('All');
+    const [searchQuery, setSearchQuery] = useState('');
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
     const { isRTL } = usePreferences();
@@ -110,6 +111,15 @@ export default function ActivitiesPage() {
 
     const filtered = activities.filter(activity => {
         const matchesType = filter === 'All' || activity.task_type_id === filter;
+        const query = searchQuery.trim().toLocaleLowerCase();
+        const matchesSearch = !query || [
+            activity.task_type?.name || 'Unassigned',
+            activity.subject,
+            activity.regarding,
+            activity.notes,
+            fmt(activity.start_date),
+            fmt(activity.due_date),
+        ].some(value => String(value || '').toLocaleLowerCase().includes(query));
         const matchesColumns = matchesColumnFilters(columnFilters, {
             type: activity.task_type?.name || 'Unassigned',
             subject: activity.subject,
@@ -117,7 +127,7 @@ export default function ActivitiesPage() {
             sentOn: fmt(activity.start_date),
             dueDate: fmt(activity.due_date),
         });
-        return matchesType && matchesColumns;
+        return matchesType && matchesSearch && matchesColumns;
     });
 
     return (
@@ -171,6 +181,18 @@ export default function ActivitiesPage() {
 
             {/* Table */}
             <div className="rounded-2xl overflow-hidden glass-card">
+                <div className="border-b border-border-subtle p-4">
+                    <div className="relative max-w-sm">
+                        <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-text" />
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={event => setSearchQuery(event.target.value)}
+                            placeholder="Search activities..."
+                            className="w-full rounded-xl border border-black/5 bg-black/5 py-2 text-xl text-foreground placeholder-muted-text outline-none transition-all ltr:pl-9 ltr:pr-3 rtl:pl-3 rtl:pr-9 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10 dark:border-white/5 dark:bg-white/5"
+                        />
+                    </div>
+                </div>
                 <ScrollableTable>
                     {loading ? (
                         <div className="flex items-center justify-center h-48">

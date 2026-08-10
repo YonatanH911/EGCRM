@@ -7,6 +7,7 @@ import api from '@/lib/api';
 import { Activity, ArrowLeft, Loader2, Check, Trash2, PowerOff, Power } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 
 interface TaskType { id: number; name: string; color: string; }
 interface Account { id: number; name: string; }
@@ -302,8 +303,12 @@ export default function EditActivityPage() {
                     {/* Notes */}
                     <div>
                         <label className={labelCls}>Notes</label>
-                        <textarea rows={4} value={form.notes} onChange={e => set('notes', e.target.value)}
-                            className={`${inputCls} resize-none`} placeholder="" />
+                        <AutoResizeTextarea
+                            value={form.notes}
+                            onChange={value => set('notes', value)}
+                            className={inputCls}
+                            placeholder=""
+                        />
                     </div>
 
                     {/* Actions */}
