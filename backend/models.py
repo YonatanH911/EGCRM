@@ -264,6 +264,8 @@ class Deposit(Base):
     supplier = Column(String(255), nullable=True)
     box = Column(String(255), nullable=True)
     is_confirmation_sent = Column(Boolean, default=False, nullable=True)
+    verified_by_contact_id = Column(Integer, ForeignKey("contacts.id", ondelete="SET NULL"), nullable=True)
+    date_report_sent = Column(DateTime, nullable=True)
     description = Column(String(1000), nullable=True)
     received_by = Column(String(255), nullable=True)
     
@@ -277,6 +279,7 @@ class Deposit(Base):
     accounts = relationship("Account", secondary=deposit_accounts)
     vaults = relationship("Vault", secondary=deposit_vaults)
     contacts = relationship("Contact", secondary=deposit_contacts, back_populates="deposits")
+    verified_by_contact = relationship("Contact", foreign_keys=[verified_by_contact_id])
 
     @property
     def account_ids(self):

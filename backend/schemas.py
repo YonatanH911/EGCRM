@@ -200,6 +200,8 @@ class DepositBase(BaseSchema):
     supplier: Optional[str] = None
     box: Optional[str] = None
     is_confirmation_sent: Optional[bool] = False
+    verified_by_contact_id: Optional[int] = None
+    date_report_sent: Optional[datetime] = None
     description: Optional[str] = None
     received_by: Optional[str] = None
     account_id: Optional[int] = None
@@ -222,6 +224,8 @@ class DepositUpdate(BaseModel):
     supplier: Optional[str] = None
     box: Optional[str] = None
     is_confirmation_sent: Optional[bool] = None
+    verified_by_contact_id: Optional[int] = None
+    date_report_sent: Optional[datetime] = None
     description: Optional[str] = None
     received_by: Optional[str] = None
     account_id: Optional[int] = None

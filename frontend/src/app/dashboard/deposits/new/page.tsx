@@ -48,6 +48,8 @@ export default function NewDepositPage() {
         version: '',
         description: '',
         is_confirmation_sent: false,
+        verified_by_contact_id: '',
+        date_report_sent: '',
         received_by: ''
     });
 
@@ -82,7 +84,9 @@ export default function NewDepositPage() {
                 vault_ids: formData.vault_ids.map(Number),
                 vault_id: formData.vault_ids[0] ? Number(formData.vault_ids[0]) : null,
                 supplier: formData.supplier.join(', '),
-                date: formData.date ? new Date(formData.date).toISOString() : null
+                date: formData.date ? new Date(formData.date).toISOString() : null,
+                verified_by_contact_id: formData.verified_by_contact_id ? Number(formData.verified_by_contact_id) : null,
+                date_report_sent: formData.date_report_sent ? new Date(formData.date_report_sent).toISOString() : null,
             };
 
             await api.post('/deposits', payload);
@@ -141,25 +145,6 @@ export default function NewDepositPage() {
                                     </div>
                                 </div>
 
-                                <div className="sm:col-span-2">
-                                    <label htmlFor="contact_ids" className="block text-xl font-medium text-foreground">
-                                        Billed Contact
-                                    </label>
-                                    <div className="mt-1">
-                                        <SearchableDropdown
-                                            multiple
-                                            value={formData.contact_ids}
-                                            onChange={(value) => setFormData({ ...formData, contact_ids: value })}
-                                            placeholder="Select a contact"
-                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
-                                            options={contacts.map(contact => ({
-                                                value: String(contact.id),
-                                                label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
-                                            }))}
-                                        />
-                                    </div>
-                                </div>
-
                                 <div>
                                     <label htmlFor="supplier" className="block text-xl font-medium text-foreground">Supplier</label>
                                     <div className="mt-1">
@@ -170,28 +155,6 @@ export default function NewDepositPage() {
                                             placeholder="Select Supplier"
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={accounts.map(account => ({ value: account.name, label: account.name }))}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label htmlFor="amount" className="block text-xl font-medium text-foreground">
-                                        Deposit Amount ($) *
-                                    </label>
-                                    <div className="mt-1 flex rounded-md shadow-sm">
-                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-border-subtle bg-black/5 dark:bg-white/5 text-muted-text sm:text-xl">
-                                            $
-                                        </span>
-                                        <input
-                                            type="number"
-                                            name="amount"
-                                            id="amount"
-                                            required
-                                            min="0.01"
-                                            step="0.01"
-                                            value={formData.amount}
-                                            onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                                            className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md focus:ring-crm-500 focus:border-crm-500 sm:text-xl border-border-subtle border bg-black/5 dark:bg-white/5 text-foreground"
                                         />
                                     </div>
                                 </div>
@@ -305,11 +268,35 @@ export default function NewDepositPage() {
                                     <div className="mt-1">
                                         <SearchableDropdown
                                             value={formData.status === 'Cleared' ? 'Verified' : 'Not Verified'}
-                                            onChange={(val) => setFormData(prev => ({ ...prev, status: val === 'Verified' ? 'Cleared' : 'Pending' }))}
+                                            onChange={(val) => setFormData(prev => ({
+                                                ...prev,
+                                                status: val === 'Verified' ? 'Cleared' : 'Pending',
+                                                verified_by_contact_id: val === 'Verified' ? prev.verified_by_contact_id : '',
+                                            }))}
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={[
                                                 { value: 'Not Verified', label: 'Not Verified' },
                                                 { value: 'Verified', label: 'Verified' },
+                                            ]}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className={formData.status !== 'Cleared' ? 'opacity-50' : ''}>
+                                    <label htmlFor="verified_by_contact_id" className="block text-xl font-medium text-foreground">Verified By</label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            value={formData.verified_by_contact_id}
+                                            onChange={(value) => setFormData(prev => ({ ...prev, verified_by_contact_id: value }))}
+                                            placeholder="Select a contact"
+                                            disabled={formData.status !== 'Cleared'}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: '', label: 'No verifier selected' },
+                                                ...contacts.map(contact => ({
+                                                    value: String(contact.id),
+                                                    label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                                })),
                                             ]}
                                         />
                                     </div>
@@ -326,6 +313,19 @@ export default function NewDepositPage() {
                                                 { value: 'No', label: 'No' },
                                                 { value: 'Yes', label: 'Yes' },
                                             ]}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="date_report_sent" className="block text-xl font-medium text-foreground">Date Report Sent</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="date"
+                                            id="date_report_sent"
+                                            value={formData.date_report_sent}
+                                            onChange={(event) => setFormData(prev => ({ ...prev, date_report_sent: event.target.value }))}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                         />
                                     </div>
                                 </div>

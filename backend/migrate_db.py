@@ -67,6 +67,9 @@ def migrate():
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS supplier VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS box VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS received_by VARCHAR(255) NULL;",
+        "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS verified_by_contact_id INT NULL;",
+        "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS date_report_sent DATETIME NULL;",
+        "ALTER TABLE deposits ADD CONSTRAINT fk_deposits_verified_by_contact FOREIGN KEY (verified_by_contact_id) REFERENCES contacts(id) ON DELETE SET NULL;",
         "ALTER TABLE accounts ADD COLUMN IF NOT EXISTS description TEXT NULL;",
 
         # 6. Active / Inactive records
