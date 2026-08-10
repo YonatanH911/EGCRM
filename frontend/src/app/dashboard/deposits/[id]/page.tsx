@@ -210,11 +210,11 @@ export default function EditDepositPage() {
                         </div>
                     )}
 
-                    <div className="space-y-8">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
                         <div>
                             <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">General Information</h3>
-                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 xl:grid-cols-3">
-                                <div className="sm:col-span-2 xl:col-span-1">
+                            <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
+                                <div className="sm:col-span-2">
                                     <label htmlFor="reference_number" className="block text-xl font-medium text-foreground">
                                         Deposit Number *
                                     </label>
@@ -231,7 +231,7 @@ export default function EditDepositPage() {
                                     </div>
                                 </div>
 
-                                <div className="sm:col-span-2 xl:col-span-2">
+                                <div className="sm:col-span-2">
                                     <label htmlFor="contact_ids" className="block text-xl font-medium text-foreground">
                                         Billed Contact
                                     </label>
@@ -345,13 +345,13 @@ export default function EditDepositPage() {
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+                        <div className="space-y-8">
                             <div>
                                 <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4 flex items-center gap-2">
                                     <Shield className="w-5 h-5 text-muted-text" />
                                     Vault Information
                                 </h3>
-                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                                     <div>
                                         <label htmlFor="is_vaulted" className="block text-xl font-medium text-foreground">Is Vaulted</label>
                                         <div className="mt-1">
@@ -391,7 +391,7 @@ export default function EditDepositPage() {
 
                             <div>
                                 <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Verification Information</h3>
-                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                                <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                                     <div>
                                         <label htmlFor="verification_status" className="block text-xl font-medium text-foreground">Verification Status</label>
                                         <div className="mt-1">
@@ -423,19 +423,19 @@ export default function EditDepositPage() {
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Description</h3>
-                            <div className="mt-1">
-                                <textarea
-                                    id="description"
-                                    rows={3}
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
-                                    placeholder="Enter description..."
-                                />
+                            <div>
+                                <h3 className="text-3xl font-medium leading-6 text-foreground border-b border-border-subtle pb-2 mb-4">Description</h3>
+                                <div className="mt-1">
+                                    <textarea
+                                        id="description"
+                                        rows={4}
+                                        value={formData.description}
+                                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                        className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
+                                        placeholder="Enter description..."
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>

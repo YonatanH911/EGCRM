@@ -315,20 +315,44 @@ export default function EditAccountPage() {
                     <h2 className="text-lg font-bold text-foreground uppercase tracking-widest">Account Details</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                        <Field label="Account Name *" field="name" placeholder="" />
-                        <div className="md:col-span-1 xl:col-span-2">
-                            <label className={labelCls}>Description</label>
-                            <textarea
-                                rows={2}
-                                value={formData.description}
-                                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                className={inputCls}
-                                placeholder=""
-                            />
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
+                                <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">General Information</h3>
+                            </div>
+                            <Field label="Account Name *" field="name" placeholder="" />
+                            <div>
+                                <label className={labelCls}>Description</label>
+                                <textarea
+                                    rows={3}
+                                    value={formData.description}
+                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                    className={inputCls}
+                                    placeholder=""
+                                />
+                            </div>
+                        </div>
+
+                        {/* Account Information Section */}
+                        <div className="space-y-5">
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
+                                <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Account Information</h3>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <Field label="Phone Number" field="phone" placeholder="" />
+                                <Field label="Website" field="website" type="url" placeholder="" />
+                                <Field label="Street" field="street" placeholder="" />
+                                <Field label="City" field="city" placeholder="" />
+                                <Field label="State / Province" field="state_or_province" placeholder="" />
+                                <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />
+                                <Field label="Country / Region" field="country" placeholder="" />
+                            </div>
                         </div>
                     </div>
 
+                    <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
                     {/* Related Activities */}
                     <RelatedSection
                         title="Related Activities"
@@ -515,22 +539,6 @@ export default function EditAccountPage() {
                             </div>
                         </div>
                     </RelatedSection>
-
-                    {/* Account Information Section */}
-                    <div className="pt-6 border-t border-border-subtle">
-                        <div className="flex items-center gap-2 mb-5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
-                            <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Account Information</h3>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                            <Field label="Phone Number" field="phone" placeholder="" />
-                            <Field label="Website" field="website" type="url" placeholder="" />
-                            <Field label="Street" field="street" placeholder="" />
-                            <Field label="City" field="city" placeholder="" />
-                            <Field label="State / Province" field="state_or_province" placeholder="" />
-                            <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />
-                            <Field label="Country / Region" field="country" placeholder="" />
-                        </div>
                     </div>
 
                     {/* Actions */}

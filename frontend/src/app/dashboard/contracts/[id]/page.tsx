@@ -283,14 +283,14 @@ export default function EditContractPage() {
                 <div className="p-3.5 text-xl text-red-500 bg-red-500/10 border border-red-500/20 rounded-xl">{error}</div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
                 {/* Contract Details */}
                 <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <FileText className="w-4 h-4 text-indigo-500" />
                         <h2 className="text-xl font-semibold text-foreground">Contract Details</h2>
                     </div>
-                    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                    <div className="p-6">
                         <div>
                             <label className={labelCls}>Contact Type</label>
                             <SearchableDropdown
@@ -301,33 +301,6 @@ export default function EditContractPage() {
                             />
                         </div>
                     </div>
-                </div>
-
-                {/* Beneficiary + Supplier cubes side by side */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {CUBES.map(cube => (
-                        <div key={cube.key} className="glass-card rounded-2xl overflow-visible border border-border-subtle">
-                            <div className="px-5 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
-                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${cube.gradient}`}>
-                                    <User className="w-3.5 h-3.5 text-white" />
-                                </div>
-                                <h2 className="text-xl font-semibold text-foreground">{cube.label}</h2>
-                            </div>
-                            <div className="p-5 grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                <div className="xl:col-span-2">
-                                    <label className={labelCls}>{cube.titleLabel} *</label>
-                                    <input type="text" value={form[cube.titleField] as string} onChange={set(cube.titleField)}
-                                        placeholder="" className={inputCls} />
-                                </div>
-                                {cube.fields.map(({ field, label }) => (
-                                    <div key={field}>
-                                        <label className={labelCls}>{label}</label>
-                                        <ContactDropdown field={field} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    ))}
                 </div>
 
                 {/* Contract Dates */}
@@ -348,16 +321,43 @@ export default function EditContractPage() {
                     </div>
                 </div>
 
+                {/* Beneficiary + Supplier cubes side by side */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 xl:col-span-2">
+                    {CUBES.map(cube => (
+                        <div key={cube.key} className="glass-card rounded-2xl overflow-visible border border-border-subtle">
+                            <div className="px-5 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                                <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${cube.gradient}`}>
+                                    <User className="w-3.5 h-3.5 text-white" />
+                                </div>
+                                <h2 className="text-xl font-semibold text-foreground">{cube.label}</h2>
+                            </div>
+                            <div className="p-5 space-y-4">
+                                <div>
+                                    <label className={labelCls}>{cube.titleLabel} *</label>
+                                    <input type="text" value={form[cube.titleField] as string} onChange={set(cube.titleField)}
+                                        placeholder="" className={inputCls} />
+                                </div>
+                                {cube.fields.map(({ field, label }) => (
+                                    <div key={field}>
+                                        <label className={labelCls}>{label}</label>
+                                        <ContactDropdown field={field} />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
                 {/* Billing */}
-                <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
+                <div className="glass-card rounded-2xl overflow-visible border border-border-subtle xl:col-span-2">
                     <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
                         <CreditCard className="w-4 h-4 text-indigo-500" />
                         <h2 className="text-xl font-semibold text-foreground">Billing Information</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
                         {BILLING_COLUMNS.map(column => (
-                            <div key={column.key} className="grid grid-cols-1 xl:grid-cols-2 gap-4 content-start">
-                                <h3 className="text-2xl font-semibold text-foreground xl:col-span-2">{column.label}</h3>
+                            <div key={column.key} className="space-y-4">
+                                <h3 className="text-2xl font-semibold text-foreground">{column.label}</h3>
                                 <div>
                                     <label className={labelCls}>{column.label} Currency</label>
                                     <SearchableDropdown
@@ -380,7 +380,7 @@ export default function EditContractPage() {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-between items-center gap-3 pt-2">
+                <div className="flex justify-between items-center gap-3 pt-2 xl:col-span-2">
                     <div className="flex items-center gap-2">
                         <button type="button" onClick={handleDelete} disabled={loading || saving}
                             className="flex items-center gap-2 px-4 py-2.5 text-xl font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 rounded-xl transition-colors disabled:opacity-50">
