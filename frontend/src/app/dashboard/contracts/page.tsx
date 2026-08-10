@@ -9,6 +9,8 @@ import {
 import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import ScrollableTable from '@/components/ScrollableTable';
+import ColumnFilter from '@/components/ColumnFilter';
+import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
 interface Account { id: number; name: string; }
 interface Contract {
@@ -53,6 +55,7 @@ export default function ContractsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterContactType, setFilterContactType] = useState('');
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
         const fetchAll = async () => {
@@ -72,7 +75,15 @@ export default function ContractsPage() {
             titleParts.supplierTitle.toLowerCase().includes(query) ||
             (contract.account?.name && contract.account.name.toLowerCase().includes(query));
         const matchesFilter = filterContactType ? (contract.contact_type || '3-party') === filterContactType : true;
-        return matchesSearch && matchesFilter;
+        const matchesColumns = matchesColumnFilters(columnFilters, {
+            beneficiary: titleParts.beneficiaryTitle,
+            supplier: titleParts.supplierTitle,
+            contactType: contract.contact_type || '3-party',
+            account: contract.account?.name,
+            value: formatCurrency(contract.value, contract.currency),
+            dates: `${formatDate(contract.start_date) || ''} ${formatDate(contract.end_date) || ''}`,
+        });
+        return matchesSearch && matchesFilter && matchesColumns;
     });
 
     const sortedContracts = [...filteredContracts].sort((a, b) => {
@@ -141,9 +152,26 @@ export default function ContractsPage() {
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
-                                {['Beneficiary', 'Supplier', 'Contact Type', 'Account', 'Value', 'Dates', 'Actions'].map((h, i) => (
-                                    <th key={i} scope="col" className={thCls}>{h}</th>
+                                {[
+                                    { key: 'beneficiary', label: 'Beneficiary' },
+                                    { key: 'supplier', label: 'Supplier' },
+                                    { key: 'contactType', label: 'Contact Type' },
+                                    { key: 'account', label: 'Account' },
+                                    { key: 'value', label: 'Value' },
+                                    { key: 'dates', label: 'Dates' },
+                                ].map(column => (
+                                    <th key={column.key} scope="col" className={thCls}>
+                                        <div className="flex items-center gap-1.5">
+                                            <span>{column.label}</span>
+                                            <ColumnFilter
+                                                label={column.label}
+                                                value={columnFilters[column.key] || ''}
+                                                onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                            />
+                                        </div>
+                                    </th>
                                 ))}
+                                <th scope="col" className={thCls}>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">

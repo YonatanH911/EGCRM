@@ -7,6 +7,8 @@ import { Shield, Plus, Search, MapPin, Database } from 'lucide-react';
 import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import ScrollableTable from '@/components/ScrollableTable';
+import ColumnFilter from '@/components/ColumnFilter';
+import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
 interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; }
 
@@ -28,6 +30,7 @@ export default function VaultsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('');
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
         const fetchVaults = async () => {
@@ -43,7 +46,14 @@ export default function VaultsPage() {
         const matchesSearch = vault.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (vault.location && vault.location.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesFilter = filterStatus ? vault.status === filterStatus : true;
-        return matchesSearch && matchesFilter;
+        const matchesColumns = matchesColumnFilters(columnFilters, {
+            name: vault.name,
+            status: vault.status,
+            location: vault.location,
+            capacity: vault.capacity,
+            createdAt: new Date(vault.created_at).toLocaleDateString(),
+        });
+        return matchesSearch && matchesFilter && matchesColumns;
     });
 
     const filterInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
@@ -94,8 +104,23 @@ export default function VaultsPage() {
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
-                                {['Name', 'Status', 'Location', 'Capacity', 'Created At'].map(h => (
-                                    <th key={h} scope="col" className={thCls}>{h}</th>
+                                {[
+                                    { key: 'name', label: 'Name' },
+                                    { key: 'status', label: 'Status' },
+                                    { key: 'location', label: 'Location' },
+                                    { key: 'capacity', label: 'Capacity' },
+                                    { key: 'createdAt', label: 'Created At' },
+                                ].map(column => (
+                                    <th key={column.key} scope="col" className={thCls}>
+                                        <div className="flex items-center gap-1.5">
+                                            <span>{column.label}</span>
+                                            <ColumnFilter
+                                                label={column.label}
+                                                value={columnFilters[column.key] || ''}
+                                                onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                            />
+                                        </div>
+                                    </th>
                                 ))}
                             </tr>
                         </thead>

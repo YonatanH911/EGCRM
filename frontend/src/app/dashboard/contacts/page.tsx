@@ -8,6 +8,8 @@ import { Users, Plus, Search } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import ScrollableTable from '@/components/ScrollableTable';
 import CopyButton from '@/components/CopyButton';
+import ColumnFilter from '@/components/ColumnFilter';
+import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -20,6 +22,7 @@ export default function ContactsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterContact, setFilterContact] = useState('');
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
         const fetchContacts = async () => {
@@ -63,7 +66,18 @@ export default function ContactsPage() {
         let matchesFilter = true;
         if (filterContact === 'has_email') matchesFilter = !!contact.email;
         if (filterContact === 'has_phone') matchesFilter = !!contact.phone;
-        return matchesSearch && matchesFilter;
+        const isIsraeli = contact.is_israeli === null || contact.is_israeli === undefined
+            ? dash
+            : (contact.is_israeli ? 'Yes' : 'No');
+        const matchesColumns = matchesColumnFilters(columnFilters, {
+            name: `${contact.first_name || ''} ${contact.last_name || ''}`,
+            account: getAccountNames(contact),
+            email: contact.email,
+            phone: contact.phone,
+            isIsraeli,
+            created: new Date(contact.created_at).toLocaleDateString(),
+        });
+        return matchesSearch && matchesFilter && matchesColumns;
     });
 
     return (
@@ -125,8 +139,24 @@ export default function ContactsPage() {
                         <table className="min-w-full">
                             <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                                 <tr>
-                                    {['Name', 'Account', 'Email', 'Phone', 'Is Israeli?', 'Created'].map(h => (
-                                        <th key={h} scope="col" className={thCls}>{h}</th>
+                                    {[
+                                        { key: 'name', label: 'Name' },
+                                        { key: 'account', label: 'Account' },
+                                        { key: 'email', label: 'Email' },
+                                        { key: 'phone', label: 'Phone' },
+                                        { key: 'isIsraeli', label: 'Is Israeli?' },
+                                        { key: 'created', label: 'Created' },
+                                    ].map(column => (
+                                        <th key={column.key} scope="col" className={thCls}>
+                                            <div className="flex items-center gap-1.5">
+                                                <span>{column.label}</span>
+                                                <ColumnFilter
+                                                    label={column.label}
+                                                    value={columnFilters[column.key] || ''}
+                                                    onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                                />
+                                            </div>
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>

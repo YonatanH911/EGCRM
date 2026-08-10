@@ -8,6 +8,8 @@ import { Building2, Plus, Search, Building } from 'lucide-react';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import ScrollableTable from '@/components/ScrollableTable';
 import CopyButton from '@/components/CopyButton';
+import ColumnFilter from '@/components/ColumnFilter';
+import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -18,6 +20,7 @@ export default function AccountsPage() {
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [websiteFilter, setWebsiteFilter] = useState('');
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
         const fetchAccounts = async () => {
@@ -37,7 +40,14 @@ export default function AccountsPage() {
         const matchesSearch = account.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (account.website && account.website.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesFilter = websiteFilter === 'has_website' ? !!account.website : true;
-        return matchesSearch && matchesFilter;
+        const matchesColumns = matchesColumnFilters(columnFilters, {
+            name: account.name,
+            website: account.website,
+            street: account.street,
+            city: account.city,
+            country: account.country,
+        });
+        return matchesSearch && matchesFilter && matchesColumns;
     });
 
     const sortedAccounts = [...filteredAccounts].sort((a, b) => {
@@ -117,9 +127,25 @@ export default function AccountsPage() {
                         <table className="min-w-full">
                             <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                                 <tr>
-                                    {['Account Name', 'Website', 'Street', 'City', 'Country', 'Actions'].map(h => (
-                                        <th key={h} scope="col" className={thCls}>{h}</th>
+                                    {[
+                                        { key: 'name', label: 'Account Name' },
+                                        { key: 'website', label: 'Website' },
+                                        { key: 'street', label: 'Street' },
+                                        { key: 'city', label: 'City' },
+                                        { key: 'country', label: 'Country' },
+                                    ].map(column => (
+                                        <th key={column.key} scope="col" className={thCls}>
+                                            <div className="flex items-center gap-1.5">
+                                                <span>{column.label}</span>
+                                                <ColumnFilter
+                                                    label={column.label}
+                                                    value={columnFilters[column.key] || ''}
+                                                    onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                                />
+                                            </div>
+                                        </th>
                                     ))}
+                                    <th scope="col" className={thCls}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-subtle">

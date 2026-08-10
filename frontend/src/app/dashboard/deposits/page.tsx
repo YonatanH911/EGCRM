@@ -7,6 +7,8 @@ import { Landmark, Plus, Search, Shield, Calendar, Package, Tag, User, Box, Chec
 import api from '@/lib/api';
 import ScrollableTable from '@/components/ScrollableTable';
 import CopyButton from '@/components/CopyButton';
+import ColumnFilter from '@/components/ColumnFilter';
+import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
 interface Vault { id: number; name: string; }
 interface Deposit {
@@ -14,6 +16,20 @@ interface Deposit {
     vault: Vault | null; is_confirmation_sent: boolean | null; version: string | null;
     supplier: string | null; received_by: string | null; product_name: string | null; status: string;
 }
+
+const formatDepositDate = (date: string | null) => date
+    ? new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '';
+
+const depositColumns = [
+    { key: 'productName', label: 'Product Name', icon: Package },
+    { key: 'version', label: 'Version', icon: Tag },
+    { key: 'supplier', label: 'Supplier', icon: User },
+    { key: 'date', label: 'Date', icon: Calendar },
+    { key: 'vault', label: 'Vault', icon: Shield },
+    { key: 'depositNumber', label: 'Deposit number', icon: Landmark },
+    { key: 'status', label: 'Verification Status', icon: CheckSquare },
+];
 
 const thCls = "px-3 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-3 py-3.5";
@@ -23,6 +39,7 @@ export default function DepositsPage() {
     const [deposits, setDeposits] = useState<Deposit[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
         const fetchDeposits = async () => {
@@ -35,13 +52,23 @@ export default function DepositsPage() {
 
     const filteredDeposits = deposits.filter(deposit => {
         const q = searchQuery.toLowerCase();
-        return (
+        const matchesSearch = (
             (deposit.reference_number || '').toLowerCase().includes(q) ||
             (deposit.supplier || '').toLowerCase().includes(q) ||
             (deposit.version || '').toLowerCase().includes(q) ||
             (deposit.vault?.name || '').toLowerCase().includes(q) ||
             (deposit.received_by || '').toLowerCase().includes(q)
         );
+        const matchesColumns = matchesColumnFilters(columnFilters, {
+            productName: deposit.product_name,
+            version: deposit.version,
+            supplier: deposit.supplier,
+            date: formatDepositDate(deposit.date),
+            vault: deposit.vault?.name,
+            depositNumber: deposit.reference_number,
+            status: deposit.status || 'Pending',
+        });
+        return matchesSearch && matchesColumns;
     });
 
     const sortedDeposits = [...filteredDeposits].sort((a, b) => {
@@ -87,14 +114,19 @@ export default function DepositsPage() {
                     <table className="min-w-full">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
-                                <th className={thCls}><div className="flex items-center gap-1"><Package className="w-3 h-3" />Product Name</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Tag className="w-3 h-3" />Version</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><User className="w-3 h-3" />Supplier</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Calendar className="w-3 h-3" />Date</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Shield className="w-3 h-3" />Vault</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><Landmark className="w-3 h-3" />Deposit number</div></th>
-                                <th className={thCls}><div className="flex items-center gap-1"><CheckSquare className="w-3 h-3" />Verification Status</div></th>
-
+                                {depositColumns.map(({ key, label, icon: Icon }) => (
+                                    <th key={key} className={thCls}>
+                                        <div className="flex items-center gap-1">
+                                            <Icon className="h-3 w-3" />
+                                            <span>{label}</span>
+                                            <ColumnFilter
+                                                label={label}
+                                                value={columnFilters[key] || ''}
+                                                onChange={value => setColumnFilters(current => ({ ...current, [key]: value }))}
+                                            />
+                                        </div>
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
@@ -118,9 +150,7 @@ export default function DepositsPage() {
                                         <td className={tdCls}>
                                             <div className="flex items-center text-xl text-muted-text whitespace-nowrap">
                                                 <Calendar className="mr-1 h-3.5 w-3.5 text-muted-text" />
-                                                {deposit.date
-                                                    ? new Date(deposit.date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
-                                                    : dash}
+                                                {formatDepositDate(deposit.date) || dash}
                                             </div>
                                         </td>
                                         <td className={tdCls}>

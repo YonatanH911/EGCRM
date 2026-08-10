@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import ScrollableTable from '@/components/ScrollableTable';
+import ColumnFilter from '@/components/ColumnFilter';
 import { Plus, Trash2, Activity, Loader2, Settings, Check, X } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
+import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 
 interface TaskType { id: number; name: string; color: string; }
 interface ActivityRecord {
@@ -38,6 +40,7 @@ export default function ActivitiesPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<number | 'All'>('All');
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
     const { isRTL } = usePreferences();
 
     // Modal state
@@ -105,7 +108,17 @@ export default function ActivitiesPage() {
         }
     };
 
-    const filtered = filter === 'All' ? activities : activities.filter(a => a.task_type_id === filter);
+    const filtered = activities.filter(activity => {
+        const matchesType = filter === 'All' || activity.task_type_id === filter;
+        const matchesColumns = matchesColumnFilters(columnFilters, {
+            type: activity.task_type?.name || 'Unassigned',
+            subject: activity.subject,
+            regarding: activity.regarding,
+            sentOn: fmt(activity.start_date),
+            dueDate: fmt(activity.due_date),
+        });
+        return matchesType && matchesColumns;
+    });
 
     return (
         <div className="space-y-6">
@@ -179,9 +192,25 @@ export default function ActivitiesPage() {
                         <table className="w-full text-xl">
                             <thead className="border-b border-border-subtle bg-background-subtle/30">
                                 <tr>
-                                    {['Type', 'Subject', 'Regarding', 'Sent on', 'Due Date', ''].map((h, i) => (
-                                        <th key={i} className={thCls}>{h}</th>
+                                    {[
+                                        { key: 'type', label: 'Type' },
+                                        { key: 'subject', label: 'Subject' },
+                                        { key: 'regarding', label: 'Regarding' },
+                                        { key: 'sentOn', label: 'Sent on' },
+                                        { key: 'dueDate', label: 'Due Date' },
+                                    ].map(column => (
+                                        <th key={column.key} className={thCls}>
+                                            <div className="flex items-center gap-1.5">
+                                                <span>{column.label}</span>
+                                                <ColumnFilter
+                                                    label={column.label}
+                                                    value={columnFilters[column.key] || ''}
+                                                    onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                                />
+                                            </div>
+                                        </th>
                                     ))}
+                                    <th className={thCls} />
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-subtle">
