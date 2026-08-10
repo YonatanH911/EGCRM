@@ -151,21 +151,28 @@ export default function NewContractPage() {
         }
     };
 
-    const ContactDropdown = ({ field }: { field: FormField }) => (
-        <SearchableDropdown
-            multiple
-            value={form[field] as string[]}
-            onChange={(value) => setForm(prev => ({ ...prev, [field]: value }))}
-            placeholder="None"
-            className={inputCls}
-            options={[
-                ...contacts.map(c => ({
-                    value: `${c.first_name} ${c.last_name}`,
-                    label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
-                })),
-            ]}
-        />
-    );
+    const ContactDropdown = ({ field }: { field: FormField }) => {
+        const selectedValues = form[field] as string[];
+        const contactOptions = contacts.map(c => ({
+            value: `${c.first_name} ${c.last_name}`,
+            label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
+        }));
+        const knownValues = new Set(contactOptions.map(option => option.value));
+        const restoredOptions = selectedValues
+            .filter(value => !knownValues.has(value))
+            .map(value => ({ value, label: value }));
+
+        return (
+            <SearchableDropdown
+                multiple
+                value={selectedValues}
+                onChange={(value) => setForm(prev => ({ ...prev, [field]: value }))}
+                placeholder="None"
+                className={inputCls}
+                options={[...contactOptions, ...restoredOptions]}
+            />
+        );
+    };
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
