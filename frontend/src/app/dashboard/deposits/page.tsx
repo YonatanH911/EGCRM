@@ -9,12 +9,15 @@ import ScrollableTable from '@/components/ScrollableTable';
 import CopyButton from '@/components/CopyButton';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
+import SortControl from '@/components/SortControl';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
 interface Vault { id: number; name: string; }
 interface Deposit {
     id: number; reference_number: string; date: string | null;
     vault: Vault | null; is_confirmation_sent: boolean | null; version: string | null;
     supplier: string | null; received_by: string | null; product_name: string | null; status: string;
+    created_at: string; date_report_sent: string | null; is_active?: boolean;
 }
 
 const formatDepositDate = (date: string | null) => date
@@ -39,6 +42,8 @@ export default function DepositsPage() {
     const [deposits, setDeposits] = useState<Deposit[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -72,12 +77,18 @@ export default function DepositsPage() {
     });
 
     const sortedDeposits = [...filteredDeposits].sort((a, b) => {
-        const dateA = a.date ? new Date(a.date).getTime() : 0;
-        const dateB = b.date ? new Date(b.date).getTime() : 0;
-        return dateB - dateA;
+        if (sortBy === 'active') {
+            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
+        }
+        if (sortBy === 'date') {
+            return compareSortValues(dateSortValue(a.date), dateSortValue(b.date), sortDirection);
+        }
+        if (sortBy === 'date_report_sent') {
+            return compareSortValues(dateSortValue(a.date_report_sent), dateSortValue(b.date_report_sent), sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
-    const filterInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
     const dash = <span className="text-slate-600 italic">—</span>;
 
     return (
@@ -100,14 +111,26 @@ export default function DepositsPage() {
             </div>
 
             <div className="rounded-2xl overflow-hidden glass-card">
-                <div className="p-4 border-b border-border-subtle">
-                    <div className="relative max-w-sm">
+                <div className="p-4 flex flex-col sm:flex-row gap-3 border-b border-border-subtle">
+                    <div className="relative flex-1 max-w-sm">
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text" />
                         <input type="text" placeholder="Search by deposit number, supplier, version…"
                             value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'date', label: 'Date Received' },
+                            { value: 'date_report_sent', label: 'Date Report Sent' },
+                        ]}
+                    />
                 </div>
 
                 <ScrollableTable>

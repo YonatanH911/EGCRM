@@ -5,12 +5,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Shield, Plus, Search, MapPin, Database } from 'lucide-react';
 import api from '@/lib/api';
-import SearchableDropdown from '@/components/SearchableDropdown';
+import SortControl from '@/components/SortControl';
 import ScrollableTable from '@/components/ScrollableTable';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
-interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; }
+interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; is_active?: boolean; }
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -29,7 +30,8 @@ export default function VaultsPage() {
     const [vaults, setVaults] = useState<Vault[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterStatus, setFilterStatus] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -41,11 +43,9 @@ export default function VaultsPage() {
         fetchVaults();
     }, []);
 
-    const uniqueStatuses = Array.from(new Set(vaults.map(v => v.status).filter(Boolean)));
     const filteredVaults = vaults.filter(vault => {
         const matchesSearch = vault.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (vault.location && vault.location.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesFilter = filterStatus ? vault.status === filterStatus : true;
         const matchesColumns = matchesColumnFilters(columnFilters, {
             name: vault.name,
             status: vault.status,
@@ -53,10 +53,19 @@ export default function VaultsPage() {
             capacity: vault.capacity,
             createdAt: new Date(vault.created_at).toLocaleDateString(),
         });
-        return matchesSearch && matchesFilter && matchesColumns;
+        return matchesSearch && matchesColumns;
     });
 
-    const filterInputStyle = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' };
+    const sortedVaults = [...filteredVaults].sort((a, b) => {
+        if (sortBy === 'active') {
+            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
+        }
+        if (sortBy === 'status') {
+            return compareSortValues(a.status, b.status, sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
+    });
+
 
     return (
         <div className="space-y-6">
@@ -86,18 +95,17 @@ export default function VaultsPage() {
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
-                    <div className="sm:w-44">
-                        <SearchableDropdown
-                            value={filterStatus}
-                            onChange={setFilterStatus}
-                            placeholder="All Statuses"
-                            className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
-                            options={[
-                                { value: '', label: 'All Statuses' },
-                                ...uniqueStatuses.map(status => ({ value: String(status), label: String(status) })),
-                            ]}
-                        />
-                    </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'status', label: 'Vault Status' },
+                        ]}
+                    />
                 </div>
 
                 <ScrollableTable>
@@ -127,7 +135,7 @@ export default function VaultsPage() {
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
                                 <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-text text-xl">Loading vaults…</td></tr>
-                            ) : filteredVaults.length === 0 ? (
+                            ) : sortedVaults.length === 0 ? (
                                 <tr><td colSpan={5} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <Shield className="h-10 w-10 text-muted-text mb-3" />
@@ -135,7 +143,7 @@ export default function VaultsPage() {
                                     </div>
                                 </td></tr>
                             ) : (
-                                filteredVaults.map((vault) => {
+                                sortedVaults.map((vault) => {
                                     const st = getStatusStyle(vault.status);
                                     return (
                                         <tr key={vault.id} className="cursor-pointer transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5"

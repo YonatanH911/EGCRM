@@ -5,11 +5,12 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Users, Plus, Search } from 'lucide-react';
-import SearchableDropdown from '@/components/SearchableDropdown';
+import SortControl from '@/components/SortControl';
 import ScrollableTable from '@/components/ScrollableTable';
 import CopyButton from '@/components/CopyButton';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -21,7 +22,8 @@ export default function ContactsPage() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterContact, setFilterContact] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -63,9 +65,6 @@ export default function ContactsPage() {
         const matchesSearch = fullName.includes(query) ||
             (contact.email && contact.email.toLowerCase().includes(query)) ||
             getAccountNames(contact).toLowerCase().includes(query);
-        let matchesFilter = true;
-        if (filterContact === 'has_email') matchesFilter = !!contact.email;
-        if (filterContact === 'has_phone') matchesFilter = !!contact.phone;
         const isIsraeli = contact.is_israeli === null || contact.is_israeli === undefined
             ? dash
             : (contact.is_israeli ? 'Yes' : 'No');
@@ -77,7 +76,19 @@ export default function ContactsPage() {
             isIsraeli,
             created: new Date(contact.created_at).toLocaleDateString(),
         });
-        return matchesSearch && matchesFilter && matchesColumns;
+        return matchesSearch && matchesColumns;
+    });
+
+    const sortedContacts = [...filteredContacts].sort((a, b) => {
+        if (sortBy === 'active') {
+            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
+        }
+        if (sortBy === 'name') {
+            const aName = `${a.first_name || ''} ${a.last_name || ''}`.trim();
+            const bName = `${b.first_name || ''} ${b.last_name || ''}`.trim();
+            return compareSortValues(aName, bName, sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
     return (
@@ -108,25 +119,23 @@ export default function ContactsPage() {
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
-                    <div className="sm:w-44">
-                        <SearchableDropdown
-                            value={filterContact}
-                            onChange={setFilterContact}
-                            placeholder="All Contacts"
-                            className="px-3 py-2 text-xl rounded-xl text-slate-300 focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
-                            options={[
-                                { value: '', label: 'All Contacts' },
-                                { value: 'has_email', label: 'Has Email' },
-                                { value: 'has_phone', label: 'Has Phone Number' },
-                            ]}
-                        />
-                    </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'name', label: 'Contact Name' },
+                        ]}
+                    />
                 </div>
 
                 <ScrollableTable>
                     {loading ? (
                         <div className="p-12 text-center text-muted-text text-xl">Loading contacts...</div>
-                    ) : filteredContacts.length === 0 ? (
+                    ) : sortedContacts.length === 0 ? (
                         <div className="p-16 flex flex-col items-center justify-center">
                             <Users className="w-10 h-10 text-muted-text mb-3 opacity-50" />
                             <h3 className="text-2xl font-semibold text-foreground">No contacts found</h3>
@@ -161,7 +170,7 @@ export default function ContactsPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-subtle">
-                                {filteredContacts.map((contact) => (
+                                {sortedContacts.map((contact) => (
                                     <tr key={contact.id}
                                         onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
                                         className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"

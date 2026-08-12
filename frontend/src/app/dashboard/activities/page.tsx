@@ -9,12 +9,14 @@ import ColumnFilter from '@/components/ColumnFilter';
 import { Plus, Trash2, Activity, Loader2, Settings, Check, X, Search } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
+import SortControl from '@/components/SortControl';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
 interface TaskType { id: number; name: string; color: string; }
 interface ActivityRecord {
     id: number; task_type_id: number | null; task_type?: TaskType; subject: string;
     regarding: string | null; start_date: string | null; due_date: string | null;
-    notes: string | null; created_at: string;
+    notes: string | null; created_at: string; is_active?: boolean;
 }
 
 function fmt(d: string | null) {
@@ -40,6 +42,8 @@ export default function ActivitiesPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<number | 'All'>('All');
     const [searchQuery, setSearchQuery] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
     const { isRTL } = usePreferences();
@@ -130,6 +134,19 @@ export default function ActivitiesPage() {
         return matchesType && matchesSearch && matchesColumns;
     });
 
+    const sortedActivities = [...filtered].sort((a, b) => {
+        if (sortBy === 'active') {
+            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
+        }
+        if (sortBy === 'start_date') {
+            return compareSortValues(dateSortValue(a.start_date), dateSortValue(b.start_date), sortDirection);
+        }
+        if (sortBy === 'due_date') {
+            return compareSortValues(dateSortValue(a.due_date), dateSortValue(b.due_date), sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
+    });
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -181,8 +198,8 @@ export default function ActivitiesPage() {
 
             {/* Table */}
             <div className="rounded-2xl overflow-hidden glass-card">
-                <div className="border-b border-border-subtle p-4">
-                    <div className="relative max-w-sm">
+                <div className="flex flex-col gap-3 border-b border-border-subtle p-4 sm:flex-row">
+                    <div className="relative max-w-sm flex-1">
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-text" />
                         <input
                             type="text"
@@ -192,13 +209,25 @@ export default function ActivitiesPage() {
                             className="w-full rounded-xl border border-black/5 bg-black/5 py-2 text-xl text-foreground placeholder-muted-text outline-none transition-all ltr:pl-9 ltr:pr-3 rtl:pl-3 rtl:pr-9 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10 dark:border-white/5 dark:bg-white/5"
                         />
                     </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'start_date', label: 'Start Date' },
+                            { value: 'due_date', label: 'Due Date' },
+                        ]}
+                    />
                 </div>
                 <ScrollableTable>
                     {loading ? (
                         <div className="flex items-center justify-center h-48">
                             <Loader2 className="w-8 h-8 animate-spin text-crm-500" />
                         </div>
-                    ) : filtered.length === 0 ? (
+                    ) : sortedActivities.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-20 text-center">
                             <div className="w-16 h-16 rounded-full bg-background-subtle flex items-center justify-center mb-4 border border-border-subtle shadow-inner">
                                 <Activity className="w-8 h-8 text-muted-text opacity-50" />
@@ -236,7 +265,7 @@ export default function ActivitiesPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-subtle">
-                                {filtered.map(activity => {
+                                {sortedActivities.map(activity => {
                                     const tColor = activity.task_type?.color || '#9ca3af';
                                     const tName = activity.task_type?.name || 'Unassigned';
                                     return (

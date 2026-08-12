@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
-import SearchableDropdown from '@/components/SearchableDropdown';
+import SortControl from '@/components/SortControl';
 import ScrollableTable from '@/components/ScrollableTable';
 import CopyButton from '@/components/CopyButton';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -19,7 +20,8 @@ export default function AccountsPage() {
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [websiteFilter, setWebsiteFilter] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -39,7 +41,6 @@ export default function AccountsPage() {
     const filteredAccounts = accounts.filter(account => {
         const matchesSearch = account.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (account.website && account.website.toLowerCase().includes(searchQuery.toLowerCase()));
-        const matchesFilter = websiteFilter === 'has_website' ? !!account.website : true;
         const matchesColumns = matchesColumnFilters(columnFilters, {
             name: account.name,
             website: account.website,
@@ -47,15 +48,17 @@ export default function AccountsPage() {
             city: account.city,
             country: account.country,
         });
-        return matchesSearch && matchesFilter && matchesColumns;
+        return matchesSearch && matchesColumns;
     });
 
     const sortedAccounts = [...filteredAccounts].sort((a, b) => {
-        const aActive = a.is_active !== false;
-        const bActive = b.is_active !== false;
-        if (aActive && !bActive) return -1;
-        if (!aActive && bActive) return 1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        if (sortBy === 'active') {
+            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
+        }
+        if (sortBy === 'name') {
+            return compareSortValues(a.name, b.name, sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
     const handleReactivate = async (e: React.MouseEvent, accountId: number) => {
@@ -97,18 +100,17 @@ export default function AccountsPage() {
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
-                    <div className="sm:w-48">
-                        <SearchableDropdown
-                            value={websiteFilter}
-                            onChange={setWebsiteFilter}
-                            placeholder="All Accounts"
-                            className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
-                            options={[
-                                { value: '', label: 'All Accounts' },
-                                { value: 'has_website', label: 'Has Website' },
-                            ]}
-                        />
-                    </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'name', label: 'Account Name' },
+                        ]}
+                    />
                 </div>
 
                 <ScrollableTable>

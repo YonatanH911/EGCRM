@@ -7,10 +7,11 @@ import {
     FileText, Plus, Search, Building2, Calendar,
 } from 'lucide-react';
 import api from '@/lib/api';
-import SearchableDropdown from '@/components/SearchableDropdown';
+import SortControl from '@/components/SortControl';
 import ScrollableTable from '@/components/ScrollableTable';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
 interface Account { id: number; name: string; }
 interface Contract {
@@ -22,7 +23,6 @@ interface Contract {
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 
-const CONTRACT_TYPES = ['3-party', 'frame'];
 const contactTypeBadge = { bg: 'rgba(99,102,241,0.15)', color: '#a5b4fc', border: 'rgba(99,102,241,0.25)' };
 
 const formatDate = (d: string | null) =>
@@ -54,7 +54,8 @@ export default function ContractsPage() {
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterContactType, setFilterContactType] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -74,7 +75,6 @@ export default function ContractsPage() {
         const matchesSearch = titleParts.beneficiaryTitle.toLowerCase().includes(query) ||
             titleParts.supplierTitle.toLowerCase().includes(query) ||
             (contract.account?.name && contract.account.name.toLowerCase().includes(query));
-        const matchesFilter = filterContactType ? (contract.contact_type || '3-party') === filterContactType : true;
         const matchesColumns = matchesColumnFilters(columnFilters, {
             beneficiary: titleParts.beneficiaryTitle,
             supplier: titleParts.supplierTitle,
@@ -83,15 +83,20 @@ export default function ContractsPage() {
             value: formatCurrency(contract.value, contract.currency),
             dates: `${formatDate(contract.start_date) || ''} ${formatDate(contract.end_date) || ''}`,
         });
-        return matchesSearch && matchesFilter && matchesColumns;
+        return matchesSearch && matchesColumns;
     });
 
     const sortedContracts = [...filteredContracts].sort((a, b) => {
-        const aActive = a.is_active !== false;
-        const bActive = b.is_active !== false;
-        if (aActive && !bActive) return -1;
-        if (!aActive && bActive) return 1;
-        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        if (sortBy === 'active') {
+            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
+        }
+        if (sortBy === 'start_date') {
+            return compareSortValues(dateSortValue(a.start_date), dateSortValue(b.start_date), sortDirection);
+        }
+        if (sortBy === 'end_date') {
+            return compareSortValues(dateSortValue(a.end_date), dateSortValue(b.end_date), sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
     const handleReactivate = async (e: React.MouseEvent, contractId: number) => {
@@ -133,18 +138,18 @@ export default function ContractsPage() {
                             className="w-full ltr:pl-9 ltr:pr-3 rtl:pr-9 rtl:pl-3 py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
                         />
                     </div>
-                    <div className="sm:w-44">
-                        <SearchableDropdown
-                            value={filterContactType}
-                            onChange={setFilterContactType}
-                            placeholder="All Contact Types"
-                            className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/5 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
-                            options={[
-                                { value: '', label: 'All Contact Types' },
-                                ...CONTRACT_TYPES.map(type => ({ value: type, label: type })),
-                            ]}
-                        />
-                    </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'active', label: 'Active' },
+                            { value: 'start_date', label: 'Signed Date' },
+                            { value: 'end_date', label: 'Expiry Date' },
+                        ]}
+                    />
                 </div>
 
                 {/* Table */}

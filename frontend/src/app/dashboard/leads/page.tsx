@@ -5,7 +5,8 @@ import Link from 'next/link';
 import api from '@/lib/api';
 import { Briefcase, Plus, MoreHorizontal, ArrowRight, DollarSign, Calendar, Search, Loader2 } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
-import SearchableDropdown from '@/components/SearchableDropdown';
+import SortControl from '@/components/SortControl';
+import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 
 const STATUSES = ['New', 'Contacted', 'Qualified', 'Lost'];
 
@@ -20,7 +21,8 @@ export default function LeadsKanbanPage() {
     const [leads, setLeads] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [filterLead, setFilterLead] = useState('');
+    const [sortBy, setSortBy] = useState('created_at');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const { isRTL } = usePreferences();
 
     const fetchLeads = async () => {
@@ -47,12 +49,20 @@ export default function LeadsKanbanPage() {
 
     const filteredLeads = leads.filter(lead => {
         const matchesSearch = lead.title?.toLowerCase().includes(searchQuery.toLowerCase());
-        let matchesFilter = true;
-        if (filterLead === 'has_value') matchesFilter = (lead.value && lead.value > 0);
-        return matchesSearch && matchesFilter;
+        return matchesSearch;
     });
 
-    const leadsByStatus = (status: string) => filteredLeads.filter((l) => l.status === status);
+    const sortedLeads = [...filteredLeads].sort((a, b) => {
+        if (sortBy === 'status') {
+            return compareSortValues(STATUSES.indexOf(a.status), STATUSES.indexOf(b.status), sortDirection);
+        }
+        if (sortBy === 'value') {
+            return compareSortValues(a.value, b.value, sortDirection);
+        }
+        return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
+    });
+
+    const leadsByStatus = (status: string) => sortedLeads.filter((l) => l.status === status);
 
     return (
         <div className="h-[calc(100vh-8rem)] flex flex-col space-y-5">
@@ -67,7 +77,7 @@ export default function LeadsKanbanPage() {
                         <p className="text-lg text-muted-text">Track and manage your opportunities across stages.</p>
                     </div>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-center">
+                <div className="flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end xl:flex-nowrap">
                     <div className="relative w-full sm:w-56">
                         <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-4 w-4 text-muted-text`} />
                         <input type="text" placeholder="Search leads…"
@@ -75,18 +85,17 @@ export default function LeadsKanbanPage() {
                             className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10`}
                         />
                     </div>
-                    <div className="w-full sm:w-32">
-                        <SearchableDropdown
-                            value={filterLead}
-                            onChange={setFilterLead}
-                            placeholder="All Leads"
-                            className="px-3 py-2 text-xl rounded-xl text-foreground focus:outline-none bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10"
-                            options={[
-                                { value: '', label: 'All Leads' },
-                                { value: 'has_value', label: 'Has Value' },
-                            ]}
-                        />
-                    </div>
+                    <SortControl
+                        value={sortBy}
+                        onChange={setSortBy}
+                        direction={sortDirection}
+                        onDirectionChange={setSortDirection}
+                        options={[
+                            { value: 'created_at', label: 'Date Created' },
+                            { value: 'status', label: 'Pipeline Status' },
+                            { value: 'value', label: 'Value' },
+                        ]}
+                    />
                     <Link href="/dashboard/leads/new"
                         className="inline-flex items-center gap-2 px-4 py-2 text-xl font-semibold text-white rounded-xl bg-crm-500 hover:bg-crm-600 shadow-lg shadow-crm-500/20 whitespace-nowrap transition-transform hover:-translate-y-0.5 duration-200">
                         <Plus className="w-4 h-4" /> New Lead
