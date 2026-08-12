@@ -122,6 +122,24 @@ def split_contract_title(title: str) -> tuple[str, str]:
     return parts[0].strip(), parts[1].strip()
 
 
+def activity_type_from_subject(subject: Any) -> str:
+    """Extract the activity category written at the start of an imported subject."""
+    value = clean(subject)
+    lowered = value.casefold()
+    known_prefixes = (
+        (r"^billing\b", "Billing"),
+        (r"^dep(?:osit)?\s+req(?:uest)?\b", "Dep Req"),
+        (r"^ronen\b", "Ronen"),
+        (r"^termination\b", "Termination"),
+    )
+    for pattern, activity_type in known_prefixes:
+        if re.match(pattern, lowered):
+            return activity_type
+
+    parts = re.split(r"\s+-\s+", value, maxsplit=1)
+    return parts[0].strip() if len(parts) == 2 else ""
+
+
 class WorkbookRows:
     def __init__(self, path: Path):
         self.path = path
@@ -165,6 +183,7 @@ class ExcelImporter:
         self._contacts: list[models.Contact] | None = None
         self._vaults_by_name: dict[str, list[models.Vault]] | None = None
         self._activities_by_key: dict[tuple[str, datetime | None, datetime | None], list[models.Activity]] | None = None
+        self._task_types_by_name: dict[str, models.TaskType] | None = None
 
     def load_mappings(self) -> None:
         try:
@@ -554,12 +573,19 @@ class ExcelImporter:
             book.close()
 
     def task_type(self, name: str) -> models.TaskType:
-        task_type = self.db.query(models.TaskType).filter(models.TaskType.name == name).first()
+        if self._task_types_by_name is None:
+            self._task_types_by_name = {
+                normalized(task_type.name): task_type
+                for task_type in self.db.query(models.TaskType).all()
+            }
+        key = normalized(name)
+        task_type = self._task_types_by_name.get(key)
         if task_type:
             return task_type
         task_type = models.TaskType(name=name[:50], color="#6366f1")
         self.db.add(task_type)
         self.db.flush()
+        self._task_types_by_name[key] = task_type
         return task_type
 
     def import_activities(self) -> None:
@@ -600,7 +626,11 @@ class ExcelImporter:
                     stats.created += 1
                 else:
                     stats.matched += 1
-                activity_type = clean(book.value(row, "Activity Type")) or "Task"
+                activity_type = (
+                    activity_type_from_subject(subject)
+                    or clean(book.value(row, "Activity Type"))
+                    or "Task"
+                )
                 task_type = self.task_type(activity_type)
                 changed = self.set_value(activity, "subject", subject)
                 changed |= self.set_value(activity, "regarding", clean(book.value(row, "Regarding")))

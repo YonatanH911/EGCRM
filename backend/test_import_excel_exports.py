@@ -6,6 +6,7 @@ import openpyxl
 
 from import_excel_exports import (
     WorkbookRows,
+    activity_type_from_subject,
     normalize_header,
     parse_yes_no,
     split_contract_title,
@@ -32,6 +33,23 @@ class ExcelImportTests(unittest.TestCase):
             split_contract_title("6 Cross North - RS Industries"),
             ("6 Cross North", "RS Industries"),
         )
+
+    def test_extracts_activity_type_from_subject(self):
+        cases = {
+            "Billing - invoice sent": "Billing",
+            "BILLING -Customer follow-up": "Billing",
+            "Dep req for Clal - FU Ofer": "Dep Req",
+            "Dep request Elbit / Simigon": "Dep Req",
+            "RONEN - follow up": "Ronen",
+            "Termination - old contract": "Termination",
+            "Letter of transfer - Enlight": "Letter of transfer",
+        }
+        for subject, expected in cases.items():
+            with self.subTest(subject=subject):
+                self.assertEqual(activity_type_from_subject(subject), expected)
+
+    def test_activity_type_is_empty_without_a_recognized_prefix(self):
+        self.assertEqual(activity_type_from_subject("General follow-up"), "")
 
     def test_reads_values_by_normalized_header(self):
         with tempfile.TemporaryDirectory() as directory:
