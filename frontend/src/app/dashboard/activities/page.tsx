@@ -11,6 +11,7 @@ import { usePreferences } from '@/components/PreferencesProvider';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import SortControl from '@/components/SortControl';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
+import InactiveToggle from '@/components/InactiveToggle';
 
 interface TaskType { id: number; name: string; color: string; }
 interface ActivityRecord {
@@ -44,6 +45,7 @@ export default function ActivitiesPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [showInactive, setShowInactive] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
     const { isRTL } = usePreferences();
@@ -114,6 +116,7 @@ export default function ActivitiesPage() {
     };
 
     const filtered = activities.filter(activity => {
+        const matchesActive = showInactive || activity.is_active !== false;
         const matchesType = filter === 'All' || activity.task_type_id === filter;
         const query = searchQuery.trim().toLocaleLowerCase();
         const matchesSearch = !query || [
@@ -131,13 +134,10 @@ export default function ActivitiesPage() {
             sentOn: fmt(activity.start_date),
             dueDate: fmt(activity.due_date),
         });
-        return matchesType && matchesSearch && matchesColumns;
+        return matchesActive && matchesType && matchesSearch && matchesColumns;
     });
 
     const sortedActivities = [...filtered].sort((a, b) => {
-        if (sortBy === 'active') {
-            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
-        }
         if (sortBy === 'start_date') {
             return compareSortValues(dateSortValue(a.start_date), dateSortValue(b.start_date), sortDirection);
         }
@@ -216,10 +216,14 @@ export default function ActivitiesPage() {
                         onDirectionChange={setSortDirection}
                         options={[
                             { value: 'created_at', label: 'Date Created' },
-                            { value: 'active', label: 'Active' },
                             { value: 'start_date', label: 'Start Date' },
                             { value: 'due_date', label: 'Due Date' },
                         ]}
+                    />
+                    <InactiveToggle
+                        checked={showInactive}
+                        onChange={setShowInactive}
+                        label="Show inactive activities?"
                     />
                 </div>
                 <ScrollableTable>

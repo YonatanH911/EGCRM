@@ -11,6 +11,7 @@ import CopyButton from '@/components/CopyButton';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
+import InactiveToggle from '@/components/InactiveToggle';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -24,6 +25,7 @@ export default function ContactsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [showInactive, setShowInactive] = useState(false);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -60,6 +62,7 @@ export default function ContactsPage() {
     };
 
     const filteredContacts = contacts.filter(contact => {
+        const matchesActive = showInactive || contact.is_active !== false;
         const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.toLowerCase();
         const query = searchQuery.toLowerCase();
         const matchesSearch = fullName.includes(query) ||
@@ -76,13 +79,10 @@ export default function ContactsPage() {
             isIsraeli,
             created: new Date(contact.created_at).toLocaleDateString(),
         });
-        return matchesSearch && matchesColumns;
+        return matchesActive && matchesSearch && matchesColumns;
     });
 
     const sortedContacts = [...filteredContacts].sort((a, b) => {
-        if (sortBy === 'active') {
-            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
-        }
         if (sortBy === 'name') {
             const aName = `${a.first_name || ''} ${a.last_name || ''}`.trim();
             const bName = `${b.first_name || ''} ${b.last_name || ''}`.trim();
@@ -126,9 +126,13 @@ export default function ContactsPage() {
                         onDirectionChange={setSortDirection}
                         options={[
                             { value: 'created_at', label: 'Date Created' },
-                            { value: 'active', label: 'Active' },
                             { value: 'name', label: 'Contact Name' },
                         ]}
+                    />
+                    <InactiveToggle
+                        checked={showInactive}
+                        onChange={setShowInactive}
+                        label="Show inactive contacts?"
                     />
                 </div>
 

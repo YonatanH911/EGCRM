@@ -11,6 +11,7 @@ import CopyButton from '@/components/CopyButton';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
+import InactiveToggle from '@/components/InactiveToggle';
 
 const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
 const tdCls = "px-6 py-4 whitespace-nowrap";
@@ -22,6 +23,7 @@ export default function AccountsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [showInactive, setShowInactive] = useState(false);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -39,6 +41,7 @@ export default function AccountsPage() {
     }, []);
 
     const filteredAccounts = accounts.filter(account => {
+        const matchesActive = showInactive || account.is_active !== false;
         const matchesSearch = account.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (account.website && account.website.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesColumns = matchesColumnFilters(columnFilters, {
@@ -48,13 +51,10 @@ export default function AccountsPage() {
             city: account.city,
             country: account.country,
         });
-        return matchesSearch && matchesColumns;
+        return matchesActive && matchesSearch && matchesColumns;
     });
 
     const sortedAccounts = [...filteredAccounts].sort((a, b) => {
-        if (sortBy === 'active') {
-            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
-        }
         if (sortBy === 'name') {
             return compareSortValues(a.name, b.name, sortDirection);
         }
@@ -107,9 +107,13 @@ export default function AccountsPage() {
                         onDirectionChange={setSortDirection}
                         options={[
                             { value: 'created_at', label: 'Date Created' },
-                            { value: 'active', label: 'Active' },
                             { value: 'name', label: 'Account Name' },
                         ]}
+                    />
+                    <InactiveToggle
+                        checked={showInactive}
+                        onChange={setShowInactive}
+                        label="Show inactive accounts?"
                     />
                 </div>
 

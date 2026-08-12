@@ -12,6 +12,7 @@ import ScrollableTable from '@/components/ScrollableTable';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
+import InactiveToggle from '@/components/InactiveToggle';
 
 interface Account { id: number; name: string; }
 interface Contract {
@@ -56,6 +57,7 @@ export default function ContractsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [showInactive, setShowInactive] = useState(false);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -70,6 +72,7 @@ export default function ContractsPage() {
     }, []);
 
     const filteredContracts = contracts.filter(contract => {
+        const matchesActive = showInactive || contract.is_active !== false;
         const titleParts = splitContractTitle(contract);
         const query = searchQuery.toLowerCase();
         const matchesSearch = titleParts.beneficiaryTitle.toLowerCase().includes(query) ||
@@ -83,13 +86,10 @@ export default function ContractsPage() {
             value: formatCurrency(contract.value, contract.currency),
             dates: `${formatDate(contract.start_date) || ''} ${formatDate(contract.end_date) || ''}`,
         });
-        return matchesSearch && matchesColumns;
+        return matchesActive && matchesSearch && matchesColumns;
     });
 
     const sortedContracts = [...filteredContracts].sort((a, b) => {
-        if (sortBy === 'active') {
-            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
-        }
         if (sortBy === 'start_date') {
             return compareSortValues(dateSortValue(a.start_date), dateSortValue(b.start_date), sortDirection);
         }
@@ -145,10 +145,14 @@ export default function ContractsPage() {
                         onDirectionChange={setSortDirection}
                         options={[
                             { value: 'created_at', label: 'Date Created' },
-                            { value: 'active', label: 'Active' },
                             { value: 'start_date', label: 'Signed Date' },
                             { value: 'end_date', label: 'Expiry Date' },
                         ]}
+                    />
+                    <InactiveToggle
+                        checked={showInactive}
+                        onChange={setShowInactive}
+                        label="Show inactive contracts?"
                     />
                 </div>
 

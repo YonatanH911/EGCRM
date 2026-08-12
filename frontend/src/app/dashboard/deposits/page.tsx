@@ -11,6 +11,7 @@ import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import SortControl from '@/components/SortControl';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
+import InactiveToggle from '@/components/InactiveToggle';
 
 interface Vault { id: number; name: string; }
 interface Deposit {
@@ -44,6 +45,7 @@ export default function DepositsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [showInactive, setShowInactive] = useState(false);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -56,6 +58,7 @@ export default function DepositsPage() {
     }, []);
 
     const filteredDeposits = deposits.filter(deposit => {
+        const matchesActive = showInactive || deposit.is_active !== false;
         const q = searchQuery.toLowerCase();
         const matchesSearch = (
             (deposit.reference_number || '').toLowerCase().includes(q) ||
@@ -73,13 +76,10 @@ export default function DepositsPage() {
             depositNumber: deposit.reference_number,
             status: deposit.status || 'Pending',
         });
-        return matchesSearch && matchesColumns;
+        return matchesActive && matchesSearch && matchesColumns;
     });
 
     const sortedDeposits = [...filteredDeposits].sort((a, b) => {
-        if (sortBy === 'active') {
-            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
-        }
         if (sortBy === 'date') {
             return compareSortValues(dateSortValue(a.date), dateSortValue(b.date), sortDirection);
         }
@@ -126,10 +126,14 @@ export default function DepositsPage() {
                         onDirectionChange={setSortDirection}
                         options={[
                             { value: 'created_at', label: 'Date Created' },
-                            { value: 'active', label: 'Active' },
                             { value: 'date', label: 'Date Received' },
                             { value: 'date_report_sent', label: 'Date Report Sent' },
                         ]}
+                    />
+                    <InactiveToggle
+                        checked={showInactive}
+                        onChange={setShowInactive}
+                        label="Show inactive deposits?"
                     />
                 </div>
 

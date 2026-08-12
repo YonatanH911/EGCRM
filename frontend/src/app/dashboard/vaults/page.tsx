@@ -10,6 +10,7 @@ import ScrollableTable from '@/components/ScrollableTable';
 import ColumnFilter from '@/components/ColumnFilter';
 import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
+import InactiveToggle from '@/components/InactiveToggle';
 
 interface Vault { id: number; name: string; location: string | null; capacity: string | null; status: string; created_at: string; is_active?: boolean; }
 
@@ -32,6 +33,7 @@ export default function VaultsPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState('created_at');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [showInactive, setShowInactive] = useState(false);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
 
     useEffect(() => {
@@ -44,6 +46,7 @@ export default function VaultsPage() {
     }, []);
 
     const filteredVaults = vaults.filter(vault => {
+        const matchesActive = showInactive || vault.is_active !== false;
         const matchesSearch = vault.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (vault.location && vault.location.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesColumns = matchesColumnFilters(columnFilters, {
@@ -53,13 +56,10 @@ export default function VaultsPage() {
             capacity: vault.capacity,
             createdAt: new Date(vault.created_at).toLocaleDateString(),
         });
-        return matchesSearch && matchesColumns;
+        return matchesActive && matchesSearch && matchesColumns;
     });
 
     const sortedVaults = [...filteredVaults].sort((a, b) => {
-        if (sortBy === 'active') {
-            return compareSortValues(a.is_active !== false, b.is_active !== false, sortDirection);
-        }
         if (sortBy === 'status') {
             return compareSortValues(a.status, b.status, sortDirection);
         }
@@ -102,9 +102,13 @@ export default function VaultsPage() {
                         onDirectionChange={setSortDirection}
                         options={[
                             { value: 'created_at', label: 'Date Created' },
-                            { value: 'active', label: 'Active' },
                             { value: 'status', label: 'Vault Status' },
                         ]}
+                    />
+                    <InactiveToggle
+                        checked={showInactive}
+                        onChange={setShowInactive}
+                        label="Show inactive vaults?"
                     />
                 </div>
 
