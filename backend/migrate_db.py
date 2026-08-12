@@ -76,7 +76,18 @@ def migrate():
         "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
         "ALTER TABLE activities ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
         "ALTER TABLE vaults ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
-        "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;"
+        "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
+
+        # 7. Stable IDs for repeatable imports from Dynamics Excel exports
+        """
+        CREATE TABLE IF NOT EXISTS legacy_import_ids (
+            entity_type VARCHAR(32) NOT NULL,
+            source_id VARCHAR(64) NOT NULL,
+            local_id INT NOT NULL,
+            PRIMARY KEY (entity_type, source_id),
+            INDEX idx_legacy_import_local (entity_type, local_id)
+        );
+        """
     ]
 
     print("Starting database migration...")

@@ -1,0 +1,56 @@
+import tempfile
+import unittest
+from pathlib import Path
+
+import openpyxl
+
+from import_excel_exports import (
+    WorkbookRows,
+    normalize_header,
+    parse_yes_no,
+    split_contract_title,
+    split_name,
+)
+
+
+class ExcelImportTests(unittest.TestCase):
+    def test_normalizes_export_headers(self):
+        self.assertEqual(normalize_header("  Israeli? "), "israeli")
+        self.assertEqual(normalize_header("(Do Not Modify) Contact"), "do not modify contact")
+
+    def test_preserves_unknown_boolean(self):
+        self.assertTrue(parse_yes_no("Yes"))
+        self.assertFalse(parse_yes_no("No"))
+        self.assertIsNone(parse_yes_no(None))
+
+    def test_uses_full_name_only_when_parts_are_missing(self):
+        self.assertEqual(split_name(None, None, None, "Ada Lovelace"), ("Ada", "", "Lovelace"))
+        self.assertEqual(split_name("Ada", None, "Lovelace", "Ignored"), ("Ada", "", "Lovelace"))
+
+    def test_splits_contract_parties(self):
+        self.assertEqual(
+            split_contract_title("6 Cross North - RS Industries"),
+            ("6 Cross North", "RS Industries"),
+        )
+
+    def test_reads_values_by_normalized_header(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "contacts.xlsx"
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+            worksheet.append([" Full Name", "Israeli?"])
+            worksheet.append(["Ada Lovelace", "Yes"])
+            workbook.save(path)
+            workbook.close()
+
+            rows = WorkbookRows(path)
+            try:
+                row = next(rows.rows())
+                self.assertEqual(rows.value(row, "Full Name"), "Ada Lovelace")
+                self.assertEqual(rows.value(row, "Israeli?"), "Yes")
+            finally:
+                rows.close()
+
+
+if __name__ == "__main__":
+    unittest.main()
