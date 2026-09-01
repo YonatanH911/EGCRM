@@ -7,6 +7,7 @@ Usage:
     python import_excel_exports.py ../excel
     python import_excel_exports.py ../excel --apply
     python import_excel_exports.py ../excel --apply --overwrite
+    python import_excel_exports.py ../excel --activities-only --apply
 """
 from __future__ import annotations
 
@@ -644,8 +645,19 @@ class ExcelImporter:
         finally:
             book.close()
 
-    def run(self) -> None:
+    def run(self, activities_only: bool = False) -> None:
         self.load_mappings()
+        if activities_only:
+            self.import_activities()
+            if self.apply:
+                self.db.commit()
+            else:
+                self.db.rollback()
+            print("\nImport Summary")
+            self.stats["Activities"].display("Activities")
+            print("Changes committed." if self.apply else "Dry run only; no imported data was committed.")
+            return
+
         # Active rows go first so they win if an export contains an overlap.
         self.import_accounts("active_accounts", True)
         self.import_accounts("inactive_accounts", False)
@@ -685,6 +697,11 @@ def parse_args():
     parser.add_argument("directory", type=Path, help="Directory containing the nine .xlsx exports.")
     parser.add_argument("--apply", action="store_true", help="Commit changes; otherwise run a dry run.")
     parser.add_argument(
+        "--activities-only",
+        action="store_true",
+        help="Import only Activities.xlsx and leave every other entity unchanged.",
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="Replace populated CRM fields with non-empty spreadsheet values.",
@@ -695,7 +712,8 @@ def parse_args():
 def main() -> int:
     args = parse_args()
     directory = args.directory.expanduser().resolve()
-    missing = validate_files(directory)
+    required_files = {"activities": FILES["activities"]} if args.activities_only else FILES
+    missing = [name for name in required_files.values() if not (directory / name).is_file()]
     if missing:
         print("Missing required exports:")
         for name in missing:
@@ -712,7 +730,7 @@ def main() -> int:
     )
     importer = ExcelImporter(directory, args.apply, args.overwrite)
     try:
-        importer.run()
+        importer.run(activities_only=args.activities_only)
     except Exception:
         importer.db.rollback()
         raise
