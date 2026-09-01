@@ -1,6 +1,7 @@
 import tempfile
 import unittest
 from pathlib import Path
+from types import SimpleNamespace
 
 import openpyxl
 
@@ -11,6 +12,7 @@ from import_excel_exports import (
     parse_yes_no,
     split_contract_title,
     split_name,
+    unique_unclaimed,
 )
 
 
@@ -50,6 +52,12 @@ class ExcelImportTests(unittest.TestCase):
 
     def test_activity_type_is_empty_without_a_recognized_prefix(self):
         self.assertEqual(activity_type_from_subject("General follow-up"), "")
+
+    def test_selects_only_one_unclaimed_contract_candidate(self):
+        candidates = [SimpleNamespace(id=1), SimpleNamespace(id=2)]
+        self.assertEqual(unique_unclaimed(candidates, {1}).id, 2)
+        self.assertIsNone(unique_unclaimed(candidates, set()))
+        self.assertIsNone(unique_unclaimed(candidates, {1, 2}))
 
     def test_reads_values_by_normalized_header(self):
         with tempfile.TemporaryDirectory() as directory:

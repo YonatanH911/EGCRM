@@ -8,6 +8,7 @@ Usage:
     python import_excel_exports.py ../excel --apply
     python import_excel_exports.py ../excel --apply --overwrite
     python import_excel_exports.py ../excel --activities-only --apply
+    python import_excel_exports.py ../excel --contracts-only --apply
 """
 from __future__ import annotations
 
@@ -139,6 +140,11 @@ def activity_type_from_subject(subject: Any) -> str:
 
     parts = re.split(r"\s+-\s+", value, maxsplit=1)
     return parts[0].strip() if len(parts) == 2 else ""
+
+
+def unique_unclaimed(candidates: list[Any], claimed_ids: set[int]):
+    available = [candidate for candidate in candidates if candidate.id not in claimed_ids]
+    return available[0] if len(available) == 1 else None
 
 
 class WorkbookRows:
@@ -451,6 +457,11 @@ class ExcelImporter:
         by_title: dict[str, list[models.Contract]] = defaultdict(list)
         for contract in contracts:
             by_title[normalized(contract.title)].append(contract)
+        claimed_ids = {
+            local_id
+            for (entity_type, _), local_id in self.mappings.items()
+            if entity_type == "contract"
+        }
         try:
             for row in book.rows():
                 stats.scanned += 1
@@ -462,7 +473,7 @@ class ExcelImporter:
                 contract = self.mapped("contract", source_id, models.Contract)
                 if contract is None:
                     candidates = by_title.get(normalized(title), [])
-                    contract = candidates[0] if len(candidates) == 1 else None
+                    contract = unique_unclaimed(candidates, claimed_ids)
                 beneficiary, supplier = split_contract_title(title)
                 created = contract is None
                 if created:
@@ -500,6 +511,7 @@ class ExcelImporter:
                 )
                 changed |= self.set_activity(contract, "contract", active)
                 self.remember("contract", source_id, contract.id)
+                claimed_ids.add(contract.id)
                 if changed and not created:
                     stats.changed += 1
         finally:
@@ -645,7 +657,7 @@ class ExcelImporter:
         finally:
             book.close()
 
-    def run(self, activities_only: bool = False) -> None:
+    def run(self, activities_only: bool = False, contracts_only: bool = False) -> None:
         self.load_mappings()
         if activities_only:
             self.import_activities()
@@ -655,6 +667,18 @@ class ExcelImporter:
                 self.db.rollback()
             print("\nImport Summary")
             self.stats["Activities"].display("Activities")
+            print("Changes committed." if self.apply else "Dry run only; no imported data was committed.")
+            return
+        if contracts_only:
+            self.import_contracts("active_contracts", True)
+            self.import_contracts("inactive_contracts", False)
+            if self.apply:
+                self.db.commit()
+            else:
+                self.db.rollback()
+            print("\nImport Summary")
+            self.stats["Active Contracts"].display("Active Contracts")
+            self.stats["Inactive Contracts"].display("Inactive Contracts")
             print("Changes committed." if self.apply else "Dry run only; no imported data was committed.")
             return
 
@@ -696,10 +720,16 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Import active and inactive EGCRM Excel exports.")
     parser.add_argument("directory", type=Path, help="Directory containing the nine .xlsx exports.")
     parser.add_argument("--apply", action="store_true", help="Commit changes; otherwise run a dry run.")
-    parser.add_argument(
+    scope = parser.add_mutually_exclusive_group()
+    scope.add_argument(
         "--activities-only",
         action="store_true",
         help="Import only Activities.xlsx and leave every other entity unchanged.",
+    )
+    scope.add_argument(
+        "--contracts-only",
+        action="store_true",
+        help="Import only active and inactive Contract exports and leave other entities unchanged.",
     )
     parser.add_argument(
         "--overwrite",
@@ -712,7 +742,15 @@ def parse_args():
 def main() -> int:
     args = parse_args()
     directory = args.directory.expanduser().resolve()
-    required_files = {"activities": FILES["activities"]} if args.activities_only else FILES
+    if args.activities_only:
+        required_files = {"activities": FILES["activities"]}
+    elif args.contracts_only:
+        required_files = {
+            "active_contracts": FILES["active_contracts"],
+            "inactive_contracts": FILES["inactive_contracts"],
+        }
+    else:
+        required_files = FILES
     missing = [name for name in required_files.values() if not (directory / name).is_file()]
     if missing:
         print("Missing required exports:")
@@ -730,7 +768,10 @@ def main() -> int:
     )
     importer = ExcelImporter(directory, args.apply, args.overwrite)
     try:
-        importer.run(activities_only=args.activities_only)
+        importer.run(
+            activities_only=args.activities_only,
+            contracts_only=args.contracts_only,
+        )
     except Exception:
         importer.db.rollback()
         raise
