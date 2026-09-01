@@ -47,6 +47,7 @@ def migrate():
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_annual_fee VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_updates VARCHAR(255) NULL;",
         "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS supplier_ext_verification VARCHAR(255) NULL;",
+        "ALTER TABLE contracts ADD COLUMN IF NOT EXISTS description TEXT NULL;",
         "UPDATE contracts SET contact_type = '3-party' WHERE contact_type IS NULL OR contact_type = '';",
         "UPDATE contracts SET beneficiary_currency = currency WHERE (beneficiary_currency IS NULL OR beneficiary_currency = '') AND currency IS NOT NULL;",
         "UPDATE contracts SET beneficiary_currency = 'USD' WHERE beneficiary_currency IS NULL OR beneficiary_currency = '';",

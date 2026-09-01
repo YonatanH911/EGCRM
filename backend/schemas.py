@@ -149,6 +149,7 @@ class ContractBase(BaseSchema):
     deposit_id: Optional[int] = None
     deposit_ids: Optional[List[int]] = None
     product_name: Optional[str] = None
+    description: Optional[str] = None
     is_active: Optional[bool] = True
 
 class ContractCreate(ContractBase):

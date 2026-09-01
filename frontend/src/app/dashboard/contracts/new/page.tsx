@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowLeft, Loader2, Check, FileText, User, CreditCard } from 'lucide-react';
 import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
+import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
 interface Account { id: number; name: string; }
@@ -21,7 +22,7 @@ type FormField =
     'beneficiary_currency' | 'beneficiary_set_up_fee' | 'beneficiary_annual_fee' | 'beneficiary_updates' | 'beneficiary_ext_verification' |
     'supplier_currency' | 'supplier_set_up_fee' | 'supplier_annual_fee' | 'supplier_updates' | 'supplier_ext_verification' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
-    'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact';
+    'supplier_management_contact' | 'supplier_technical_contact' | 'supplier_financial_contact' | 'description';
 
 const CUBES = [
     {
@@ -57,6 +58,7 @@ const emptyForm: Record<FormField, string | string[]> = {
     start_date: '', end_date: '', paid_by: [],
     beneficiary_management_contact: [], beneficiary_technical_contact: [], beneficiary_financial_contact: [],
     supplier_management_contact: [],   supplier_technical_contact: [],   supplier_financial_contact: [],
+    description: '',
 };
 
 const BILLING_COLUMNS = [
@@ -304,6 +306,23 @@ export default function NewContractPage() {
                                 ))}
                             </div>
                         ))}
+                    </div>
+                </div>
+
+                {/* Description */}
+                <div className="glass-card rounded-2xl overflow-visible border border-border-subtle">
+                    <div className="px-6 py-4 border-b border-border-subtle bg-black/5 dark:bg-white/5 flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-indigo-500" />
+                        <h2 className="text-xl font-semibold text-foreground">Description</h2>
+                    </div>
+                    <div className="p-6">
+                        <AutoResizeTextarea
+                            value={form.description as string}
+                            onChange={(value) => setForm(prev => ({ ...prev, description: value }))}
+                            className={inputCls}
+                            placeholder=""
+                            minRows={8}
+                        />
                     </div>
                 </div>
 
