@@ -164,7 +164,7 @@ export default function EditActivityPage() {
 
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/activities"
                     className="p-2.5 rounded-xl text-muted-text hover:text-foreground hover:bg-background-subtle transition-all">
@@ -199,6 +199,9 @@ export default function EditActivityPage() {
                             {error}
                         </div>
                     )}
+
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                        <div className="space-y-6">
 
                     {/* Activity Type */}
                     <div>
@@ -300,15 +303,19 @@ export default function EditActivityPage() {
                         </div>
                     </div>
 
+                        </div>
+
                     {/* Notes */}
-                    <div>
+                    <div className="xl:sticky xl:top-6">
                         <label className={labelCls}>Notes</label>
                         <AutoResizeTextarea
                             value={form.notes}
                             onChange={value => set('notes', value)}
                             className={inputCls}
                             placeholder=""
+                            minRows={22}
                         />
+                    </div>
                     </div>
 
                     {/* Actions */}

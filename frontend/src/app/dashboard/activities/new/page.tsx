@@ -117,7 +117,7 @@ export default function NewActivityPage() {
 
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
                 <Link href="/dashboard/activities" className="p-2.5 rounded-xl text-muted-text hover:text-foreground hover:bg-background-subtle transition-all">
                     <ArrowLeft className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
@@ -140,6 +140,9 @@ export default function NewActivityPage() {
                             {error}
                         </div>
                     )}
+
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+                        <div className="space-y-6">
 
                     {/* Activity Type */}
                     <div>
@@ -256,15 +259,19 @@ export default function NewActivityPage() {
                         </div>
                     </div>
 
+                        </div>
+
                     {/* Notes */}
-                    <div>
+                    <div className="xl:sticky xl:top-6">
                         <label className={labelCls}>Notes</label>
                         <AutoResizeTextarea
                             value={form.notes}
                             onChange={value => set('notes', value)}
                             placeholder=""
                             className={inputCls}
+                            minRows={22}
                         />
+                    </div>
                     </div>
 
                     <div className="pt-8 border-t border-border-subtle flex justify-end gap-3">
