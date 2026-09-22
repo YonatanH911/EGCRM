@@ -338,7 +338,7 @@ export default function EditAccountPage() {
                                         { value: '', label: 'No primary contact' },
                                         ...allContacts.map(contact => ({
                                             value: String(contact.id),
-                                            label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                            label: `${contact.first_name} ${contact.last_name}`,
                                             email: contact.email,
                                         })),
                                     ]}
@@ -465,7 +465,7 @@ export default function EditAccountPage() {
                                         { value: '', label: 'Select an existing contact to link' },
                                         ...unlinkedContactsList.map(c => ({
                                             value: String(c.id),
-                                            label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                            label: `${c.first_name} ${c.last_name}`,
                                             email: c.email,
                                         })),
                                     ]}

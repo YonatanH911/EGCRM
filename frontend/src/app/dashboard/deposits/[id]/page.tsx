@@ -391,7 +391,7 @@ export default function EditDepositPage() {
                                                     { value: '', label: 'No verifier selected' },
                                                     ...contacts.map(contact => ({
                                                         value: String(contact.id),
-                                                        label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                                        label: `${contact.first_name} ${contact.last_name}`,
                                                         email: contact.email,
                                                     })),
                                                 ]}

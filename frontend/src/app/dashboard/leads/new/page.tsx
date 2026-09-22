@@ -128,7 +128,7 @@ export default function NewLeadPage() {
                                 options={[
                                     ...contacts.map(c => ({
                                         value: String(c.id),
-                                        label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                        label: `${c.first_name} ${c.last_name}`,
                                         email: c.email,
                                     })),
                                 ]}

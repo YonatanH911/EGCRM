@@ -67,7 +67,8 @@ export default function SearchableDropdown({
         if (!normalizedQuery) return options;
         return options.filter(option =>
             option.label.toLowerCase().includes(normalizedQuery) ||
-            option.value.toLowerCase().includes(normalizedQuery)
+            option.value.toLowerCase().includes(normalizedQuery) ||
+            option.email?.toLowerCase().includes(normalizedQuery)
         );
     }, [options, query]);
 
@@ -255,6 +256,11 @@ export default function SearchableDropdown({
                                             className="flex min-w-0 flex-1 items-center gap-2 py-2 pl-3 text-left"
                                         >
                                             <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                                            {option.email && (
+                                                <span className="min-w-0 max-w-[45%] truncate text-base text-muted-text" title={option.email}>
+                                                    {option.email}
+                                                </span>
+                                            )}
                                             {active
                                                 ? <Check className="h-4 w-4 flex-shrink-0" />
                                                 : multiple && <Plus className="h-4 w-4 flex-shrink-0" />
