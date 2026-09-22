@@ -4,10 +4,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Check, ChevronDown, Plus, Search, X } from 'lucide-react';
 import clsx from 'clsx';
+import CopyButton from '@/components/CopyButton';
 
 export type DropdownOption = {
     value: string;
     label: string;
+    email?: string | null;
 };
 
 interface BaseSearchableDropdownProps {
@@ -142,14 +144,29 @@ export default function SearchableDropdown({
         setQuery('');
     };
 
+    const toggleOpen = () => {
+        if (!disabled) setOpen(prev => !prev);
+    };
+
     return (
         <div ref={rootRef} className="relative w-full">
-            <button
-                type="button"
-                disabled={disabled}
-                onClick={() => setOpen(prev => !prev)}
+            <div
+                role="button"
+                tabIndex={disabled ? -1 : 0}
+                aria-expanded={open}
+                aria-haspopup="listbox"
+                aria-disabled={disabled}
+                onClick={toggleOpen}
+                onKeyDown={event => {
+                    if (event.target !== event.currentTarget) return;
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleOpen();
+                    }
+                }}
                 className={clsx(
-                    'flex w-full items-center justify-between gap-3 text-left disabled:cursor-not-allowed disabled:opacity-60',
+                    'flex w-full cursor-pointer items-center justify-between gap-3 text-left',
+                    disabled && 'cursor-not-allowed opacity-60',
                     className
                 )}
             >
@@ -163,6 +180,7 @@ export default function SearchableDropdown({
                                         className="inline-flex max-w-full items-center gap-1 rounded-lg bg-crm-500/10 px-2 py-0.5 text-crm-500"
                                     >
                                         <span className="truncate">{option.label}</span>
+                                        <CopyButton value={option.email} label={`Copy email for ${option.label}`} />
                                         <span
                                             role="button"
                                             tabIndex={0}
@@ -189,12 +207,15 @@ export default function SearchableDropdown({
                         ) : placeholder}
                     </span>
                 ) : (
-                    <span className={clsx('min-w-0 flex-1 truncate', !selected && 'text-muted-text')}>
-                        {selected?.label || placeholder}
-                    </span>
+                    <>
+                        <span className={clsx('min-w-0 flex-1 truncate', !selected && 'text-muted-text')}>
+                            {selected?.label || placeholder}
+                        </span>
+                        <CopyButton value={selected?.email} label={`Copy email for ${selected?.label || 'contact'}`} />
+                    </>
                 )}
                 <ChevronDown className={clsx('h-4 w-4 flex-shrink-0 text-muted-text transition-transform', open && 'rotate-180')} />
-            </button>
+            </div>
 
             {open && typeof document !== 'undefined' && createPortal(
                 <div
@@ -219,23 +240,28 @@ export default function SearchableDropdown({
                                     ? selectedValues.includes(option.value)
                                     : option.value === value;
                                 return (
-                                    <button
+                                    <div
                                         key={`${option.value}-${option.label}`}
-                                        type="button"
-                                        onClick={() => selectOption(option.value)}
                                         className={clsx(
-                                            'flex w-full items-center gap-2 px-3 py-2 text-left text-xl transition-colors',
+                                            'flex w-full items-center gap-2 pr-3 text-left text-xl transition-colors',
                                             active
                                                 ? 'bg-crm-500/10 text-crm-500'
                                                 : 'text-foreground hover:bg-black/5 dark:hover:bg-white/5'
                                         )}
                                     >
-                                        <span className="min-w-0 flex-1 truncate">{option.label}</span>
-                                        {active
-                                            ? <Check className="h-4 w-4 flex-shrink-0" />
-                                            : multiple && <Plus className="h-4 w-4 flex-shrink-0" />
-                                        }
-                                    </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => selectOption(option.value)}
+                                            className="flex min-w-0 flex-1 items-center gap-2 py-2 pl-3 text-left"
+                                        >
+                                            <span className="min-w-0 flex-1 truncate">{option.label}</span>
+                                            {active
+                                                ? <Check className="h-4 w-4 flex-shrink-0" />
+                                                : multiple && <Plus className="h-4 w-4 flex-shrink-0" />
+                                            }
+                                        </button>
+                                        <CopyButton value={option.email} label={`Copy email for ${option.label}`} />
+                                    </div>
                                 );
                             })
                         ) : (

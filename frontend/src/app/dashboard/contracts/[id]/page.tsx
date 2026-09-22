@@ -8,7 +8,7 @@ import api from '@/lib/api';
 import SearchableDropdown from '@/components/SearchableDropdown';
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 
-interface Contact { id: number; first_name: string; last_name: string; job_title?: string; }
+interface Contact { id: number; first_name: string; last_name: string; job_title?: string; email?: string | null; }
 
 const CONTRACT_TYPES = ['3-party', 'frame'];
 const BILLING_CURRENCIES = ['EUR', 'USD', 'NIS', 'BP'].map(currency => ({ value: currency, label: currency }));
@@ -240,16 +240,23 @@ export default function EditContractPage() {
         );
     }
 
+    const contactEmails = new Map<string, string | null>();
+    for (const contact of contacts) {
+        const name = `${contact.first_name} ${contact.last_name}`.trim();
+        contactEmails.set(name, contactEmails.has(name) ? null : contact.email?.trim() || null);
+    }
+
     const ContactDropdown = ({ field }: { field: FormField }) => {
         const selectedValues = form[field] as string[];
         const contactOptions = contacts.map(c => ({
             value: `${c.first_name} ${c.last_name}`,
             label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
+            email: contactEmails.get(`${c.first_name} ${c.last_name}`.trim()),
         }));
         const knownValues = new Set(contactOptions.map(option => option.value));
         const restoredOptions = selectedValues
             .filter(value => !knownValues.has(value))
-            .map(value => ({ value, label: value }));
+            .map(value => ({ value, label: value, email: contactEmails.get(value.trim()) }));
 
         return (
             <SearchableDropdown

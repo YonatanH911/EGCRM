@@ -129,6 +129,7 @@ export default function NewLeadPage() {
                                     ...contacts.map(c => ({
                                         value: String(c.id),
                                         label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                        email: c.email,
                                     })),
                                 ]}
                             />

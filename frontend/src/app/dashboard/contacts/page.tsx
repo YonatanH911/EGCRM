@@ -185,7 +185,10 @@ export default function ContactsPage() {
                                                     {(contact.first_name || '?').charAt(0)}{(contact.last_name || '').charAt(0)}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-xl font-medium text-foreground">{contact.first_name} {contact.last_name}</span>
+                                                    <span className="inline-flex items-center gap-1 text-xl font-medium text-foreground">
+                                                        {contact.first_name} {contact.last_name}
+                                                        <CopyButton value={contact.email} label={`Copy email for ${contact.first_name} ${contact.last_name}`} />
+                                                    </span>
                                                     {contact.job_title && <span className="text-lg text-muted-text">{contact.job_title}</span>}
                                                 </div>
                                             </div>

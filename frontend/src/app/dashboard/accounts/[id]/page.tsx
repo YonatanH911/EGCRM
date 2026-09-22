@@ -339,6 +339,7 @@ export default function EditAccountPage() {
                                         ...allContacts.map(contact => ({
                                             value: String(contact.id),
                                             label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                            email: contact.email,
                                         })),
                                     ]}
                                 />
@@ -437,12 +438,12 @@ export default function EditAccountPage() {
                                         <div className="flex-1 min-w-0">
                                             <p className="text-xl font-semibold text-foreground group-hover:text-crm-500 transition-colors">
                                                 {c.first_name} {c.last_name}
+                                                <CopyButton value={c.email} label={`Copy email for ${c.first_name} ${c.last_name}`} />
                                             </p>
                                             {c.job_title && <p className="text-lg text-muted-text">{c.job_title}</p>}
                                         </div>
                                         <div className="flex items-center gap-1 text-lg text-muted-text shrink-0">
                                             {c.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{c.email}</span>}
-                                            <CopyButton value={c.email} label="Copy email" />
                                         </div>
                                         <button type="button" onClick={(e) => handleUnlinkContact(e, c)}
                                             className="p-2 ml-2 text-muted-text hover:text-red-500 rounded-lg hover:bg-red-500/10 transition-colors"
@@ -465,6 +466,7 @@ export default function EditAccountPage() {
                                         ...unlinkedContactsList.map(c => ({
                                             value: String(c.id),
                                             label: `${c.first_name} ${c.last_name}${c.email ? ` (${c.email})` : ''}`,
+                                            email: c.email,
                                         })),
                                     ]}
                                 />

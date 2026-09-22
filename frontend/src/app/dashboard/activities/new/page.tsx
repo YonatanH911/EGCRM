@@ -14,7 +14,7 @@ const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placehol
 
 interface TaskType { id: number; name: string; color: string; }
 interface Account { id: number; name: string; }
-interface Contact { id: number; first_name: string; last_name: string; }
+interface Contact { id: number; first_name: string; last_name: string; email?: string | null; }
 
 export default function NewActivityPage() {
     const router = useRouter();
@@ -87,7 +87,7 @@ export default function NewActivityPage() {
 
     const contactOptions = [
         { value: '', label: 'None' },
-        ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}` })),
+        ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}`, email: c.email })),
     ];
     const selectedType = taskTypes.find(type => type.id === form.task_type_id);
     const isBilling = selectedType?.name.trim().toLowerCase() === 'billing';

@@ -11,7 +11,7 @@ import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 
 interface TaskType { id: number; name: string; color: string; }
 interface Account { id: number; name: string; }
-interface Contact { id: number; first_name: string; last_name: string; }
+interface Contact { id: number; first_name: string; last_name: string; email?: string | null; }
 
 function toDateInput(iso: string | null) {
     if (!iso) return '';
@@ -150,7 +150,7 @@ export default function EditActivityPage() {
 
     const contactOptions = [
         { value: '', label: 'None' },
-        ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}` })),
+        ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}`, email: c.email })),
     ];
     const selectedType = taskTypes.find(type => type.id === form.task_type_id);
     const isBilling = selectedType?.name.trim().toLowerCase() === 'billing';

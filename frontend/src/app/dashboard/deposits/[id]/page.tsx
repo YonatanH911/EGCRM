@@ -392,6 +392,7 @@ export default function EditDepositPage() {
                                                     ...contacts.map(contact => ({
                                                         value: String(contact.id),
                                                         label: `${contact.first_name} ${contact.last_name}${contact.email ? ` (${contact.email})` : ''}`,
+                                                        email: contact.email,
                                                     })),
                                                 ]}
                                             />
