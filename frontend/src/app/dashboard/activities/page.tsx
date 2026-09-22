@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
-import ScrollableTable from '@/components/ScrollableTable';
 import ColumnFilter from '@/components/ColumnFilter';
 import { Plus, Trash2, Activity, Loader2, Settings, Check, X, Search } from 'lucide-react';
 import { usePreferences } from '@/components/PreferencesProvider';
@@ -22,11 +21,18 @@ interface ActivityRecord {
 
 function fmt(d: string | null) {
     if (!d) return '—';
-    return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    return new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' });
 }
 
-const thCls = "px-5 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
+const thCls = "min-w-0 px-3 py-2 ltr:text-left rtl:text-right text-sm font-semibold text-muted-text uppercase";
 const inputCls = "w-full px-3 py-2 text-xl rounded-lg text-foreground bg-background-subtle border border-border-subtle focus:border-crm-500 focus:outline-none";
+const columns = [
+    { key: 'type', label: 'Type', heading: 'Type', width: '14%' },
+    { key: 'subject', label: 'Subject', heading: 'Subject', width: '33%' },
+    { key: 'regarding', label: 'Regarding', heading: 'Regarding', width: '22%' },
+    { key: 'sentOn', label: 'Sent on', heading: 'Sent', width: '13%' },
+    { key: 'dueDate', label: 'Due Date', heading: 'Due', width: '13%' },
+] as const;
 
 // Simple helper to convert hex to rgba with 0.15 opacity for badges
 function hexToRgba(hex: string, alpha: number = 0.15) {
@@ -43,8 +49,8 @@ export default function ActivitiesPage() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<number | 'All'>('All');
     const [searchQuery, setSearchQuery] = useState('');
-    const [sortBy, setSortBy] = useState('created_at');
-    const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+    const [sortBy, setSortBy] = useState('due_date');
+    const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
     const [showInactive, setShowInactive] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
@@ -198,8 +204,8 @@ export default function ActivitiesPage() {
 
             {/* Table */}
             <div className="rounded-2xl overflow-hidden glass-card">
-                <div className="flex flex-col gap-3 border-b border-border-subtle p-4 sm:flex-row">
-                    <div className="relative max-w-sm flex-1">
+                <div className="flex flex-wrap items-center gap-3 border-b border-border-subtle p-3">
+                    <div className="relative min-w-[220px] flex-[1_1_260px]">
                         <Search className="absolute ltr:left-3 rtl:right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-text" />
                         <input
                             type="text"
@@ -226,7 +232,7 @@ export default function ActivitiesPage() {
                         label="Show inactive activities?"
                     />
                 </div>
-                <ScrollableTable>
+                <div className="min-w-0">
                     {loading ? (
                         <div className="flex items-center justify-center h-48">
                             <Loader2 className="w-8 h-8 animate-spin text-crm-500" />
@@ -244,19 +250,30 @@ export default function ActivitiesPage() {
                             </Link>
                         </div>
                     ) : (
-                        <table className="w-full text-xl">
-                            <thead className="border-b border-border-subtle bg-background-subtle/30">
+                        <>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1 border-b border-border-subtle px-3 py-2 lg:hidden">
+                            {columns.map(column => (
+                                <span key={column.key} className="inline-flex items-center gap-1 text-sm font-semibold text-muted-text">
+                                    {column.label}
+                                    <ColumnFilter
+                                        label={column.label}
+                                        value={columnFilters[column.key] || ''}
+                                        onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                    />
+                                </span>
+                            ))}
+                        </div>
+                        <table className="block w-full text-base lg:table lg:table-fixed">
+                            <colgroup className="hidden lg:table-column-group">
+                                {columns.map(column => <col key={column.key} style={{ width: column.width }} />)}
+                                <col style={{ width: '5%' }} />
+                            </colgroup>
+                            <thead className="hidden border-b border-border-subtle bg-background-subtle/30 lg:table-header-group">
                                 <tr>
-                                    {[
-                                        { key: 'type', label: 'Type' },
-                                        { key: 'subject', label: 'Subject' },
-                                        { key: 'regarding', label: 'Regarding' },
-                                        { key: 'sentOn', label: 'Sent on' },
-                                        { key: 'dueDate', label: 'Due Date' },
-                                    ].map(column => (
+                                    {columns.map(column => (
                                         <th key={column.key} className={thCls}>
-                                            <div className="flex items-center gap-1.5">
-                                                <span>{column.label}</span>
+                                            <div className="flex min-w-0 items-center gap-1">
+                                                <span>{column.heading}</span>
                                                 <ColumnFilter
                                                     label={column.label}
                                                     value={columnFilters[column.key] || ''}
@@ -265,33 +282,41 @@ export default function ActivitiesPage() {
                                             </div>
                                         </th>
                                     ))}
-                                    <th className={thCls} />
+                                    <th className="p-0" />
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-border-subtle">
+                            <tbody className="block divide-y divide-border-subtle lg:table-row-group">
                                 {sortedActivities.map(activity => {
                                     const tColor = activity.task_type?.color || '#9ca3af';
                                     const tName = activity.task_type?.name || 'Unassigned';
                                     return (
-                                        <tr key={activity.id} className="group transition-colors duration-150 cursor-pointer hover:bg-background-subtle/50"
+                                        <tr key={activity.id} className="group grid w-full grid-cols-2 gap-x-3 gap-y-1 p-3 transition-colors duration-150 cursor-pointer hover:bg-background-subtle/50 lg:table-row lg:p-0"
                                             onClick={() => router.push(`/dashboard/activities/${activity.id}/edit`)}
                                         >
-                                            <td className="px-5 py-3.5">
-                                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-base font-bold tracking-wider"
+                                            <td className="col-start-1 row-start-1 min-w-0 lg:table-cell lg:px-3 lg:py-2">
+                                                <span className="inline-flex max-w-full items-center gap-1.5 rounded-md px-2 py-0.5 text-sm font-semibold"
                                                     style={{ background: hexToRgba(tColor), color: tColor, border: `1px solid ${hexToRgba(tColor, 0.3)}` }}>
-                                                    <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: tColor }}></div>
-                                                    {tName}
+                                                    <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: tColor }} />
+                                                    <span className="min-w-0 truncate">{tName}</span>
                                                 </span>
                                             </td>
-                                            <td className="px-5 py-3.5 font-bold text-foreground group-hover:text-crm-500 transition-colors">{activity.subject}</td>
-                                            <td className="px-5 py-3.5 text-muted-text font-medium">{activity.regarding || '—'}</td>
-                                            <td className="px-5 py-3.5 text-muted-text font-medium whitespace-nowrap">{fmt(activity.start_date)}</td>
-                                            <td className="px-5 py-3.5 text-muted-text font-medium whitespace-nowrap">{fmt(activity.due_date)}</td>
-                                            <td className="px-5 py-3.5">
-                                                <div className="flex items-center gap-1.5 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <td className="col-span-2 min-w-0 font-semibold text-foreground transition-colors group-hover:text-crm-500 lg:table-cell lg:px-3 lg:py-2">
+                                                <span className="block line-clamp-2 break-words" title={activity.subject}>{activity.subject}</span>
+                                            </td>
+                                            <td className="col-span-2 min-w-0 text-muted-text lg:table-cell lg:px-3 lg:py-2">
+                                                <span className="block line-clamp-2 break-words" title={activity.regarding || undefined}>{activity.regarding || '—'}</span>
+                                            </td>
+                                            <td className="min-w-0 whitespace-nowrap text-sm text-muted-text lg:table-cell lg:px-3 lg:py-2">
+                                                <span className="mr-1 font-semibold lg:hidden">Sent:</span>{fmt(activity.start_date)}
+                                            </td>
+                                            <td className="min-w-0 whitespace-nowrap text-sm text-muted-text lg:table-cell lg:px-3 lg:py-2">
+                                                <span className="mr-1 font-semibold lg:hidden">Due:</span>{fmt(activity.due_date)}
+                                            </td>
+                                            <td className="col-start-2 row-start-1 min-w-0 lg:table-cell lg:px-1 lg:py-2">
+                                                <div className="flex justify-end opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
                                                     <button onClick={(e) => { e.stopPropagation(); handleDelete(activity.id); }} disabled={deletingId === activity.id}
-                                                        className="p-1.5 rounded-lg transition-colors disabled:opacity-50 text-muted-text hover:bg-red-500/10 hover:text-red-500"
-                                                        title="Delete">
+                                                        className="rounded-md p-1.5 text-muted-text transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-50"
+                                                        title="Delete activity" aria-label="Delete activity">
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>
                                                 </div>
@@ -301,8 +326,9 @@ export default function ActivitiesPage() {
                                 })}
                             </tbody>
                         </table>
+                        </>
                     )}
-                </ScrollableTable>
+                </div>
             </div>
 
             {/* Manage Task Types Modal */}
