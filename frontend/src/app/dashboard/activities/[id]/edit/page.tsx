@@ -152,6 +152,8 @@ export default function EditActivityPage() {
         { value: '', label: 'None' },
         ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}` })),
     ];
+    const selectedType = taskTypes.find(type => type.id === form.task_type_id);
+    const isBilling = selectedType?.name.trim().toLowerCase() === 'billing';
 
     if (loading) {
         return (
@@ -215,29 +217,15 @@ export default function EditActivityPage() {
                                 No task types configured. Please create one in the Activities dashboard first.
                             </div>
                         ) : (
-                            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                                {taskTypes.map(t => {
-                                    const isSelected = form.task_type_id === t.id;
-                                    return (
-                                        <button
-                                            key={t.id}
-                                            type="button"
-                                            onClick={() => set('task_type_id', t.id)}
-                                            style={{
-                                                backgroundColor: isSelected ? t.color : 'transparent',
-                                                borderColor: isSelected ? t.color : '',
-                                                color: isSelected ? '#fff' : '',
-                                            }}
-                                            className={`flex justify-center items-center py-2.5 px-3 rounded-xl text-lg font-bold transition-all duration-200 border ${isSelected
-                                                ? 'shadow-lg'
-                                                : 'bg-background-subtle border-border-subtle text-muted-text hover:bg-background-subtle/80 hover:text-foreground'
-                                                }`}
-                                        >
-                                            {t.name}
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                            <SearchableDropdown
+                                value={String(form.task_type_id)}
+                                onChange={value => set('task_type_id', value ? Number(value) : '')}
+                                options={taskTypes.map(type => ({ value: String(type.id), label: type.name }))}
+                                placeholder="Select activity type"
+                                searchPlaceholder="Search activity types..."
+                                emptyText="No activity types found"
+                                className={inputCls}
+                            />
                         )}
                     </div>
 
@@ -277,8 +265,7 @@ export default function EditActivityPage() {
                         </div>
                     </div>
 
-                    {/* Invoice Number */}
-                    <div>
+                    {isBilling && <div>
                         <label className={labelCls}>Invoice Number</label>
                         <input
                             type="text"
@@ -287,7 +274,7 @@ export default function EditActivityPage() {
                             placeholder=""
                             className={inputCls}
                         />
-                    </div>
+                    </div>}
 
                     {/* Dates */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

@@ -1,14 +1,19 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from datetime import timedelta
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 
 import models, schemas, crud, auth
-from database import engine, get_db
+from database import engine, get_db, SessionLocal
 
 models.Base.metadata.create_all(bind=engine)
+with SessionLocal() as db:
+    if not db.query(models.TaskType).filter(func.lower(models.TaskType.name) == "billing").first():
+        db.add(models.TaskType(name="Billing", color="#16a34a"))
+        db.commit()
 
 app = FastAPI(title="CRM System API")
 
@@ -406,6 +411,9 @@ def create_task_type(task_type: schemas.TaskTypeCreate, db: Session = Depends(ge
 
 @app.put("/task-types/{task_type_id}", response_model=schemas.TaskTypeResponse)
 def update_task_type(task_type_id: int, task_type: schemas.TaskTypeBase, db: Session = Depends(get_db)):
+    existing = db.query(models.TaskType).filter(models.TaskType.id == task_type_id).first()
+    if existing and existing.name.casefold() == "billing" and task_type.name.casefold() != "billing":
+        raise HTTPException(status_code=400, detail="Billing is a required task type")
     db_obj = crud.update_task_type(db, task_type_id=task_type_id, task_type=task_type)
     if db_obj is None:
         raise HTTPException(status_code=404, detail="Task type not found")
@@ -413,6 +421,9 @@ def update_task_type(task_type_id: int, task_type: schemas.TaskTypeBase, db: Ses
 
 @app.delete("/task-types/{task_type_id}")
 def delete_task_type(task_type_id: int, db: Session = Depends(get_db)):
+    existing = db.query(models.TaskType).filter(models.TaskType.id == task_type_id).first()
+    if existing and existing.name.casefold() == "billing":
+        raise HTTPException(status_code=400, detail="Billing is a required task type")
     db_obj = crud.delete_task_type(db, task_type_id=task_type_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Task type not found")

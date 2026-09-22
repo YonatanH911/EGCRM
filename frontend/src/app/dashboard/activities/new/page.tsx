@@ -89,6 +89,8 @@ export default function NewActivityPage() {
         { value: '', label: 'None' },
         ...contacts.map(c => ({ value: String(c.id), label: `${c.first_name} ${c.last_name}` })),
     ];
+    const selectedType = taskTypes.find(type => type.id === form.task_type_id);
+    const isBilling = selectedType?.name.trim().toLowerCase() === 'billing';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -225,8 +227,7 @@ export default function NewActivityPage() {
                         </div>
                     </div>
 
-                    {/* Invoice Number */}
-                    <div>
+                    {isBilling && <div>
                         <label className={labelCls}>Invoice Number</label>
                         <input
                             type="text"
@@ -235,7 +236,7 @@ export default function NewActivityPage() {
                             placeholder=""
                             className={inputCls}
                         />
-                    </div>
+                    </div>}
 
                     {/* Dates */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">

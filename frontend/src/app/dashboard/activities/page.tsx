@@ -350,9 +350,11 @@ export default function ActivitiesPage() {
                                                 <div className="w-6 h-6 rounded-md shadow-sm border border-black/10 dark:border-white/10" style={{ backgroundColor: t.color }}></div>
                                                 <span className="text-xl font-bold text-foreground">{t.name}</span>
                                             </div>
-                                            <button onClick={() => handleDeleteType(t.id)} className="p-1.5 text-muted-text hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
+                                            {t.name.toLowerCase() !== 'billing' && (
+                                                <button onClick={() => handleDeleteType(t.id)} title={`Delete ${t.name}`} className="p-1.5 text-muted-text hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors">
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     ))
                                 )}
