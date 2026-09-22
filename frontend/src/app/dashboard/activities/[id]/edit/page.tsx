@@ -166,7 +166,7 @@ export default function EditActivityPage() {
 
 
     return (
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="w-full space-y-6">
             <div className="flex items-center gap-3">
                 <Link href="/dashboard/activities"
                     className="p-2.5 rounded-xl text-muted-text hover:text-foreground hover:bg-background-subtle transition-all">
@@ -202,8 +202,7 @@ export default function EditActivityPage() {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
-                        <div className="space-y-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
 
                     {/* Activity Type */}
                     <div>
@@ -237,7 +236,7 @@ export default function EditActivityPage() {
                     </div>
 
                     {/* Regarding & Follow up with */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:col-span-2">
                         <div>
                             <label className={labelCls}>Regarding</label>
                             <SearchableDropdown
@@ -265,6 +264,17 @@ export default function EditActivityPage() {
                         </div>
                     </div>
 
+                    <div className="lg:col-span-2">
+                        <label className={labelCls}>Notes</label>
+                        <AutoResizeTextarea
+                            value={form.notes}
+                            onChange={value => set('notes', value)}
+                            className={inputCls}
+                            placeholder=""
+                            minRows={9}
+                        />
+                    </div>
+
                     {isBilling && <div>
                         <label className={labelCls}>Invoice Number</label>
                         <input
@@ -277,7 +287,7 @@ export default function EditActivityPage() {
                     </div>}
 
                     {/* Dates */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:col-span-2">
                         <div>
                             <label className={labelCls}>Sent on</label>
                             <input type="date" value={form.start_date} onChange={e => set('start_date', e.target.value)}
@@ -290,19 +300,6 @@ export default function EditActivityPage() {
                         </div>
                     </div>
 
-                        </div>
-
-                    {/* Notes */}
-                    <div className="xl:sticky xl:top-6">
-                        <label className={labelCls}>Notes</label>
-                        <AutoResizeTextarea
-                            value={form.notes}
-                            onChange={value => set('notes', value)}
-                            className={inputCls}
-                            placeholder=""
-                            minRows={22}
-                        />
-                    </div>
                     </div>
 
                     {/* Actions */}
