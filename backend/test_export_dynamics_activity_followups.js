@@ -15,7 +15,15 @@ async function main() {
       Utility: { getGlobalContext: () => ({ getClientUrl: () => "https://crm.example" }) },
       Page: {
         data: { entity: { getEntityName: () => "task", getId: () => "{abc}" } },
-        ui: { controls: { get: () => [] } },
+        ui: { controls: { get: () => [{
+          getLabel: () => "Follow Up Email",
+          getName: () => "new_followupemail2",
+          getAttribute: () => ({
+            getName: () => "new_followupemail2",
+            getAttributeType: () => "lookup",
+            getValue: () => [{ id: "contact-guid", entityType: "contact", name: "Person" }],
+          }),
+        }] } },
       },
     },
     location: { origin: "https://crm.example" },
@@ -23,13 +31,22 @@ async function main() {
       requests.push({ url, method: options.method });
       let value;
       if (url.includes("EntityDefinitions(LogicalName='task')/Attributes")) {
-        value = [{
-          LogicalName: "new_followupemail",
-          SchemaName: "new_FollowUpEmail",
-          AttributeType: "String",
-          DisplayName: { UserLocalizedLabel: { Label: "Follow Up Email" } },
-          IsValidForRead: true,
-        }];
+        value = [
+          {
+            LogicalName: "new_followupemail2",
+            SchemaName: "new_FollowUpEmail2",
+            AttributeType: "Lookup",
+            DisplayName: { UserLocalizedLabel: { Label: "Follow Up Email" } },
+            IsValidForRead: true,
+          },
+          {
+            LogicalName: "new_followupemail2name",
+            SchemaName: "new_FollowUpEmail2Name",
+            AttributeType: "String",
+            DisplayName: { UserLocalizedLabel: { Label: "" } },
+            IsValidForRead: true,
+          },
+        ];
       } else if (url.includes("EntityDefinitions")) {
         value = [{
           LogicalName: "task",
@@ -42,7 +59,8 @@ async function main() {
         value = [{
           activityid: "abc",
           subject: "Follow up",
-          new_followupemail: "person@example.com",
+          _new_followupemail2_value: "contact-guid",
+          "_new_followupemail2_value@Microsoft.Dynamics.CRM.lookuplogicalname": "contact",
         }];
       } else {
         throw new Error(`Unexpected URL: ${url}`);
@@ -66,8 +84,10 @@ async function main() {
   const payload = JSON.parse(downloaded.parts.join(""));
   assert.equal(payload.count, 1);
   assert.equal(payload.activities[0].activityid, "abc");
-  assert.equal(payload.activities[0].follow_up_fields[0].value, "person@example.com");
-  assert.equal(payload.discovered_fields[0].fields[0].logical_name, "new_followupemail");
+  assert.equal(payload.activities[0].follow_up_fields[0].value, "contact-guid");
+  assert.equal(payload.activities[0].follow_up_fields[0].lookup_type, "contact");
+  assert.equal(payload.discovered_fields[0].fields[0].logical_name, "new_followupemail2");
+  assert.ok(!requests.some((request) => request.url.includes("new_followupemail2name")));
   assert.ok(requests.length >= 3);
   assert.ok(requests.every((request) => request.method === "GET"));
   console.log("Dynamics follow-up exporter test passed.");

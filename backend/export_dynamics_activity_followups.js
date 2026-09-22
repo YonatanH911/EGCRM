@@ -91,7 +91,7 @@ GET requests and downloads a JSON export; it does not change Dynamics records.
           });
         }
       }
-      const matched = attributes.filter((attribute) => {
+      const candidates = attributes.filter((attribute) => {
         const names = [
           label(attribute.DisplayName),
           attribute.LogicalName,
@@ -105,6 +105,12 @@ GET requests and downloads a JSON export; it does not change Dynamics records.
         return attribute.IsValidForRead !== false &&
           (names.some(matchesFollowUp) || formField);
       });
+      const formAttributeNames = formContext?.entity_name === entity.LogicalName
+        ? formContext.matching_controls.map((control) => control.attribute_name).filter(Boolean)
+        : [];
+      const matched = formAttributeNames.length
+        ? candidates.filter((attribute) => formAttributeNames.includes(attribute.LogicalName))
+        : candidates.filter((attribute) => !/(?:name|yominame)$/i.test(attribute.LogicalName));
       if (!matched.length) continue;
 
       const fields = matched.map((attribute) => {
