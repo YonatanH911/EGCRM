@@ -2,8 +2,14 @@ import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import openpyxl
+from sqlalchemy import create_engine, text
+from sqlalchemy.orm import sessionmaker
+
+import import_excel_exports
+import models
 
 from import_excel_exports import (
     WorkbookRows,
@@ -76,6 +82,64 @@ class ExcelImportTests(unittest.TestCase):
                 self.assertEqual(rows.value(row, "Israeli?"), "Yes")
             finally:
                 rows.close()
+
+    def test_imports_active_vaults_and_remembers_dynamics_ids(self):
+        engine = create_engine("sqlite:///:memory:")
+        models.Base.metadata.create_all(engine)
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "CREATE TABLE legacy_import_ids ("
+                    "entity_type VARCHAR(32), source_id VARCHAR(64), local_id INT)"
+                )
+            )
+        session_factory = sessionmaker(bind=engine)
+        with session_factory() as db:
+            existing = models.Vault(
+                name="Existing Vault",
+                status=models.VaultStatus.LOCKED,
+                is_active=False,
+            )
+            db.add(existing)
+            db.commit()
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "Active Vaults.xlsx"
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+            worksheet.append(["(Do Not Modify) Vault", "Vault Name", "Created On"])
+            worksheet.append(["vault-existing", "Existing Vault", "2020-01-02"])
+            worksheet.append(["vault-new", "New Vault", "2021-03-04"])
+            workbook.save(path)
+            workbook.close()
+
+            with patch.object(import_excel_exports, "SessionLocal", session_factory):
+                importer = import_excel_exports.ExcelImporter(
+                    Path(directory),
+                    apply=False,
+                    overwrite=True,
+                )
+                try:
+                    importer.load_mappings()
+                    importer.import_vaults("active_vaults", True)
+                    vaults = importer.db.query(models.Vault).order_by(models.Vault.name).all()
+                    self.assertEqual(
+                        [vault.name for vault in vaults],
+                        ["Existing Vault", "New Vault"],
+                    )
+                    self.assertTrue(all(vault.is_active for vault in vaults))
+                    self.assertEqual(vaults[0].status, models.VaultStatus.LOCKED)
+                    self.assertEqual(
+                        importer.mappings[("vault", "vault-existing")],
+                        vaults[0].id,
+                    )
+                    self.assertEqual(
+                        importer.mappings[("vault", "vault-new")],
+                        vaults[1].id,
+                    )
+                    importer.db.rollback()
+                finally:
+                    importer.close()
 
 
 if __name__ == "__main__":

@@ -9,6 +9,7 @@ Usage:
     python import_excel_exports.py ../excel --apply --overwrite
     python import_excel_exports.py ../excel --activities-only --apply
     python import_excel_exports.py ../excel --contracts-only --apply
+    python import_excel_exports.py ../excel --active-records-only --overwrite --apply
 """
 from __future__ import annotations
 
@@ -40,6 +41,7 @@ FILES = {
     "active_contracts": "Active Contracts.xlsx",
     "inactive_contracts": "Inactive Contracts.xlsx",
     "active_deposits": "Active Deposits.xlsx",
+    "active_vaults": "Active Vaults.xlsx",
     "inactive_deposits": "Inactive Deposits.xlsx",
     "activities": "Activities.xlsx",
 }
@@ -536,6 +538,62 @@ class ExcelImporter:
             return vault
         return None
 
+    def import_vaults(self, key: str, active: bool) -> None:
+        label = "Active Vaults" if active else "Inactive Vaults"
+        stats = self.stats[label] = Stats()
+        book = self.workbook(key)
+        vaults = self.db.query(models.Vault).all()
+        by_name: dict[str, list[models.Vault]] = defaultdict(list)
+        for vault in vaults:
+            by_name[normalized(vault.name)].append(vault)
+        try:
+            for row in book.rows():
+                stats.scanned += 1
+                source_id = clean(book.value(row, "(Do Not Modify) Vault"))
+                name = clean(book.value(row, "Vault Name", "Name"))
+                if not source_id or not name:
+                    stats.skipped += 1
+                    continue
+
+                vault = self.mapped("vault", source_id, models.Vault)
+                if vault is None:
+                    candidates = by_name.get(normalized(name), [])
+                    vault = candidates[0] if len(candidates) == 1 else None
+                    if len(candidates) > 1:
+                        stats.unresolved += 1
+                        self.warnings.append(
+                            f"{label}: vault name '{name}' was not uniquely matched."
+                        )
+                        continue
+                created = vault is None
+                if created:
+                    vault = models.Vault(
+                        name=name,
+                        status=models.VaultStatus.OPEN,
+                        is_active=active,
+                    )
+                    self.db.add(vault)
+                    self.db.flush()
+                    vaults.append(vault)
+                    by_name[normalized(name)].append(vault)
+                    stats.created += 1
+                else:
+                    stats.matched += 1
+
+                changed = self.set_value(vault, "name", name)
+                changed |= self.set_value(
+                    vault,
+                    "created_at",
+                    parse_date(book.value(row, "Created On")),
+                )
+                changed |= self.set_activity(vault, "vault", active)
+                self.remember("vault", source_id, vault.id)
+                if changed and not created:
+                    stats.changed += 1
+        finally:
+            book.close()
+        self._vaults_by_name = by_name
+
     def import_deposits(self, key: str, active: bool) -> None:
         label = "Active Deposits" if active else "Inactive Deposits"
         stats = self.stats[label] = Stats()
@@ -657,7 +715,12 @@ class ExcelImporter:
         finally:
             book.close()
 
-    def run(self, activities_only: bool = False, contracts_only: bool = False) -> None:
+    def run(
+        self,
+        activities_only: bool = False,
+        contracts_only: bool = False,
+        active_records_only: bool = False,
+    ) -> None:
         self.load_mappings()
         if activities_only:
             self.import_activities()
@@ -667,6 +730,26 @@ class ExcelImporter:
                 self.db.rollback()
             print("\nImport Summary")
             self.stats["Activities"].display("Activities")
+            print("Changes committed." if self.apply else "Dry run only; no imported data was committed.")
+            return
+        if active_records_only:
+            self.import_accounts("active_accounts", True)
+            self.import_contacts("active_contacts", True)
+            self.link_primary_contacts()
+            self.import_vaults("active_vaults", True)
+            self.import_contracts("active_contracts", True)
+            self.import_deposits("active_deposits", True)
+            if self.apply:
+                self.db.commit()
+            else:
+                self.db.rollback()
+            print("\nImport Summary")
+            for label, stats in self.stats.items():
+                stats.display(label)
+            if self.warnings:
+                print("\nUnresolved relationships")
+                for warning in self.warnings:
+                    print(f"  - {warning}")
             print("Changes committed." if self.apply else "Dry run only; no imported data was committed.")
             return
         if contracts_only:
@@ -731,6 +814,14 @@ def parse_args():
         action="store_true",
         help="Import only active and inactive Contract exports and leave other entities unchanged.",
     )
+    scope.add_argument(
+        "--active-records-only",
+        action="store_true",
+        help=(
+            "Import active Accounts, Contacts, Vaults, Contracts, and Deposits only; "
+            "records absent from these snapshots are preserved."
+        ),
+    )
     parser.add_argument(
         "--overwrite",
         action="store_true",
@@ -749,8 +840,21 @@ def main() -> int:
             "active_contracts": FILES["active_contracts"],
             "inactive_contracts": FILES["inactive_contracts"],
         }
+    elif args.active_records_only:
+        required_files = {
+            key: FILES[key]
+            for key in (
+                "active_accounts",
+                "active_contacts",
+                "active_vaults",
+                "active_contracts",
+                "active_deposits",
+            )
+        }
     else:
-        required_files = FILES
+        required_files = {
+            key: name for key, name in FILES.items() if key != "active_vaults"
+        }
     missing = [name for name in required_files.values() if not (directory / name).is_file()]
     if missing:
         print("Missing required exports:")
@@ -771,6 +875,7 @@ def main() -> int:
         importer.run(
             activities_only=args.activities_only,
             contracts_only=args.contracts_only,
+            active_records_only=args.active_records_only,
         )
     except Exception:
         importer.db.rollback()
