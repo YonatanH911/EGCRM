@@ -29,6 +29,7 @@ STATUS_ALIASES = {
     "verified": models.DepositStatus.VERIFIED,
     "verify": models.DepositStatus.VERIFIED,
     "open": models.DepositStatus.OPEN,
+    "in process": models.DepositStatus.OPEN,
     "passive": models.DepositStatus.PASSIVE,
 }
 
@@ -36,6 +37,7 @@ STATUS_ALIASES = {
 @dataclass
 class VerificationStatusExport:
     statuses: dict[str, models.DepositStatus]
+    names: dict[str, str]
     records: int
     blank_statuses: int
     duplicate_records: int
@@ -67,6 +69,7 @@ def load_statuses(path: Path) -> VerificationStatusExport:
 
     primary_id = (payload.get("entity") or {}).get("primary_id_attribute")
     statuses: dict[str, models.DepositStatus] = {}
+    names: dict[str, str] = {}
     source_counts: Counter[models.DepositStatus] = Counter()
     unknown: Counter[str] = Counter()
     conflicts: set[str] = set()
@@ -80,6 +83,7 @@ def load_statuses(path: Path) -> VerificationStatusExport:
         )
         if not source_id:
             continue
+        names[source_id] = str(record.get("name") or "").strip()
         raw_label = record.get("status_label")
         raw_value = record.get("status_value")
         if normalized_label(raw_label):
@@ -120,6 +124,7 @@ def load_statuses(path: Path) -> VerificationStatusExport:
     field_name = str(field.get("logical_name") or field.get("display_name") or "unknown")
     return VerificationStatusExport(
         statuses=statuses,
+        names=names,
         records=len(records),
         blank_statuses=blank_statuses,
         duplicate_records=duplicate_records,
@@ -165,23 +170,67 @@ def run(json_file: Path, apply: bool = False) -> None:
         duplicate_local_ids = {
             local_id for local_id, guids in local_guids.items() if len(guids) > 1
         }
-        if ambiguous_guids or duplicate_local_ids:
+        if ambiguous_guids:
             raise RuntimeError(
-                "Refusing migration: deposit import mappings are ambiguous "
-                f"({len(ambiguous_guids)} GUID conflicts, "
-                f"{len(duplicate_local_ids)} EGCRM deposits mapped to multiple GUIDs)."
+                "Refusing migration: "
+                f"{len(ambiguous_guids)} Dynamics deposit GUIDs map to multiple EGCRM deposits."
+            )
+
+        resolved_statuses: dict[int, models.DepositStatus] = {}
+        resolved_by_name: set[int] = set()
+        conflicting_local_statuses: dict[int, set[models.DepositStatus]] = {}
+        for local_id, guids in local_guids.items():
+            exported_guids = [guid for guid in guids if guid in export.statuses]
+            statuses = {export.statuses[guid] for guid in exported_guids}
+            if len(statuses) > 1:
+                deposit = db.get(models.Deposit, local_id)
+                product_name = normalized_label(
+                    deposit.product_name if deposit is not None else ""
+                )
+                name_matches = [
+                    guid
+                    for guid in exported_guids
+                    if product_name and normalized_label(export.names.get(guid)) == product_name
+                ]
+                if len(name_matches) == 1:
+                    resolved_statuses[local_id] = export.statuses[name_matches[0]]
+                    resolved_by_name.add(local_id)
+                else:
+                    conflicting_local_statuses[local_id] = statuses
+            elif statuses:
+                resolved_statuses[local_id] = next(iter(statuses))
+        if conflicting_local_statuses:
+            example_rows: list[str] = []
+            for local_id in list(conflicting_local_statuses)[:10]:
+                deposit = db.get(models.Deposit, local_id)
+                reference = deposit.reference_number if deposit is not None else "missing"
+                product = deposit.product_name if deposit is not None else "missing"
+                assignments = ", ".join(
+                    f"{guid}:{export.statuses[guid].value}:{export.names.get(guid, '')}"
+                    for guid in sorted(local_guids[local_id])
+                    if guid in export.statuses
+                )
+                example_rows.append(
+                    f"{local_id} ({reference}, product={product}) [{assignments}]"
+                )
+            raise RuntimeError(
+                "Refusing migration: "
+                f"{len(conflicting_local_statuses)} EGCRM deposits map to conflicting "
+                f"Dynamics statuses. Examples: {'; '.join(example_rows)}"
             )
 
         counts: Counter[str] = Counter()
         changes_by_status: Counter[models.DepositStatus] = Counter()
         missing_examples: list[str] = []
-        for guid, local_id in mappings.items():
-            incoming = export.statuses.get(guid)
+        for local_id, guids in local_guids.items():
+            incoming = resolved_statuses.get(local_id)
             if incoming is None:
                 counts["missing_from_export"] += 1
                 deposit = db.get(models.Deposit, local_id)
                 if deposit is not None and len(missing_examples) < 20:
-                    missing_examples.append(f"{guid} | {deposit.reference_number}")
+                    missing_examples.append(
+                        f"{','.join(sorted(guids))} | {deposit.reference_number}"
+                    )
                 continue
             deposit = db.get(models.Deposit, local_id)
             if deposit is None:
@@ -206,7 +255,10 @@ def run(json_file: Path, apply: bool = False) -> None:
         print(f"Usable status values: {len(export.statuses)}")
         print(f"Blank status values skipped: {export.blank_statuses}")
         print(f"Duplicate export rows: {export.duplicate_records}")
-        print(f"Imported deposit mappings scanned: {len(mappings)}")
+        print(f"Imported deposit mappings scanned: {len(rows)}")
+        print(f"Unique mapped EGCRM deposits: {len(local_guids)}")
+        print(f"Deposits with agreeing duplicate GUID mappings: {len(duplicate_local_ids)}")
+        print(f"Conflicting duplicate mappings resolved by product name: {len(resolved_by_name)}")
         print(f"Statuses changed: {counts['changed']}")
         print(f"Already identical: {counts['already_same']}")
         print(f"Imported deposits absent from export: {counts['missing_from_export']}")

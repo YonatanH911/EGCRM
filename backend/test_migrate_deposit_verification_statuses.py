@@ -32,6 +32,7 @@ class DepositVerificationStatusMigrationTests(unittest.TestCase):
         self.assertEqual(deposit_status("Verified"), models.DepositStatus.VERIFIED)
         self.assertEqual(deposit_status(" verify "), models.DepositStatus.VERIFIED)
         self.assertEqual(deposit_status("OPEN"), models.DepositStatus.OPEN)
+        self.assertEqual(deposit_status("In Process"), models.DepositStatus.OPEN)
         self.assertEqual(deposit_status("Passive"), models.DepositStatus.PASSIVE)
         self.assertIsNone(deposit_status(""))
 
@@ -88,6 +89,7 @@ class DepositVerificationStatusMigrationTests(unittest.TestCase):
                 reference_number="DEP-1",
                 amount=0,
                 status=models.DepositStatus.VERIFIED,
+                product_name="Main product",
             )
             unchanged = models.Deposit(
                 reference_number="DEP-2",
@@ -102,6 +104,7 @@ class DepositVerificationStatusMigrationTests(unittest.TestCase):
                 text(
                     "INSERT INTO legacy_import_ids VALUES "
                     "('deposit', 'abc', :changing_id), "
+                    "('deposit', 'abc-copy', :changing_id), "
                     "('deposit', 'def', :unchanged_id)"
                 ),
                 {"changing_id": changing_id, "unchanged_id": unchanged_id},
@@ -114,6 +117,7 @@ class DepositVerificationStatusMigrationTests(unittest.TestCase):
                 path,
                 [
                     {"source_id": "ABC", "status_label": "Open"},
+                    {"source_id": "ABC-COPY", "status_label": "Open"},
                     {"source_id": "DEF", "status_label": "Passive"},
                 ],
             )
@@ -141,6 +145,49 @@ class DepositVerificationStatusMigrationTests(unittest.TestCase):
                         db.get(models.Deposit, unchanged_id).status,
                         models.DepositStatus.PASSIVE,
                     )
+
+                with session_factory() as db:
+                    db.execute(
+                        text(
+                            "INSERT INTO legacy_import_ids VALUES "
+                            "('deposit', 'abc-conflict', :changing_id)"
+                        ),
+                        {"changing_id": changing_id},
+                    )
+                    db.commit()
+                write_export(
+                    path,
+                    [
+                        {"source_id": "ABC", "name": "Main product", "status_label": "Open"},
+                        {"source_id": "ABC-COPY", "name": "Old product", "status_label": "Open"},
+                        {"source_id": "ABC-CONFLICT", "name": "Other product", "status_label": "Passive"},
+                        {"source_id": "DEF", "status_label": "Passive"},
+                    ],
+                )
+                with contextlib.redirect_stdout(io.StringIO()):
+                    migrate_deposit_verification_statuses.run(path)
+
+                with session_factory() as db:
+                    db.execute(
+                        text(
+                            "INSERT INTO legacy_import_ids VALUES "
+                            "('deposit', 'abc-ambiguous', :changing_id)"
+                        ),
+                        {"changing_id": changing_id},
+                    )
+                    db.commit()
+                write_export(
+                    path,
+                    [
+                        {"source_id": "ABC", "name": "Main product", "status_label": "Open"},
+                        {"source_id": "ABC-COPY", "name": "Old product", "status_label": "Open"},
+                        {"source_id": "ABC-CONFLICT", "name": "Other product", "status_label": "Passive"},
+                        {"source_id": "ABC-AMBIGUOUS", "name": "Main product", "status_label": "Passive"},
+                        {"source_id": "DEF", "status_label": "Passive"},
+                    ],
+                )
+                with self.assertRaisesRegex(RuntimeError, "conflicting Dynamics statuses"):
+                    migrate_deposit_verification_statuses.run(path)
 
 
 if __name__ == "__main__":
