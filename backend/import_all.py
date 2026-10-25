@@ -459,7 +459,7 @@ def import_deposits(db: Session, vault_map: dict):
             reference_number=ref,
             amount=0.0,
             date=parse_date(row[col.get('Date Received', 6)]),
-            status=models.DepositStatus.CLEARED,
+            status=models.DepositStatus.VERIFIED,
             vault_id=vault_id,
             product_name=str_val(row[col.get('Product Name', 3)]),
             version=str_val(row[col.get('Version', 4)]),

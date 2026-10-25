@@ -2,8 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Users2, Building, Briefcase, TrendingUp, DollarSign } from 'lucide-react';
+import { Users2, Building, Briefcase, DollarSign, Landmark, Calendar, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import CopyButton from '@/components/CopyButton';
+
+interface DashboardDeposit {
+    id: number;
+    reference_number: string;
+    product_name?: string | null;
+    supplier?: string | null;
+    date?: string | null;
+    created_at: string;
+    status: string;
+    is_active?: boolean;
+}
 
 const STAT_CARDS = [
     { key: 'accounts', label: 'Total Accounts', icon: Building, gradient: 'from-blue-600 to-cyan-500', glow: 'rgba(59,130,246,0.25)' },
@@ -16,19 +28,26 @@ export default function DashboardOverview() {
     const [stats, setStats] = useState({ accounts: 0, contacts: 0, leads: 0, pipelineValue: 0 });
     const [loading, setLoading] = useState(true);
     const [recentLeads, setRecentLeads] = useState<any[]>([]);
+    const [openDeposits, setOpenDeposits] = useState<DashboardDeposit[]>([]);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [accRes, conRes, leadRes] = await Promise.all([
+                const [accRes, conRes, leadRes, depositRes] = await Promise.all([
                     api.get('/accounts'),
                     api.get('/contacts'),
-                    api.get('/leads')
+                    api.get('/leads'),
+                    api.get('/deposits'),
                 ]);
                 const leads = leadRes.data;
                 const pipelineValue = leads.reduce((acc: number, lead: any) => acc + (lead.value || 0), 0);
                 setStats({ accounts: accRes.data.length, contacts: conRes.data.length, leads: leads.length, pipelineValue });
                 setRecentLeads(leads.slice(-5).reverse());
+                setOpenDeposits(
+                    (depositRes.data as DashboardDeposit[])
+                        .filter(deposit => deposit.status === 'Open' && deposit.is_active !== false)
+                        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                );
             } catch (error) {
                 console.error("Failed to fetch dashboard data", error);
             } finally {
@@ -93,11 +112,47 @@ export default function DashboardOverview() {
 
             {/* Bottom Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                {/* Chart placeholder */}
-                <div className="lg:col-span-2 rounded-2xl flex flex-col items-center justify-center min-h-[280px] relative overflow-hidden glass-card">
-                    <TrendingUp className="w-12 h-12 text-indigo-500/20 mb-3" />
-                    <p className="text-muted-text font-medium text-xl">Pipeline Chart coming soon</p>
-                    <p className="text-lg text-muted-text mt-1">Requires additional charting library setup.</p>
+                {/* Open Deposits */}
+                <div className="lg:col-span-2 rounded-2xl overflow-hidden flex flex-col glass-card">
+                    <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-2 min-w-0">
+                            <Landmark className="w-5 h-5 text-amber-500 flex-shrink-0" />
+                            <h3 className="font-semibold text-foreground text-xl">Open Deposits</h3>
+                            <span className="rounded-md bg-amber-500/10 px-2 py-0.5 text-base font-semibold text-amber-500">
+                                {openDeposits.length}
+                            </span>
+                        </div>
+                        <Link href="/dashboard/deposits" className="text-lg text-indigo-500 hover:text-indigo-400 font-medium transition-colors whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1">View all <ArrowRight className="h-4 w-4" /></span>
+                        </Link>
+                    </div>
+                    <div className="max-h-[420px] overflow-y-auto">
+                        {openDeposits.length > 0 ? (
+                            <div className="divide-y divide-border-subtle">
+                                {openDeposits.map(deposit => (
+                                    <div key={deposit.id} className="flex items-center gap-3 px-5 py-3 hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                                        <Link href={`/dashboard/deposits/${deposit.id}`} className="grid min-w-0 flex-1 grid-cols-1 gap-1 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-center sm:gap-4">
+                                            <div className="min-w-0">
+                                                <p className="truncate text-xl font-medium text-foreground">{deposit.product_name || 'Untitled deposit'}</p>
+                                                <p className="truncate text-lg text-muted-text">{deposit.reference_number}</p>
+                                            </div>
+                                            <p className="truncate text-lg text-muted-text">{deposit.supplier || 'No supplier'}</p>
+                                            <span className="inline-flex items-center gap-1 whitespace-nowrap text-lg text-muted-text">
+                                                <Calendar className="h-3.5 w-3.5" />
+                                                {deposit.date ? new Date(deposit.date).toLocaleDateString('en-GB') : 'No date'}
+                                            </span>
+                                        </Link>
+                                        <CopyButton value={deposit.reference_number} label="Copy deposit number" />
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="flex min-h-[240px] flex-col items-center justify-center px-5 py-8 text-center">
+                                <Landmark className="mb-3 h-9 w-9 text-muted-text opacity-40" />
+                                <p className="text-xl text-muted-text">No open deposits.</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Recent Leads */}

@@ -152,7 +152,7 @@ def import_deposits(db: Session, vault_name_to_id: dict):
             reference_number=ref,
             amount=0.0,
             date=date_received,
-            status=models.DepositStatus.CLEARED,
+            status=models.DepositStatus.VERIFIED,
             vault_id=vault_id,
             product_name=pname,
             version=version,

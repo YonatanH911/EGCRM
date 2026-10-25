@@ -74,7 +74,7 @@ export default function DepositsPage() {
             date: formatDepositDate(deposit.date),
             vault: deposit.vault?.name,
             depositNumber: deposit.reference_number,
-            status: deposit.status || 'Pending',
+            status: deposit.status || 'Open',
         });
         return matchesActive && matchesSearch && matchesColumns;
     });
@@ -197,11 +197,11 @@ export default function DepositsPage() {
                                         </td>
                                         <td className={tdCls}>
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-semibold ${
-                                                deposit.status === 'Cleared' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
-                                                deposit.status === 'Pending' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
-                                                'bg-red-500/10 text-red-500 border-red-500/20'
+                                                deposit.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
+                                                deposit.status === 'Open' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
+                                                'bg-slate-500/10 text-slate-500 border-slate-500/20'
                                             }`} style={{ border: '1px solid' }}>
-                                                {deposit.status || 'Pending'}
+                                                {deposit.status || 'Open'}
                                             </span>
                                         </td>
                                     </tr>

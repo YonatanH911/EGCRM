@@ -39,7 +39,7 @@ export default function NewDepositPage() {
     const [formData, setFormData] = useState({
         reference_number: defaultRef,
         amount: 0,
-        status: 'Pending',
+        status: 'Open',
         date: new Date().toISOString().split('T')[0],
         contact_ids: [] as string[],
         vault_ids: [] as string[],
@@ -267,29 +267,30 @@ export default function NewDepositPage() {
                                     <label htmlFor="verification_status" className="block text-xl font-medium text-foreground">Verification Status</label>
                                     <div className="mt-1">
                                         <SearchableDropdown
-                                            value={formData.status === 'Cleared' ? 'Verified' : 'Not Verified'}
+                                            value={formData.status}
                                             onChange={(val) => setFormData(prev => ({
                                                 ...prev,
-                                                status: val === 'Verified' ? 'Cleared' : 'Pending',
+                                                status: val,
                                                 verified_by_contact_id: val === 'Verified' ? prev.verified_by_contact_id : '',
                                             }))}
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={[
-                                                { value: 'Not Verified', label: 'Not Verified' },
                                                 { value: 'Verified', label: 'Verified' },
+                                                { value: 'Open', label: 'Open' },
+                                                { value: 'Passive', label: 'Passive' },
                                             ]}
                                         />
                                     </div>
                                 </div>
 
-                                <div className={formData.status !== 'Cleared' ? 'opacity-50' : ''}>
+                                <div className={formData.status !== 'Verified' ? 'opacity-50' : ''}>
                                     <label htmlFor="verified_by_contact_id" className="block text-xl font-medium text-foreground">Verified By</label>
                                     <div className="mt-1">
                                         <SearchableDropdown
                                             value={formData.verified_by_contact_id}
                                             onChange={(value) => setFormData(prev => ({ ...prev, verified_by_contact_id: value }))}
                                             placeholder="Select a contact"
-                                            disabled={formData.status !== 'Cleared'}
+                                            disabled={formData.status !== 'Verified'}
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={[
                                                 { value: '', label: 'No verifier selected' },

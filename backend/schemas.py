@@ -195,7 +195,7 @@ class DepositBase(BaseSchema):
     reference_number: str
     amount: float
     date: Optional[datetime] = None
-    status: DepositStatus = DepositStatus.PENDING
+    status: DepositStatus = DepositStatus.OPEN
     product_name: Optional[str] = None
     version: Optional[str] = None
     supplier: Optional[str] = None

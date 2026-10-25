@@ -518,9 +518,9 @@ export default function EditAccountPage() {
                                         </div>
                                         <div className="flex items-center gap-3 shrink-0">
                                             <span className={`text-lg font-semibold px-2.5 py-1 rounded-full ${
-                                                d.status === 'Cleared' ? 'bg-emerald-500/10 text-emerald-500' :
-                                                d.status === 'Pending' ? 'bg-amber-500/10 text-amber-500' :
-                                                'bg-red-500/10 text-red-500'
+                                                d.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-500' :
+                                                d.status === 'Open' ? 'bg-amber-500/10 text-amber-500' :
+                                                'bg-slate-500/10 text-slate-500'
                                             }`}>
                                                 {d.status}
                                             </span>

@@ -559,7 +559,7 @@ class ExcelImporter:
                     deposit = models.Deposit(
                         reference_number=safe_reference,
                         amount=0.0,
-                        status=models.DepositStatus.CLEARED,
+                        status=models.DepositStatus.VERIFIED,
                         is_active=active,
                     )
                     self.db.add(deposit)

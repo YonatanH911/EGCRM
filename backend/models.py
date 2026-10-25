@@ -71,9 +71,9 @@ class VaultStatus(str, enum.Enum):
     MAINTENANCE = "Maintenance"
 
 class DepositStatus(str, enum.Enum):
-    PENDING = "Pending"
-    CLEARED = "Cleared"
-    FAILED = "Failed"
+    OPEN = "Open"
+    VERIFIED = "Verified"
+    PASSIVE = "Passive"
 
 class TaskType(Base):
     __tablename__ = "task_types"
@@ -259,7 +259,7 @@ class Deposit(Base):
     reference_number = Column(String(255), unique=True, index=True, nullable=False)
     amount = Column(Float, nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
-    status = Column(Enum(DepositStatus), default=DepositStatus.PENDING)
+    status = Column(Enum(DepositStatus), default=DepositStatus.OPEN, nullable=False)
     product_name = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
     supplier = Column(String(255), nullable=True)

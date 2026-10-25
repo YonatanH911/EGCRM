@@ -71,6 +71,11 @@ def migrate():
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS verified_by_contact_id INT NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS date_report_sent DATETIME NULL;",
         "ALTER TABLE deposits ADD CONSTRAINT fk_deposits_verified_by_contact FOREIGN KEY (verified_by_contact_id) REFERENCES contacts(id) ON DELETE SET NULL;",
+        "ALTER TABLE deposits MODIFY COLUMN status ENUM('PENDING','CLEARED','FAILED','OPEN','VERIFIED','PASSIVE') NULL DEFAULT 'OPEN';",
+        "UPDATE deposits SET status = 'OPEN' WHERE status = 'PENDING' OR status IS NULL;",
+        "UPDATE deposits SET status = 'VERIFIED' WHERE status = 'CLEARED';",
+        "UPDATE deposits SET status = 'PASSIVE' WHERE status = 'FAILED';",
+        "ALTER TABLE deposits MODIFY COLUMN status ENUM('OPEN','VERIFIED','PASSIVE') NOT NULL DEFAULT 'OPEN';",
         "ALTER TABLE accounts ADD COLUMN IF NOT EXISTS description TEXT NULL;",
 
         # 6. Active / Inactive records
