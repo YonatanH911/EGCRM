@@ -2,15 +2,21 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ListFilter, X } from 'lucide-react';
+import { Check, ListFilter, X } from 'lucide-react';
+
+interface ColumnFilterOption {
+    value: string;
+    label: string;
+}
 
 interface ColumnFilterProps {
     label: string;
     value: string;
     onChange: (value: string) => void;
+    options?: readonly ColumnFilterOption[];
 }
 
-export default function ColumnFilter({ label, value, onChange }: ColumnFilterProps) {
+export default function ColumnFilter({ label, value, onChange, options }: ColumnFilterProps) {
     const [open, setOpen] = useState(false);
     const [position, setPosition] = useState({ left: 0, top: 0 });
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -96,14 +102,42 @@ export default function ColumnFilter({ label, value, onChange }: ColumnFilterPro
                             </button>
                         )}
                     </div>
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        value={value}
-                        onChange={event => onChange(event.target.value)}
-                        placeholder="Contains..."
-                        className="w-full rounded-lg border border-border-subtle bg-background-subtle px-3 py-2 text-xl font-normal text-foreground placeholder-muted-text outline-none focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
-                    />
+                    {options ? (
+                        <div className="space-y-1" role="radiogroup" aria-label={`Filter ${label}`}>
+                            {options.map(option => {
+                                const selected = value === option.value;
+                                return (
+                                    <button
+                                        key={option.value}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={selected}
+                                        onClick={() => {
+                                            onChange(option.value);
+                                            setOpen(false);
+                                        }}
+                                        className={`flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-left text-lg transition-colors ${
+                                            selected
+                                                ? 'bg-crm-500/15 font-semibold text-crm-500'
+                                                : 'text-foreground hover:bg-background-subtle'
+                                        }`}
+                                    >
+                                        <span>{option.label}</span>
+                                        {selected && <Check className="h-4 w-4 flex-shrink-0" />}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            value={value}
+                            onChange={event => onChange(event.target.value)}
+                            placeholder="Contains..."
+                            className="w-full rounded-lg border border-border-subtle bg-background-subtle px-3 py-2 text-xl font-normal text-foreground placeholder-muted-text outline-none focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10"
+                        />
+                    )}
                 </div>,
                 document.body,
             )}

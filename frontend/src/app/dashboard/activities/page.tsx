@@ -11,6 +11,11 @@ import { ColumnFilters, matchesColumnFilters } from '@/lib/columnFilters';
 import SortControl from '@/components/SortControl';
 import { compareSortValues, dateSortValue, SortDirection } from '@/lib/sorting';
 import InactiveToggle from '@/components/InactiveToggle';
+import {
+    ACTIVITY_DUE_DATE_OPTIONS,
+    ActivityDueDatePeriod,
+    matchesActivityDueDatePeriod,
+} from '@/lib/activityDueDates';
 
 interface TaskType { id: number; name: string; color: string; }
 interface ActivityRecord {
@@ -54,6 +59,7 @@ export default function ActivitiesPage() {
     const [showInactive, setShowInactive] = useState(false);
     const [deletingId, setDeletingId] = useState<number | null>(null);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
+    const [dueDateFilter, setDueDateFilter] = useState<ActivityDueDatePeriod>('');
     const { isRTL } = usePreferences();
 
     // Modal state
@@ -138,9 +144,9 @@ export default function ActivitiesPage() {
             subject: activity.subject,
             regarding: activity.regarding,
             sentOn: fmt(activity.start_date),
-            dueDate: fmt(activity.due_date),
         });
-        return matchesActive && matchesType && matchesSearch && matchesColumns;
+        const matchesDueDate = matchesActivityDueDatePeriod(activity.due_date, dueDateFilter);
+        return matchesActive && matchesType && matchesSearch && matchesColumns && matchesDueDate;
     });
 
     const sortedActivities = [...filtered].sort((a, b) => {
@@ -257,8 +263,11 @@ export default function ActivitiesPage() {
                                     {column.label}
                                     <ColumnFilter
                                         label={column.label}
-                                        value={columnFilters[column.key] || ''}
-                                        onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                        value={column.key === 'dueDate' ? dueDateFilter : columnFilters[column.key] || ''}
+                                        onChange={value => column.key === 'dueDate'
+                                            ? setDueDateFilter(value as ActivityDueDatePeriod)
+                                            : setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                        options={column.key === 'dueDate' ? ACTIVITY_DUE_DATE_OPTIONS : undefined}
                                     />
                                 </span>
                             ))}
@@ -276,8 +285,11 @@ export default function ActivitiesPage() {
                                                 <span>{column.heading}</span>
                                                 <ColumnFilter
                                                     label={column.label}
-                                                    value={columnFilters[column.key] || ''}
-                                                    onChange={value => setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                                    value={column.key === 'dueDate' ? dueDateFilter : columnFilters[column.key] || ''}
+                                                    onChange={value => column.key === 'dueDate'
+                                                        ? setDueDateFilter(value as ActivityDueDatePeriod)
+                                                        : setColumnFilters(current => ({ ...current, [column.key]: value }))}
+                                                    options={column.key === 'dueDate' ? ACTIVITY_DUE_DATE_OPTIONS : undefined}
                                                 />
                                             </div>
                                         </th>

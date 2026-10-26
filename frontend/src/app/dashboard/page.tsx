@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import api from '@/lib/api';
-import { Users2, Building, Briefcase, DollarSign, Landmark, Calendar, ArrowRight } from 'lucide-react';
+import { Users2, Building, Briefcase, DollarSign, Landmark, Calendar, ArrowRight, CalendarClock } from 'lucide-react';
 import Link from 'next/link';
 import CopyButton from '@/components/CopyButton';
+import { isActivityOverdue, matchesActivityDueDatePeriod } from '@/lib/activityDueDates';
 
 interface DashboardDeposit {
     id: number;
@@ -15,6 +16,15 @@ interface DashboardDeposit {
     created_at: string;
     status: string;
     is_active?: boolean;
+}
+
+interface DashboardActivity {
+    id: number;
+    subject: string;
+    regarding?: string | null;
+    due_date: string | null;
+    is_active?: boolean;
+    task_type?: { name: string; color: string } | null;
 }
 
 const STAT_CARDS = [
@@ -29,15 +39,17 @@ export default function DashboardOverview() {
     const [loading, setLoading] = useState(true);
     const [recentLeads, setRecentLeads] = useState<any[]>([]);
     const [openDeposits, setOpenDeposits] = useState<DashboardDeposit[]>([]);
+    const [dueSoonActivities, setDueSoonActivities] = useState<DashboardActivity[]>([]);
 
     useEffect(() => {
         const fetchDashboardData = async () => {
             try {
-                const [accRes, conRes, leadRes, depositRes] = await Promise.all([
+                const [accRes, conRes, leadRes, depositRes, activityRes] = await Promise.all([
                     api.get('/accounts'),
                     api.get('/contacts'),
                     api.get('/leads'),
                     api.get('/deposits'),
+                    api.get('/activities', { params: { limit: 10000 } }),
                 ]);
                 const leads = leadRes.data;
                 const pipelineValue = leads.reduce((acc: number, lead: any) => acc + (lead.value || 0), 0);
@@ -47,6 +59,12 @@ export default function DashboardOverview() {
                     (depositRes.data as DashboardDeposit[])
                         .filter(deposit => deposit.status === 'Open' && deposit.is_active !== false)
                         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                );
+                setDueSoonActivities(
+                    (activityRes.data as DashboardActivity[])
+                        .filter(activity => activity.is_active !== false)
+                        .filter(activity => matchesActivityDueDatePeriod(activity.due_date, 'next_7_days_or_earlier'))
+                        .sort((a, b) => new Date(a.due_date as string).getTime() - new Date(b.due_date as string).getTime())
                 );
             } catch (error) {
                 console.error("Failed to fetch dashboard data", error);
@@ -108,6 +126,54 @@ export default function DashboardOverview() {
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Activities Due Soon */}
+            <div className="rounded-2xl overflow-hidden flex flex-col glass-card">
+                <div className="px-5 py-4 border-b border-border-subtle flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2 min-w-0">
+                        <CalendarClock className="w-5 h-5 text-rose-500 flex-shrink-0" />
+                        <h3 className="font-semibold text-foreground text-xl">Activities Due Soon</h3>
+                        <span className="rounded-md bg-rose-500/10 px-2 py-0.5 text-base font-semibold text-rose-500">
+                            {dueSoonActivities.length}
+                        </span>
+                    </div>
+                    <Link href="/dashboard/activities" className="text-lg text-indigo-500 hover:text-indigo-400 font-medium transition-colors whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1">View all <ArrowRight className="h-4 w-4" /></span>
+                    </Link>
+                </div>
+                <div className="max-h-[420px] overflow-y-auto">
+                    {dueSoonActivities.length > 0 ? (
+                        <div className="divide-y divide-border-subtle">
+                            {dueSoonActivities.map(activity => {
+                                const overdue = isActivityOverdue(activity.due_date);
+                                return (
+                                    <Link
+                                        key={activity.id}
+                                        href={`/dashboard/activities/${activity.id}/edit`}
+                                        className="grid grid-cols-1 gap-1 px-5 py-3 transition-colors hover:bg-black/5 dark:hover:bg-white/5 sm:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_auto] sm:items-center sm:gap-4"
+                                    >
+                                        <div className="min-w-0">
+                                            <p className="truncate text-xl font-medium text-foreground">{activity.subject}</p>
+                                            <p className="truncate text-lg text-muted-text">{activity.task_type?.name || 'Unassigned'}</p>
+                                        </div>
+                                        <p className="truncate text-lg text-muted-text">{activity.regarding || 'No regarding'}</p>
+                                        <span className={`inline-flex items-center gap-1 whitespace-nowrap text-lg font-medium ${overdue ? 'text-red-500' : 'text-amber-500'}`}>
+                                            <Calendar className="h-3.5 w-3.5" />
+                                            {overdue ? 'Overdue: ' : 'Due: '}
+                                            {new Date(activity.due_date as string).toLocaleDateString('en-GB')}
+                                        </span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ) : (
+                        <div className="flex min-h-[180px] flex-col items-center justify-center px-5 py-8 text-center">
+                            <CalendarClock className="mb-3 h-9 w-9 text-muted-text opacity-40" />
+                            <p className="text-xl text-muted-text">No activities are due in the next 7 days.</p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {/* Bottom Grid */}
