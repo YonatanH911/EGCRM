@@ -23,7 +23,7 @@ interface DashboardActivity {
     subject: string;
     regarding?: string | null;
     due_date: string | null;
-    is_active?: boolean;
+    is_active: boolean;
     task_type?: { name: string; color: string } | null;
 }
 
@@ -62,7 +62,7 @@ export default function DashboardOverview() {
                 );
                 setDueSoonActivities(
                     (activityRes.data as DashboardActivity[])
-                        .filter(activity => activity.is_active !== false)
+                        .filter(activity => activity.is_active)
                         .filter(activity => matchesActivityDueDatePeriod(activity.due_date, 'next_7_days_or_earlier'))
                         .sort((a, b) => new Date(a.due_date as string).getTime() - new Date(b.due_date as string).getTime())
                 );

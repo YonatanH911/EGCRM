@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session, joinedload
+from datetime import datetime, timedelta
 import models, schemas, auth
 
 def _ordered_by_ids(db: Session, model, ids):
@@ -232,13 +233,29 @@ def update_deposit(db: Session, deposit_id: int, deposit_update: schemas.Deposit
     return db_deposit
 
 # --- Activities ---
+def deactivate_overdue_activities(db: Session, now: datetime | None = None):
+    cutoff = (now or datetime.now()) - timedelta(days=2)
+    changed = db.query(models.Activity).filter(
+        models.Activity.is_active.is_(True),
+        models.Activity.due_date.isnot(None),
+        models.Activity.due_date <= cutoff,
+    ).update(
+        {models.Activity.is_active: False},
+        synchronize_session=False,
+    )
+    if changed:
+        db.commit()
+    return changed
+
 def get_activity(db: Session, activity_id: int):
+    deactivate_overdue_activities(db)
     return db.query(models.Activity).options(
         joinedload(models.Activity.task_type),
         joinedload(models.Activity.contact)
     ).filter(models.Activity.id == activity_id).first()
 
 def get_activities(db: Session, skip: int = 0, limit: int = 500):
+    deactivate_overdue_activities(db)
     return db.query(models.Activity).options(
         joinedload(models.Activity.task_type),
         joinedload(models.Activity.contact)
