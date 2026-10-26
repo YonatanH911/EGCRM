@@ -256,7 +256,7 @@ class Deposit(Base):
     __tablename__ = "deposits"
 
     id = Column(Integer, primary_key=True, index=True)
-    reference_number = Column(String(255), unique=True, index=True, nullable=False)
+    reference_number = Column(String(255), index=True, nullable=False)
     amount = Column(Float, nullable=False)
     date = Column(DateTime, default=datetime.utcnow)
     status = Column(Enum(DepositStatus), default=DepositStatus.OPEN, nullable=False)

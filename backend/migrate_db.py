@@ -1,7 +1,28 @@
 
 import os
-from sqlalchemy import text
+from sqlalchemy import inspect, text
 from database import engine
+
+
+def ensure_non_unique_deposit_reference_index(connection):
+    """Allow Dynamics deposit numbers to repeat while keeping lookups indexed."""
+    indexes = inspect(connection).get_indexes("deposits")
+    for index in indexes:
+        if index.get("unique") and index.get("column_names") == ["reference_number"]:
+            name = str(index["name"]).replace("`", "``")
+            connection.execute(text(f"ALTER TABLE deposits DROP INDEX `{name}`"))
+            connection.commit()
+
+    indexes = inspect(connection).get_indexes("deposits")
+    has_reference_index = any(
+        not index.get("unique") and index.get("column_names") == ["reference_number"]
+        for index in indexes
+    )
+    if not has_reference_index:
+        connection.execute(
+            text("CREATE INDEX ix_deposits_reference_number ON deposits (reference_number)")
+        )
+        connection.commit()
 
 def migrate():
     SQL_COMMANDS = [
@@ -105,6 +126,8 @@ def migrate():
                 connection.commit()
             except Exception as e:
                 print(f"Skipped/Error: {e}")
+        print("Ensuring Deposit Number uses a non-unique index...")
+        ensure_non_unique_deposit_reference_index(connection)
     
     print("✅ Migration process finished!")
 
