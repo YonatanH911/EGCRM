@@ -89,6 +89,8 @@ def migrate():
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS supplier VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS box VARCHAR(255) NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS received_by VARCHAR(255) NULL;",
+        "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS confirmation_sent BOOLEAN NULL DEFAULT FALSE;",
+        "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS date_confirmation_sent DATETIME NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS verified_by_contact_id INT NULL;",
         "ALTER TABLE deposits ADD COLUMN IF NOT EXISTS date_report_sent DATETIME NULL;",
         "ALTER TABLE deposits ADD CONSTRAINT fk_deposits_verified_by_contact FOREIGN KEY (verified_by_contact_id) REFERENCES contacts(id) ON DELETE SET NULL;",

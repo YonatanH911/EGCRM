@@ -36,6 +36,8 @@ interface DepositForm {
     version: string;
     description: string;
     is_confirmation_sent: boolean;
+    confirmation_sent: boolean;
+    date_confirmation_sent: string;
     verified_by_contact_id: string;
     date_report_sent: string;
     received_by: string;
@@ -65,6 +67,8 @@ export default function EditDepositPage() {
         version: '',
         description: '',
         is_confirmation_sent: false,
+        confirmation_sent: false,
+        date_confirmation_sent: '',
         verified_by_contact_id: '',
         date_report_sent: '',
         received_by: '',
@@ -102,6 +106,8 @@ export default function EditDepositPage() {
                     version: deposit.version || '',
                     description: deposit.description || '',
                     is_confirmation_sent: Boolean(deposit.is_confirmation_sent),
+                    confirmation_sent: Boolean(deposit.confirmation_sent),
+                    date_confirmation_sent: deposit.date_confirmation_sent ? deposit.date_confirmation_sent.substring(0, 10) : '',
                     verified_by_contact_id: deposit.verified_by_contact_id ? String(deposit.verified_by_contact_id) : '',
                     date_report_sent: deposit.date_report_sent ? deposit.date_report_sent.substring(0, 10) : '',
                     received_by: deposit.received_by || '',
@@ -133,6 +139,7 @@ export default function EditDepositPage() {
                 vault_id: formData.vault_ids[0] ? Number(formData.vault_ids[0]) : null,
                 supplier: formData.supplier.join(', '),
                 date: formData.date ? new Date(formData.date).toISOString() : null,
+                date_confirmation_sent: formData.date_confirmation_sent ? new Date(formData.date_confirmation_sent).toISOString() : null,
                 verified_by_contact_id: formData.verified_by_contact_id ? Number(formData.verified_by_contact_id) : null,
                 date_report_sent: formData.date_report_sent ? new Date(formData.date_report_sent).toISOString() : null,
             };
@@ -305,6 +312,39 @@ export default function EditDepositPage() {
                                             onChange={(e) => setFormData({ ...formData, received_by: e.target.value })}
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"
                                             placeholder=""
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label htmlFor="confirmation_sent" className="block text-xl font-medium text-foreground">Is Confirmation Sent?</label>
+                                    <div className="mt-1">
+                                        <SearchableDropdown
+                                            value={formData.confirmation_sent ? 'Yes' : 'No'}
+                                            onChange={(value) => setFormData(prev => ({
+                                                ...prev,
+                                                confirmation_sent: value === 'Yes',
+                                                date_confirmation_sent: value === 'Yes' ? prev.date_confirmation_sent : '',
+                                            }))}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
+                                            options={[
+                                                { value: 'No', label: 'No' },
+                                                { value: 'Yes', label: 'Yes' },
+                                            ]}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className={!formData.confirmation_sent ? 'opacity-50' : ''}>
+                                    <label htmlFor="date_confirmation_sent" className="block text-xl font-medium text-foreground">Date Confirmation Sent</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="date"
+                                            id="date_confirmation_sent"
+                                            value={formData.date_confirmation_sent}
+                                            disabled={!formData.confirmation_sent}
+                                            onChange={(event) => setFormData(prev => ({ ...prev, date_confirmation_sent: event.target.value }))}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border disabled:cursor-not-allowed"
                                         />
                                     </div>
                                 </div>

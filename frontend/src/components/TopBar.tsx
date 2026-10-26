@@ -1,8 +1,9 @@
 'use client';
 
-import { Search, Bell, Menu } from 'lucide-react';
+import { Search, Menu } from 'lucide-react';
 import SettingsDropdown from './SettingsDropdown';
 import ReleaseNotesDropdown from './ReleaseNotesDropdown';
+import AboutDropdown from './AboutDropdown';
 
 export default function TopBar() {
     return (
@@ -31,6 +32,7 @@ export default function TopBar() {
 
             <div className="flex items-center gap-3">
                 <SettingsDropdown />
+                <AboutDropdown />
                 <ReleaseNotesDropdown />
             </div>
         </header>
