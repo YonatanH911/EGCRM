@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Building2, Plus, Search, Building } from 'lucide-react';
 import SortControl from '@/components/SortControl';
@@ -17,7 +16,6 @@ const thCls = "px-6 py-3.5 ltr:text-left rtl:text-right text-base font-bold text
 const tdCls = "px-6 py-4 whitespace-nowrap";
 
 export default function AccountsPage() {
-    const router = useRouter();
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -160,12 +158,11 @@ export default function AccountsPage() {
                                     const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     return (
                                         <tr key={account.id}
-                                            onClick={() => router.push(`/dashboard/accounts/${account.id}`)}
-                                            className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                                            className="group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
                                             style={rowStyle}
                                         >
-                                            <td className={tdCls}>
-                                                <div className="flex items-center gap-3">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={`/dashboard/accounts/${account.id}`} className="flex items-center gap-3 px-6 py-4">
                                                     <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg uppercase shadow-sm"
                                                         style={{ background: isActive ? 'linear-gradient(135deg, #6366f1, #3b82f6)' : '#64748b' }}>
                                                         {account.name?.charAt(0) || '?'}
@@ -174,17 +171,17 @@ export default function AccountsPage() {
                                                         <span className="text-xl font-medium text-foreground">{account.name || 'Unnamed'}</span>
                                                         {!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}
                                                     </div>
-                                                </div>
+                                                </Link>
                                             </td>
                                             <td className={tdCls}>
                                                 <div className="flex items-center gap-1.5">
-                                                    <span className="text-xl text-muted-text">{account.website || '—'}</span>
+                                                    <Link href={`/dashboard/accounts/${account.id}`} className="flex-1 text-xl text-muted-text">{account.website || '—'}</Link>
                                                     <CopyButton value={account.website} label="Copy website" />
                                                 </div>
                                             </td>
-                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.street || '—'}</span></td>
-                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.city || '—'}</span></td>
-                                            <td className={tdCls}><span className="text-xl text-muted-text">{account.country || '—'}</span></td>
+                                            <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/accounts/${account.id}`} className={`${tdCls} block text-xl text-muted-text`}>{account.street || '—'}</Link></td>
+                                            <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/accounts/${account.id}`} className={`${tdCls} block text-xl text-muted-text`}>{account.city || '—'}</Link></td>
+                                            <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/accounts/${account.id}`} className={`${tdCls} block text-xl text-muted-text`}>{account.country || '—'}</Link></td>
                                             <td className={tdCls}>
                                                 <div className="flex items-center gap-2">
                                                     {!isActive && (
@@ -193,9 +190,9 @@ export default function AccountsPage() {
                                                             Reactivate
                                                         </button>
                                                     )}
-                                                    <span className="text-lg text-muted-text">
+                                                    <Link href={`/dashboard/accounts/${account.id}`} className="text-lg text-muted-text">
                                                         {new Date(account.created_at).toLocaleDateString()}
-                                                    </span>
+                                                    </Link>
                                                 </div>
                                             </td>
                                         </tr>

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Shield, Plus, Search, MapPin, Database } from 'lucide-react';
 import api from '@/lib/api';
 import SortControl from '@/components/SortControl';
@@ -27,7 +26,6 @@ const getStatusStyle = (status: string) => {
 };
 
 export default function VaultsPage() {
-    const router = useRouter();
     const [vaults, setVaults] = useState<Vault[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -149,38 +147,35 @@ export default function VaultsPage() {
                             ) : (
                                 sortedVaults.map((vault) => {
                                     const st = getStatusStyle(vault.status);
+                                    const href = `/dashboard/vaults/${vault.id}`;
                                     return (
-                                        <tr key={vault.id} className="cursor-pointer transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5"
-                                            onClick={() => router.push(`/dashboard/vaults/${vault.id}`)}
-                                        >
-                                            <td className={tdCls}>
-                                                <div className="flex items-center gap-3">
+                                        <tr key={vault.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className={`${tdCls} flex items-center gap-3`}>
                                                     <div className="w-9 h-9 rounded-lg flex items-center justify-center"
                                                         style={{ background: 'rgba(99,102,241,0.12)' }}>
                                                         <Shield className="h-4 w-4 text-indigo-500" />
                                                     </div>
                                                     <span className="text-xl font-medium text-foreground">{vault.name}</span>
-                                                </div>
+                                                </Link>
                                             </td>
-                                            <td className={tdCls}>
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className={`${tdCls} block`}><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
                                                     style={{ background: st.bg, color: st.color, border: `1px solid ${st.border}` }}>
                                                     {vault.status}
-                                                </span>
+                                                </span></Link>
                                             </td>
-                                            <td className={tdCls}>
-                                                <div className="flex items-center text-xl text-muted-text">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text`}>
                                                     <MapPin className="mr-1.5 h-3.5 w-3.5 text-muted-text" />{vault.location || '—'}
-                                                </div>
+                                                </Link>
                                             </td>
-                                            <td className={tdCls}>
-                                                <div className="flex items-center text-xl text-muted-text">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text`}>
                                                     <Database className="mr-1.5 h-3.5 w-3.5 text-muted-text" />{vault.capacity || '—'}
-                                                </div>
+                                                </Link>
                                             </td>
-                                            <td className={`${tdCls} text-xl text-muted-text`}>
-                                                {new Date(vault.created_at).toLocaleDateString()}
-                                            </td>
+                                            <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block text-xl text-muted-text`}>{new Date(vault.created_at).toLocaleDateString()}</Link></td>
                                         </tr>
                                     );
                                 })

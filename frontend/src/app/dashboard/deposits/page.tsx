@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { Landmark, Plus, Search, Shield, Calendar, Package, Tag, User, Box, CheckSquare } from 'lucide-react';
 import api from '@/lib/api';
 import ScrollableTable from '@/components/ScrollableTable';
@@ -39,7 +38,6 @@ const thCls = "px-3 py-3.5 ltr:text-left rtl:text-right text-base font-bold text
 const tdCls = "px-3 py-3.5";
 
 export default function DepositsPage() {
-    const router = useRouter();
     const [deposits, setDeposits] = useState<Deposit[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -167,45 +165,46 @@ export default function DepositsPage() {
                                     </div>
                                 </td></tr>
                             ) : (
-                                sortedDeposits.map((deposit) => (
-                                    <tr key={deposit.id} className="cursor-pointer transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5"
-                                        onClick={() => router.push(`/dashboard/deposits/${deposit.id}`)}
-                                    >
-                                        <td className={tdCls}><div className="text-xl text-foreground max-w-[160px] truncate">{deposit.product_name || dash}</div></td>
-                                        <td className={tdCls}><div className="text-xl text-foreground font-medium max-w-[120px] truncate">{deposit.version || dash}</div></td>
-                                        <td className={tdCls}><div className="text-xl text-muted-text whitespace-nowrap">{deposit.supplier || dash}</div></td>
-                                        <td className={tdCls}>
-                                            <div className="flex items-center text-xl text-muted-text whitespace-nowrap">
+                                sortedDeposits.map((deposit) => {
+                                    const href = `/dashboard/deposits/${deposit.id}`;
+                                    return (
+                                    <tr key={deposit.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5">
+                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground max-w-[160px] truncate">{deposit.product_name || dash}</div></Link></td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground font-medium max-w-[120px] truncate">{deposit.version || dash}</div></Link></td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-muted-text whitespace-nowrap">{deposit.supplier || dash}</div></Link></td>
+                                        <td className="p-0 whitespace-nowrap">
+                                            <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text whitespace-nowrap`}>
                                                 <Calendar className="mr-1 h-3.5 w-3.5 text-muted-text" />
                                                 {formatDepositDate(deposit.date) || dash}
-                                            </div>
+                                            </Link>
                                         </td>
-                                        <td className={tdCls}>
-                                            <div className="flex items-center text-xl text-muted-text whitespace-nowrap">
+                                        <td className="p-0 whitespace-nowrap">
+                                            <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text whitespace-nowrap`}>
                                                 <Shield className="mr-1 h-3.5 w-3.5 text-muted-text" />
                                                 {deposit.vault ? deposit.vault.name : dash}
-                                            </div>
+                                            </Link>
                                         </td>
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-mono font-semibold"
+                                                <Link href={href} className="inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-mono font-semibold"
                                                     style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
                                                     {deposit.reference_number}
-                                                </span>
+                                                </Link>
                                                 <CopyButton value={deposit.reference_number} label="Copy deposit number" />
                                             </div>
                                         </td>
-                                        <td className={tdCls}>
-                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-semibold ${
+                                        <td className="p-0 whitespace-nowrap">
+                                            <Link href={href} className={`${tdCls} block`}><span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-semibold ${
                                                 deposit.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' :
                                                 deposit.status === 'Open' ? 'bg-amber-500/10 text-amber-500 border-amber-500/20' :
                                                 'bg-slate-500/10 text-slate-500 border-slate-500/20'
                                             }`} style={{ border: '1px solid' }}>
                                                 {deposit.status || 'Open'}
-                                            </span>
+                                            </span></Link>
                                         </td>
                                     </tr>
-                                ))
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>

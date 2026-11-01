@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
     FileText, Plus, Search, Building2, Calendar,
 } from 'lucide-react';
@@ -51,7 +50,6 @@ const splitContractTitle = (contract: Contract) => {
 };
 
 export default function ContractsPage() {
-    const router = useRouter();
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
@@ -198,14 +196,14 @@ export default function ContractsPage() {
                                     const isActive = contract.is_active !== false;
                                     const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     const titleParts = splitContractTitle(contract);
+                                    const href = `/dashboard/contracts/${contract.id}`;
                                     return (
                                         <tr key={contract.id}
-                                            className={`cursor-pointer group transition-colors duration-150 ${isActive ? 'hover:bg-black/5 dark:hover:bg-white/5' : 'hover:bg-black/10 dark:hover:bg-white/10'}`}
+                                            className={`group transition-colors duration-150 ${isActive ? 'hover:bg-black/5 dark:hover:bg-white/5' : 'hover:bg-black/10 dark:hover:bg-white/10'}`}
                                             style={rowStyle}
-                                            onClick={() => router.push(`/dashboard/contracts/${contract.id}`)}
                                         >
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center gap-3">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className="flex items-center gap-3 px-6 py-4">
                                                     <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${isActive ? 'bg-indigo-500/10' : 'bg-slate-500/20'}`}>
                                                         <FileText className={`h-4 w-4 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
                                                     </div>
@@ -213,35 +211,35 @@ export default function ContractsPage() {
                                                         <span className="text-xl font-medium text-foreground">{titleParts.beneficiaryTitle}</span>
                                                         {!isActive && <span className="text-base text-slate-400 uppercase tracking-wider">Inactive</span>}
                                                     </div>
-                                                </div>
+                                                </Link>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-xl font-medium text-foreground">{titleParts.supplierTitle}</span>
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className="block px-6 py-4 text-xl font-medium text-foreground">{titleParts.supplierTitle}</Link>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className="block px-6 py-4"><span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-lg font-semibold"
                                                     style={{ background: contactTypeBadge.bg, color: contactTypeBadge.color, border: `1px solid ${contactTypeBadge.border}` }}>
                                                     {contract.contact_type || '3-party'}
-                                                </span>
+                                                </span></Link>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center text-xl text-foreground">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className="flex items-center px-6 py-4 text-xl text-foreground">
                                                     <Building2 className="mr-1.5 h-4 w-4 text-muted-text" />
                                                     {contract.account ? contract.account.name : '—'}
-                                                </div>
+                                                </Link>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className="text-xl font-semibold text-foreground">
+                                            <td className="p-0 whitespace-nowrap">
+                                                <Link href={href} className="block px-6 py-4 text-xl font-semibold text-foreground">
                                                     {formatCurrency(contract.value, contract.currency)}
-                                                </span>
+                                                </Link>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-xl text-muted-text">
-                                                {contract.start_date || contract.end_date ? (
+                                            <td className="p-0 whitespace-nowrap text-xl text-muted-text">
+                                                <Link href={href} className="block px-6 py-4">{contract.start_date || contract.end_date ? (
                                                     <div className="flex items-center gap-1.5">
                                                         <Calendar className="h-3.5 w-3.5 text-muted-text" />
                                                         {formatDate(contract.start_date) || '—'} – {formatDate(contract.end_date) || '—'}
                                                     </div>
-                                                ) : '—'}
+                                                ) : '—'}</Link>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 {!isActive && (

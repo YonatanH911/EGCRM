@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import ColumnFilter from '@/components/ColumnFilter';
 import { Plus, Trash2, Activity, Loader2, Settings, Check, X, Search } from 'lucide-react';
@@ -48,7 +47,6 @@ function hexToRgba(hex: string, alpha: number = 0.15) {
 }
 
 export default function ActivitiesPage() {
-    const router = useRouter();
     const [activities, setActivities] = useState<ActivityRecord[]>([]);
     const [taskTypes, setTaskTypes] = useState<TaskType[]>([]);
     const [loading, setLoading] = useState(true);
@@ -301,28 +299,27 @@ export default function ActivitiesPage() {
                                 {sortedActivities.map(activity => {
                                     const tColor = activity.task_type?.color || '#9ca3af';
                                     const tName = activity.task_type?.name || 'Unassigned';
+                                    const href = `/dashboard/activities/${activity.id}/edit`;
                                     return (
-                                        <tr key={activity.id} className="group grid w-full grid-cols-2 gap-x-3 gap-y-1 p-3 transition-colors duration-150 cursor-pointer hover:bg-background-subtle/50 lg:table-row lg:p-0"
-                                            onClick={() => router.push(`/dashboard/activities/${activity.id}/edit`)}
-                                        >
+                                        <tr key={activity.id} className="group grid w-full grid-cols-2 gap-x-3 gap-y-1 p-3 transition-colors duration-150 hover:bg-background-subtle/50 lg:table-row lg:p-0">
                                             <td className="col-start-1 row-start-1 min-w-0 lg:table-cell lg:px-3 lg:py-2">
-                                                <span className="inline-flex max-w-full items-center gap-1.5 rounded-md px-2 py-0.5 text-sm font-semibold"
+                                                <Link href={href} className="inline-flex max-w-full items-center gap-1.5 rounded-md px-2 py-0.5 text-sm font-semibold"
                                                     style={{ background: hexToRgba(tColor), color: tColor, border: `1px solid ${hexToRgba(tColor, 0.3)}` }}>
                                                     <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full" style={{ backgroundColor: tColor }} />
                                                     <span className="min-w-0 truncate">{tName}</span>
-                                                </span>
+                                                </Link>
                                             </td>
                                             <td className="col-span-2 min-w-0 font-semibold text-foreground transition-colors group-hover:text-crm-500 lg:table-cell lg:px-3 lg:py-2">
-                                                <span className="block line-clamp-2 break-words" title={activity.subject}>{activity.subject}</span>
+                                                <Link href={href} className="block line-clamp-2 break-words" title={activity.subject}>{activity.subject}</Link>
                                             </td>
                                             <td className="col-span-2 min-w-0 text-muted-text lg:table-cell lg:px-3 lg:py-2">
-                                                <span className="block line-clamp-2 break-words" title={activity.regarding || undefined}>{activity.regarding || '—'}</span>
+                                                <Link href={href} className="block line-clamp-2 break-words" title={activity.regarding || undefined}>{activity.regarding || '—'}</Link>
                                             </td>
                                             <td className="min-w-0 whitespace-nowrap text-sm text-muted-text lg:table-cell lg:px-3 lg:py-2">
-                                                <span className="mr-1 font-semibold lg:hidden">Sent:</span>{fmt(activity.start_date)}
+                                                <Link href={href} className="block"><span className="mr-1 font-semibold lg:hidden">Sent:</span>{fmt(activity.start_date)}</Link>
                                             </td>
                                             <td className="min-w-0 whitespace-nowrap text-sm text-muted-text lg:table-cell lg:px-3 lg:py-2">
-                                                <span className="mr-1 font-semibold lg:hidden">Due:</span>{fmt(activity.due_date)}
+                                                <Link href={href} className="block"><span className="mr-1 font-semibold lg:hidden">Due:</span>{fmt(activity.due_date)}</Link>
                                             </td>
                                             <td className="col-start-2 row-start-1 min-w-0 lg:table-cell lg:px-1 lg:py-2">
                                                 <div className="flex justify-end opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">

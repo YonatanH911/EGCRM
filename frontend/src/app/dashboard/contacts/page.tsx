@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/lib/api';
 import { Users, Plus, Search } from 'lucide-react';
@@ -18,7 +17,6 @@ const tdCls = "px-6 py-4 whitespace-nowrap";
 const dash = '-';
 
 export default function ContactsPage() {
-    const router = useRouter();
     const [contacts, setContacts] = useState<any[]>([]);
     const [accounts, setAccounts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -176,40 +174,37 @@ export default function ContactsPage() {
                             <tbody className="divide-y divide-border-subtle">
                                 {sortedContacts.map((contact) => (
                                     <tr key={contact.id}
-                                        onClick={() => router.push(`/dashboard/contacts/${contact.id}`)}
-                                        className="cursor-pointer group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                                        className="group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
                                     >
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg uppercase shadow-sm bg-gradient-to-br from-indigo-500 to-purple-500">
-                                                    {(contact.first_name || '?').charAt(0)}{(contact.last_name || '').charAt(0)}
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="inline-flex items-center gap-1 text-xl font-medium text-foreground">
-                                                        {contact.first_name} {contact.last_name}
-                                                        <CopyButton value={contact.email} label={`Copy email for ${contact.first_name} ${contact.last_name}`} />
-                                                    </span>
-                                                    {contact.job_title && <span className="text-lg text-muted-text">{contact.job_title}</span>}
-                                                </div>
+                                                <Link href={`/dashboard/contacts/${contact.id}`} className="flex min-w-0 flex-1 items-center gap-3">
+                                                    <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-lg uppercase shadow-sm bg-gradient-to-br from-indigo-500 to-purple-500">
+                                                        {(contact.first_name || '?').charAt(0)}{(contact.last_name || '').charAt(0)}
+                                                    </div>
+                                                    <div className="flex min-w-0 flex-col">
+                                                        <span className="text-xl font-medium text-foreground">{contact.first_name} {contact.last_name}</span>
+                                                        {contact.job_title && <span className="text-lg text-muted-text">{contact.job_title}</span>}
+                                                    </div>
+                                                </Link>
+                                                <CopyButton value={contact.email} label={`Copy email for ${contact.first_name} ${contact.last_name}`} />
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{getAccountNames(contact)}</span></td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/contacts/${contact.id}`} className={`${tdCls} block text-xl text-muted-text`}>{getAccountNames(contact)}</Link></td>
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-xl text-muted-text">{contact.email || dash}</span>
+                                                <Link href={`/dashboard/contacts/${contact.id}`} className="flex-1 text-xl text-muted-text">{contact.email || dash}</Link>
                                                 <CopyButton value={contact.email} label="Copy email" />
                                             </div>
                                         </td>
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-1.5">
-                                                <span className="text-xl text-foreground">{contact.phone || dash}</span>
+                                                <Link href={`/dashboard/contacts/${contact.id}`} className="flex-1 text-xl text-foreground">{contact.phone || dash}</Link>
                                                 <CopyButton value={contact.phone} label="Copy phone number" />
                                             </div>
                                         </td>
-                                        <td className={tdCls}><span className="text-xl text-muted-text">{contact.is_israeli === null || contact.is_israeli === undefined ? dash : (contact.is_israeli ? 'Yes' : 'No')}</span></td>
-                                        <td className={`${tdCls} ltr:text-right rtl:text-left text-xl text-muted-text`}>
-                                            {new Date(contact.created_at).toLocaleDateString()}
-                                        </td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/contacts/${contact.id}`} className={`${tdCls} block text-xl text-muted-text`}>{contact.is_israeli === null || contact.is_israeli === undefined ? dash : (contact.is_israeli ? 'Yes' : 'No')}</Link></td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/contacts/${contact.id}`} className={`${tdCls} block ltr:text-right rtl:text-left text-xl text-muted-text`}>{new Date(contact.created_at).toLocaleDateString()}</Link></td>
                                     </tr>
                                 ))}
                             </tbody>
