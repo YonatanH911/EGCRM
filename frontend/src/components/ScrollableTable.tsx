@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode } from 'react';
 
 type ScrollableTableProps = {
     children: ReactNode;
@@ -8,69 +8,28 @@ type ScrollableTableProps = {
 };
 
 const compactTableClass = [
-    'overflow-x-auto scrollbar-thin scrollbar-thumb-border-subtle hover:scrollbar-thumb-muted-text',
-    '[&_table]:w-full [&_table]:min-w-max',
-    '[&_th]:!px-6 [&_th]:!py-3.5 [&_th]:!text-base [&_th]:!tracking-wide',
-    '[&_td]:!px-6 [&_td]:!py-4 [&_td]:!text-xl',
-    '[&_td_span]:!text-xl [&_td_div]:!text-xl [&_td_button]:!text-sm',
-    '[&_td>span]:block [&_td>span]:max-w-80 [&_td>span]:truncate',
-    '[&_td_.text-lg]:!text-lg [&_td_.text-xl]:!text-xl',
+    'min-w-0 overflow-hidden',
+    '[&_table]:block [&_table]:w-full lg:[&_table]:table lg:[&_table]:table-fixed',
+    '[&_thead]:block lg:[&_thead]:table-header-group',
+    '[&_thead>tr]:flex [&_thead>tr]:flex-wrap [&_thead>tr]:gap-x-3 [&_thead>tr]:gap-y-1 [&_thead>tr]:px-3 [&_thead>tr]:py-2',
+    'lg:[&_thead>tr]:table-row lg:[&_thead>tr]:p-0',
+    '[&_tbody]:block lg:[&_tbody]:table-row-group',
+    '[&_tbody>tr]:grid [&_tbody>tr]:w-full [&_tbody>tr]:grid-cols-2 [&_tbody>tr]:gap-x-3 [&_tbody>tr]:gap-y-1 [&_tbody>tr]:p-3',
+    'lg:[&_tbody>tr]:table-row lg:[&_tbody>tr]:p-0',
+    '[&_th]:block [&_th]:!p-0 [&_th]:!text-sm [&_th]:!tracking-normal lg:[&_th]:table-cell lg:[&_th]:!px-3 lg:[&_th]:!py-2',
+    '[&_td]:block [&_td]:min-w-0 [&_td]:max-w-full [&_td]:overflow-hidden [&_td]:!whitespace-normal [&_td]:!px-0 [&_td]:!py-1 [&_td]:!text-base',
+    'lg:[&_td]:table-cell lg:[&_td]:!px-3 lg:[&_td]:!py-2',
+    '[&_tbody>tr>td:only-child]:col-span-2',
+    '[&_td>a]:min-w-0 [&_td>a]:max-w-full [&_td>a]:overflow-hidden [&_td>a]:!p-0',
+    '[&_td_div]:min-w-0 [&_td_div]:max-w-full [&_td_span]:max-w-full',
+    '[&_td_.whitespace-nowrap]:!whitespace-normal [&_td_.text-lg]:!text-sm [&_td_.text-xl]:!text-base',
+    '[&_td_button]:!text-sm',
 ].join(' ');
 
 export default function ScrollableTable({ children, className = '' }: ScrollableTableProps) {
-    const topRef = useRef<HTMLDivElement>(null);
-    const bodyRef = useRef<HTMLDivElement>(null);
-    const syncingRef = useRef(false);
-    const [scrollWidth, setScrollWidth] = useState(0);
-
-    useEffect(() => {
-        const body = bodyRef.current;
-        if (!body) return;
-
-        const updateWidth = () => setScrollWidth(body.scrollWidth);
-        updateWidth();
-
-        const observer = new ResizeObserver(updateWidth);
-        observer.observe(body);
-        if (body.firstElementChild) observer.observe(body.firstElementChild);
-
-        return () => observer.disconnect();
-    }, [children]);
-
-    const syncScroll = (source: 'top' | 'body') => {
-        if (syncingRef.current) return;
-        const top = topRef.current;
-        const body = bodyRef.current;
-        if (!top || !body) return;
-
-        syncingRef.current = true;
-        if (source === 'top') {
-            body.scrollLeft = top.scrollLeft;
-        } else {
-            top.scrollLeft = body.scrollLeft;
-        }
-        requestAnimationFrame(() => {
-            syncingRef.current = false;
-        });
-    };
-
     return (
-        <div className="min-w-0">
-            <div
-                ref={topRef}
-                onScroll={() => syncScroll('top')}
-                className="h-4 overflow-x-auto overflow-y-hidden border-b border-border-subtle bg-black/5 dark:bg-white/5 scrollbar-thin scrollbar-thumb-border-subtle hover:scrollbar-thumb-muted-text"
-                aria-label="Table horizontal scroll"
-            >
-                <div style={{ width: scrollWidth, height: 1 }} />
-            </div>
-            <div
-                ref={bodyRef}
-                onScroll={() => syncScroll('body')}
-                className={`${compactTableClass} ${className}`}
-            >
-                {children}
-            </div>
+        <div className={`${compactTableClass} ${className}`}>
+            {children}
         </div>
     );
 }
