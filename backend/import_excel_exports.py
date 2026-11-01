@@ -28,6 +28,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from database import SessionLocal
+from contract_account_matching import unique_account_index, unique_account_match
 import models
 
 
@@ -456,6 +457,7 @@ class ExcelImporter:
         stats = self.stats[label] = Stats()
         book = self.workbook(key)
         contracts = self.db.query(models.Contract).all()
+        account_index = unique_account_index(self.db.query(models.Account).all())
         by_title: dict[str, list[models.Contract]] = defaultdict(list)
         for contract in contracts:
             by_title[normalized(contract.title)].append(contract)
@@ -477,12 +479,16 @@ class ExcelImporter:
                     candidates = by_title.get(normalized(title), [])
                     contract = unique_unclaimed(candidates, claimed_ids)
                 beneficiary, supplier = split_contract_title(title)
+                beneficiary_account = unique_account_match(account_index, beneficiary)
+                supplier_account = unique_account_match(account_index, supplier)
                 created = contract is None
                 if created:
                     contract = models.Contract(
                         title=title,
-                        beneficiary_title=beneficiary or None,
-                        supplier_title=supplier or None,
+                        beneficiary_title=beneficiary_account.name if beneficiary_account else beneficiary or None,
+                        supplier_title=supplier_account.name if supplier_account else supplier or None,
+                        beneficiary_account_id=beneficiary_account.id if beneficiary_account else None,
+                        supplier_account_id=supplier_account.id if supplier_account else None,
                         contact_type="3-party",
                         status=models.ContractStatus.ACTIVE,
                         value=0.0,
@@ -497,8 +503,10 @@ class ExcelImporter:
                     stats.matched += 1
 
                 changed = self.set_value(contract, "title", title)
-                changed |= self.set_value(contract, "beneficiary_title", beneficiary)
-                changed |= self.set_value(contract, "supplier_title", supplier)
+                changed |= self.set_value(contract, "beneficiary_title", beneficiary_account.name if beneficiary_account else beneficiary)
+                changed |= self.set_value(contract, "supplier_title", supplier_account.name if supplier_account else supplier)
+                changed |= self.set_value(contract, "beneficiary_account_id", beneficiary_account.id if beneficiary_account else None)
+                changed |= self.set_value(contract, "supplier_account_id", supplier_account.id if supplier_account else None)
                 changed |= self.set_value(contract, "start_date", parse_date(book.value(row, "Date Contract Signed")))
                 changed |= self.set_value(contract, "end_date", parse_date(book.value(row, "Date Contract Ends")))
                 changed |= self.set_value(

@@ -9,6 +9,7 @@ import SearchableDropdown from '@/components/SearchableDropdown';
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 
 interface Contact { id: number; first_name: string; last_name: string; job_title?: string; email?: string | null; }
+interface Account { id: number; name: string; }
 
 const CONTRACT_TYPES = ['3-party', 'frame'];
 const BILLING_CURRENCIES = ['EUR', 'USD', 'NIS', 'BP'].map(currency => ({ value: currency, label: currency }));
@@ -17,7 +18,7 @@ const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wid
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
-    'title' | 'beneficiary_title' | 'supplier_title' | 'status' | 'contact_type' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
+    'title' | 'beneficiary_title' | 'supplier_title' | 'beneficiary_account_id' | 'supplier_account_id' | 'status' | 'contact_type' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
     'product_name' | 'deposit_id' |
     'beneficiary_currency' | 'beneficiary_set_up_fee' | 'beneficiary_annual_fee' | 'beneficiary_updates' | 'beneficiary_ext_verification' |
     'supplier_currency' | 'supplier_set_up_fee' | 'supplier_annual_fee' | 'supplier_updates' | 'supplier_ext_verification' |
@@ -30,6 +31,7 @@ const CUBES = [
         label: 'Beneficiary',
         gradient: 'from-purple-500 to-indigo-500',
         titleField: 'beneficiary_title' as FormField,
+        accountField: 'beneficiary_account_id' as FormField,
         titleLabel: 'Beneficiary Title',
         fields: [
             { field: 'beneficiary_management_contact' as FormField, label: 'Management Contact' },
@@ -42,6 +44,7 @@ const CUBES = [
         label: 'Supplier',
         gradient: 'from-emerald-500 to-teal-500',
         titleField: 'supplier_title' as FormField,
+        accountField: 'supplier_account_id' as FormField,
         titleLabel: 'Supplier Title',
         fields: [
             { field: 'supplier_management_contact' as FormField, label: 'Management Contact' },
@@ -52,7 +55,7 @@ const CUBES = [
 ];
 
 const emptyForm: Record<FormField, string | string[]> = {
-    title: '', beneficiary_title: '', supplier_title: '', status: 'Draft', contact_type: '3-party', value: '0', currency: 'USD',
+    title: '', beneficiary_title: '', supplier_title: '', beneficiary_account_id: '', supplier_account_id: '', status: 'Draft', contact_type: '3-party', value: '0', currency: 'USD',
     beneficiary_currency: 'USD', beneficiary_set_up_fee: '', beneficiary_annual_fee: '', beneficiary_updates: '', beneficiary_ext_verification: '',
     supplier_currency: 'USD', supplier_set_up_fee: '', supplier_annual_fee: '', supplier_updates: '', supplier_ext_verification: '',
     start_date: '', end_date: '', paid_by: [], product_name: '', deposit_id: [],
@@ -94,6 +97,18 @@ const splitContractTitle = (title: string) => {
     };
 };
 
+const normalizeAccountName = (value: string) => value
+    .normalize('NFKC')
+    .toLocaleLowerCase()
+    .replaceAll('&', 'and')
+    .replace(/[^\p{L}\p{N}]+/gu, '');
+
+const matchAccountId = (accounts: Account[], title: string) => {
+    const normalizedTitle = normalizeAccountName(title);
+    const matches = accounts.filter(account => normalizeAccountName(account.name) === normalizedTitle);
+    return matches.length === 1 ? String(matches[0].id) : '';
+};
+
 export default function EditContractPage() {
     const router = useRouter();
     const params = useParams();
@@ -104,23 +119,30 @@ export default function EditContractPage() {
     const [saving, setSaving]                 = useState(false);
     const [error, setError]                   = useState('');
     const [contacts, setContacts]             = useState<Contact[]>([]);
+    const [accounts, setAccounts]             = useState<Account[]>([]);
     const [isActive, setIsActive]             = useState(true);
     const [form, setForm]                     = useState<Record<FormField, string | string[]>>(emptyForm);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [contractRes, contactsRes] = await Promise.all([
+                const [contractRes, contactsRes, accountsRes] = await Promise.all([
                     api.get(`/contracts/${id}`),
                     api.get('/contacts'),
+                    api.get('/accounts'),
                 ]);
                 const c = contractRes.data;
                 const parsedTitle = splitContractTitle(c.title || '');
+                const beneficiaryTitle = c.beneficiary_title || parsedTitle.beneficiaryTitle;
+                const supplierTitle = c.supplier_title || parsedTitle.supplierTitle;
+                const loadedAccounts = accountsRes.data as Account[];
                 setIsActive(c.is_active !== false);
                 setForm({
                     title:    c.title    || '',
-                    beneficiary_title: c.beneficiary_title || parsedTitle.beneficiaryTitle,
-                    supplier_title: c.supplier_title || parsedTitle.supplierTitle,
+                    beneficiary_title: beneficiaryTitle,
+                    supplier_title: supplierTitle,
+                    beneficiary_account_id: c.beneficiary_account_id ? String(c.beneficiary_account_id) : matchAccountId(loadedAccounts, beneficiaryTitle),
+                    supplier_account_id: c.supplier_account_id ? String(c.supplier_account_id) : matchAccountId(loadedAccounts, supplierTitle),
                     status:   c.status   || 'Draft',
                     contact_type: c.contact_type || '3-party',
                     value:    c.value != null ? String(c.value) : '0',
@@ -150,6 +172,7 @@ export default function EditContractPage() {
 
                 });
                 setContacts(contactsRes.data);
+                setAccounts(loadedAccounts);
             } catch (err: any) {
                 setError(err.response?.data?.detail || 'Failed to load contract');
             } finally {
@@ -164,12 +187,14 @@ export default function EditContractPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const beneficiaryTitle = String(form.beneficiary_title || '').trim();
-        const supplierTitle = String(form.supplier_title || '').trim();
-        if (!beneficiaryTitle || !supplierTitle) {
+        const beneficiaryAccount = accounts.find(account => String(account.id) === form.beneficiary_account_id);
+        const supplierAccount = accounts.find(account => String(account.id) === form.supplier_account_id);
+        if (!beneficiaryAccount || !supplierAccount) {
             setError('Beneficiary Title and Supplier Title are required');
             return;
         }
+        const beneficiaryTitle = beneficiaryAccount.name;
+        const supplierTitle = supplierAccount.name;
         setSaving(true);
         setError('');
         try {
@@ -178,9 +203,12 @@ export default function EditContractPage() {
                 title: `${beneficiaryTitle} - ${supplierTitle}`,
                 beneficiary_title: beneficiaryTitle,
                 supplier_title: supplierTitle,
+                beneficiary_account_id: beneficiaryAccount.id,
+                supplier_account_id: supplierAccount.id,
                 value:      Number(form.beneficiary_annual_fee) || 0,
                 currency:   form.beneficiary_currency || 'USD',
                 account_id: null,
+                account_ids: [],
                 deposit_ids: (form.deposit_id as string[]).map(Number),
                 deposit_id: (form.deposit_id as string[])[0] ? Number((form.deposit_id as string[])[0]) : null,
                 product_name: null,
@@ -351,8 +379,20 @@ export default function EditContractPage() {
                             <div className="p-5 space-y-4">
                                 <div>
                                     <label className={labelCls}>{cube.titleLabel} *</label>
-                                    <input type="text" value={form[cube.titleField] as string} onChange={set(cube.titleField)}
-                                        placeholder="" className={inputCls} />
+                                    <SearchableDropdown
+                                        value={form[cube.accountField] as string}
+                                        onChange={(value) => {
+                                            const account = accounts.find(item => String(item.id) === value);
+                                            setForm(prev => ({
+                                                ...prev,
+                                                [cube.accountField]: value,
+                                                [cube.titleField]: account?.name || '',
+                                            }));
+                                        }}
+                                        placeholder="Select an account"
+                                        className={inputCls}
+                                        options={accounts.map(account => ({ value: String(account.id), label: account.name }))}
+                                    />
                                 </div>
                                 {cube.fields.map(({ field, label }) => (
                                     <div key={field}>

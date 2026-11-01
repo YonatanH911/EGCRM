@@ -136,6 +136,33 @@ def update_lead_status(db: Session, lead_id: int, status: models.LeadStatus):
     return db_lead
 
 # --- Contracts ---
+def _sync_contract_account_titles(db: Session, data: dict, contract=None):
+    for id_field, title_field in (
+        ("beneficiary_account_id", "beneficiary_title"),
+        ("supplier_account_id", "supplier_title"),
+    ):
+        if id_field not in data:
+            continue
+        account_id = data[id_field]
+        if account_id is None:
+            data[title_field] = None
+            continue
+        account = db.get(models.Account, account_id)
+        if account is None:
+            raise ValueError(f"Account {account_id} does not exist")
+        data[title_field] = account.name
+
+    beneficiary = data.get(
+        "beneficiary_title",
+        contract.beneficiary_title if contract is not None else None,
+    )
+    supplier = data.get(
+        "supplier_title",
+        contract.supplier_title if contract is not None else None,
+    )
+    if beneficiary and supplier:
+        data["title"] = f"{beneficiary} - {supplier}"
+
 def get_contract(db: Session, contract_id: int):
     return db.query(models.Contract).filter(models.Contract.id == contract_id).first()
 
@@ -144,6 +171,7 @@ def get_contracts(db: Session, skip: int = 0, limit: int = 10000):
 
 def create_contract(db: Session, contract: schemas.ContractCreate):
     data = contract.model_dump()
+    _sync_contract_account_titles(db, data)
     db_contract = models.Contract()
     _sync_multi_relationships(db, db_contract, data, {
         "account_ids": ("accounts", models.Account, "account_id"),
@@ -160,6 +188,7 @@ def update_contract(db: Session, contract_id: int, contract_update: schemas.Cont
     db_contract = get_contract(db, contract_id)
     if db_contract:
         update_data = contract_update.model_dump(exclude_unset=True)
+        _sync_contract_account_titles(db, update_data, db_contract)
         _sync_multi_relationships(db, db_contract, update_data, {
             "account_ids": ("accounts", models.Account, "account_id"),
             "deposit_ids": ("deposits", models.Deposit, "deposit_id"),

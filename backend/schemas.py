@@ -121,6 +121,8 @@ class ContractBase(BaseSchema):
     title: str
     beneficiary_title: Optional[str] = None
     supplier_title: Optional[str] = None
+    beneficiary_account_id: Optional[int] = None
+    supplier_account_id: Optional[int] = None
     contact_type: Optional[str] = None
     status: ContractStatus = ContractStatus.DRAFT
     value: float = 0.0

@@ -123,7 +123,7 @@ class Account(Base):
 
     contacts = relationship("Contact", back_populates="account", foreign_keys="Contact.account_id")
     primary_contact = relationship("Contact", foreign_keys=[primary_contact_id], post_update=True)
-    contracts = relationship("Contract", back_populates="account")
+    contracts = relationship("Contract", back_populates="account", foreign_keys="Contract.account_id")
     deposits = relationship("Deposit", back_populates="account")
 
 class Contact(Base):
@@ -188,6 +188,8 @@ class Contract(Base):
     title = Column(String(255), nullable=False)
     beneficiary_title = Column(String(255), nullable=True)
     supplier_title = Column(String(255), nullable=True)
+    beneficiary_account_id = Column(Integer, ForeignKey("accounts.id", ondelete="SET NULL"), nullable=True)
+    supplier_account_id = Column(Integer, ForeignKey("accounts.id", ondelete="SET NULL"), nullable=True)
     contact_type = Column(String(50), nullable=True)
     status = Column(Enum(ContractStatus), default=ContractStatus.DRAFT)
     start_date = Column(DateTime)
@@ -221,7 +223,7 @@ class Contract(Base):
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    account = relationship("Account", back_populates="contracts")
+    account = relationship("Account", back_populates="contracts", foreign_keys=[account_id])
     accounts = relationship("Account", secondary=contract_accounts)
     deposits = relationship("Deposit", secondary=contract_deposits)
 

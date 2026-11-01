@@ -18,7 +18,7 @@ const labelCls = "block text-lg font-bold text-muted-text uppercase tracking-wid
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text focus:outline-none transition-all bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 focus:border-crm-500 focus:ring-4 focus:ring-crm-500/10";
 
 type FormField =
-    'title' | 'beneficiary_title' | 'supplier_title' | 'status' | 'contact_type' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' | 'account_id' |
+    'title' | 'beneficiary_title' | 'supplier_title' | 'beneficiary_account_id' | 'supplier_account_id' | 'status' | 'contact_type' | 'value' | 'currency' | 'start_date' | 'end_date' | 'paid_by' |
     'beneficiary_currency' | 'beneficiary_set_up_fee' | 'beneficiary_annual_fee' | 'beneficiary_updates' | 'beneficiary_ext_verification' |
     'supplier_currency' | 'supplier_set_up_fee' | 'supplier_annual_fee' | 'supplier_updates' | 'supplier_ext_verification' |
     'beneficiary_management_contact' | 'beneficiary_technical_contact' | 'beneficiary_financial_contact' |
@@ -30,6 +30,7 @@ const CUBES = [
         label: 'Beneficiary',
         gradient: 'from-purple-500 to-indigo-500',
         titleField: 'beneficiary_title' as FormField,
+        accountField: 'beneficiary_account_id' as FormField,
         titleLabel: 'Beneficiary Title',
         fields: [
             { field: 'beneficiary_management_contact' as FormField, label: 'Management Contact' },
@@ -42,6 +43,7 @@ const CUBES = [
         label: 'Supplier',
         gradient: 'from-emerald-500 to-teal-500',
         titleField: 'supplier_title' as FormField,
+        accountField: 'supplier_account_id' as FormField,
         titleLabel: 'Supplier Title',
         fields: [
             { field: 'supplier_management_contact' as FormField, label: 'Management Contact' },
@@ -52,7 +54,7 @@ const CUBES = [
 ];
 
 const emptyForm: Record<FormField, string | string[]> = {
-    title: '', beneficiary_title: '', supplier_title: '', status: 'Draft', contact_type: '3-party', value: '0', currency: 'USD', account_id: [],
+    title: '', beneficiary_title: '', supplier_title: '', beneficiary_account_id: '', supplier_account_id: '', status: 'Draft', contact_type: '3-party', value: '0', currency: 'USD',
     beneficiary_currency: 'USD', beneficiary_set_up_fee: '', beneficiary_annual_fee: '', beneficiary_updates: '', beneficiary_ext_verification: '',
     supplier_currency: 'USD', supplier_set_up_fee: '', supplier_annual_fee: '', supplier_updates: '', supplier_ext_verification: '',
     start_date: '', end_date: '', paid_by: [],
@@ -115,12 +117,14 @@ export default function NewContractPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const beneficiaryTitle = String(form.beneficiary_title || '').trim();
-        const supplierTitle = String(form.supplier_title || '').trim();
-        if (!beneficiaryTitle || !supplierTitle) {
+        const beneficiaryAccount = accounts.find(account => String(account.id) === form.beneficiary_account_id);
+        const supplierAccount = accounts.find(account => String(account.id) === form.supplier_account_id);
+        if (!beneficiaryAccount || !supplierAccount) {
             setError('Beneficiary Title and Supplier Title are required');
             return;
         }
+        const beneficiaryTitle = beneficiaryAccount.name;
+        const supplierTitle = supplierAccount.name;
         
         setLoading(true);
         setError('');
@@ -130,10 +134,12 @@ export default function NewContractPage() {
                 title: `${beneficiaryTitle} - ${supplierTitle}`,
                 beneficiary_title: beneficiaryTitle,
                 supplier_title: supplierTitle,
+                beneficiary_account_id: beneficiaryAccount.id,
+                supplier_account_id: supplierAccount.id,
                 value:      Number(form.beneficiary_annual_fee) || 0,
                 currency:   form.beneficiary_currency || 'USD',
-                account_ids: (form.account_id as string[]).map(Number),
-                account_id: (form.account_id as string[])[0] ? Number((form.account_id as string[])[0]) : null,
+                account_ids: [],
+                account_id: null,
                 start_date: form.start_date ? new Date(form.start_date as string).toISOString() : null,
                 end_date:   form.end_date   ? new Date(form.end_date as string).toISOString()   : null,
                 beneficiary_management_contact: (form.beneficiary_management_contact as string[]).join(', ') || null,
@@ -214,19 +220,6 @@ export default function NewContractPage() {
                         <h2 className="text-xl font-semibold text-foreground">Contract Details</h2>
                     </div>
                     <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div className="col-span-1 sm:col-span-2">
-                            <label className={labelCls}>Related Account</label>
-                            <SearchableDropdown
-                                multiple
-                                value={form.account_id as string[]}
-                                onChange={(value) => setForm(prev => ({ ...prev, account_id: value }))}
-                                placeholder="Select an account"
-                                className={inputCls}
-                                options={[
-                                    ...accounts.map(acc => ({ value: String(acc.id), label: acc.name })),
-                                ]}
-                            />
-                        </div>
                         <div>
                             <label className={labelCls}>Contact Type</label>
                             <SearchableDropdown
@@ -253,8 +246,20 @@ export default function NewContractPage() {
                             <div className="p-5 space-y-4">
                                 <div>
                                     <label className={labelCls}>{cube.titleLabel} *</label>
-                                    <input type="text" value={form[cube.titleField] as string} onChange={set(cube.titleField)}
-                                        placeholder="" className={inputCls} />
+                                    <SearchableDropdown
+                                        value={form[cube.accountField] as string}
+                                        onChange={(value) => {
+                                            const account = accounts.find(item => String(item.id) === value);
+                                            setForm(prev => ({
+                                                ...prev,
+                                                [cube.accountField]: value,
+                                                [cube.titleField]: account?.name || '',
+                                            }));
+                                        }}
+                                        placeholder="Select an account"
+                                        className={inputCls}
+                                        options={accounts.map(account => ({ value: String(account.id), label: account.name }))}
+                                    />
                                 </div>
                                 {cube.fields.map(({ field, label }) => (
                                     <div key={field}>
