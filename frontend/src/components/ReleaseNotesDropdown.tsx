@@ -2,13 +2,19 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, X, Sparkles, CheckCircle2, Activity, Building2, PanelTop, Users, Landmark, Type } from 'lucide-react';
+import { Bell, X, Sparkles, CheckCircle2, Building2, Filter, Phone, Search, Users } from 'lucide-react';
+import packageInfo from '../../package.json';
+
+const RELEASE_STORAGE_KEY = 'egcrm:last-read-release';
 
 export default function ReleaseNotesDropdown() {
     const [isOpen, setIsOpen] = useState(false);
+    const [hasUnread, setHasUnread] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        setHasUnread(window.localStorage.getItem(RELEASE_STORAGE_KEY) !== packageInfo.version);
+
         const handleClickOutside = (event: MouseEvent) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
@@ -18,46 +24,49 @@ export default function ReleaseNotesDropdown() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const markReleaseRead = () => {
+        window.localStorage.setItem(RELEASE_STORAGE_KEY, packageInfo.version);
+        setHasUnread(false);
+    };
+
+    const toggleOpen = () => {
+        if (!isOpen) markReleaseRead();
+        setIsOpen(current => !current);
+    };
+
     const notes = [
         {
-            title: 'Contact Fields',
-            description: 'On the Contacts page, Supplier was renamed to Role and a new Is Israeli? field was added to the contact list and forms.',
-            icon: Users,
-            color: 'text-blue-500',
-            bg: 'bg-blue-500/10',
-        },
-        {
-            title: 'Deposit Updates',
-            description: 'The Deposits page now includes the missing fields, and Billed Account was changed to Billed Contact.',
-            icon: Landmark,
-            color: 'text-cyan-500',
-            bg: 'bg-cyan-500/10',
-        },
-        {
-            title: 'General Cleanup',
-            description: 'Placeholder examples were removed for clarity, and font sizes were increased across the CRM for easier reading.',
-            icon: Type,
-            color: 'text-purple-500',
-            bg: 'bg-purple-500/10',
-        },
-        {
-            title: 'Compact Tables',
-            description: 'Dashboard tables now use tighter row spacing, truncated long values, and a horizontal scrollbar at the top so wide lists are easier to scan.',
-            icon: PanelTop,
+            title: 'Contract Accounts',
+            description: 'Beneficiary and Supplier titles now select their related accounts directly, replacing the separate Related Account field.',
+            icon: Building2,
             color: 'text-indigo-500',
             bg: 'bg-indigo-500/10',
         },
         {
-            title: 'Activity Account Dropdown',
-            description: 'The Activity Regarding field is now a searchable account dropdown on both new and edit activity forms.',
-            icon: Activity,
+            title: 'Inactive-Only Views',
+            description: 'The inactive checkbox now switches every supported list from active records to inactive records only.',
+            icon: Filter,
+            color: 'text-blue-500',
+            bg: 'bg-blue-500/10',
+        },
+        {
+            title: 'Consistent Inactive Records',
+            description: 'Inactive contacts, contracts, deposits, vaults, activities, and accounts are clearly labeled and can be reactivated from their lists.',
+            icon: Users,
             color: 'text-emerald-500',
             bg: 'bg-emerald-500/10',
         },
         {
-            title: 'Related Activities',
-            description: 'Account detail pages now show a Related Activities section above Related Contacts, listing activities connected to that account.',
-            icon: Building2,
+            title: 'Contact Phone Fields',
+            description: 'Contacts now separate Business Phone and Mobile Phone, with search, filtering, copy controls, and updated Excel data.',
+            icon: Phone,
+            color: 'text-cyan-500',
+            bg: 'bg-cyan-500/10',
+        },
+        {
+            title: 'Contract Contact Search',
+            description: 'Beneficiary and Supplier contact searches now return unique matching names and display only first and last name when selected.',
+            icon: Search,
             color: 'text-amber-500',
             bg: 'bg-amber-500/10',
         }
@@ -65,12 +74,22 @@ export default function ReleaseNotesDropdown() {
 
     return (
         <div className="relative" ref={dropdownRef}>
-            <button 
-                onClick={() => setIsOpen(!isOpen)}
-                className={`relative p-2 transition-all rounded-xl hover:bg-black/5 dark:hover:bg-white/5 ${isOpen ? 'text-foreground bg-black/5 dark:bg-white/5' : 'text-muted-text hover:text-foreground'}`}
+            <button
+                type="button"
+                onClick={toggleOpen}
+                className={`relative p-2 transition-all rounded-xl hover:bg-black/5 dark:hover:bg-white/5 ${
+                    isOpen
+                        ? 'text-foreground bg-black/5 dark:bg-white/5'
+                        : hasUnread
+                            ? 'bg-indigo-500/10 text-indigo-500 ring-1 ring-indigo-500/40 shadow-[0_0_16px_rgba(99,102,241,0.65)]'
+                            : 'text-muted-text hover:text-foreground'
+                }`}
+                title={hasUnread ? `What's new in v${packageInfo.version}` : "What's new"}
+                aria-label={hasUnread ? `Unread release notes for version ${packageInfo.version}` : 'Release notes'}
+                aria-expanded={isOpen}
             >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-2 right-2 w-2 h-2 bg-indigo-500 rounded-full border-2 border-surface shadow-[0_0_10px_rgba(99,102,241,0.5)]" />
+                <Bell className={`w-5 h-5 ${hasUnread ? 'animate-pulse' : ''}`} />
+                {hasUnread && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-500 rounded-full border-2 border-surface" />}
             </button>
 
             {isOpen && (
@@ -79,6 +98,9 @@ export default function ReleaseNotesDropdown() {
                         <div className="flex items-center gap-2">
                             <Sparkles className="w-4 h-4 text-indigo-500" />
                             <h3 className="text-xl font-bold text-foreground">What's New</h3>
+                            <span className="rounded-md bg-indigo-500/10 px-2 py-0.5 font-mono text-sm font-semibold text-indigo-500">
+                                v{packageInfo.version}
+                            </span>
                         </div>
                         <button onClick={() => setIsOpen(false)} className="text-muted-text hover:text-foreground">
                             <X className="w-4 h-4" />
@@ -105,7 +127,8 @@ export default function ReleaseNotesDropdown() {
                     </div>
 
                     <div className="p-4 bg-zinc-50 dark:bg-zinc-800/50 border-t border-border-subtle text-center">
-                        <button 
+                        <button
+                            type="button"
                             onClick={() => setIsOpen(false)}
                             className="text-base font-bold uppercase tracking-widest text-muted-text hover:text-foreground transition-colors"
                         >
