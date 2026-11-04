@@ -10,6 +10,7 @@ export type DropdownOption = {
     value: string;
     label: string;
     email?: string | null;
+    searchText?: string;
 };
 
 interface BaseSearchableDropdownProps {
@@ -65,11 +66,14 @@ export default function SearchableDropdown({
     const filteredOptions = useMemo(() => {
         const normalizedQuery = query.trim().toLowerCase();
         if (!normalizedQuery) return options;
-        return options.filter(option =>
-            option.label.toLowerCase().includes(normalizedQuery) ||
-            option.value.toLowerCase().includes(normalizedQuery) ||
-            option.email?.toLowerCase().includes(normalizedQuery)
-        );
+        return options.filter(option => {
+            if (option.searchText !== undefined) {
+                return option.searchText.toLowerCase().includes(normalizedQuery);
+            }
+            return option.label.toLowerCase().includes(normalizedQuery) ||
+                option.value.toLowerCase().includes(normalizedQuery) ||
+                Boolean(option.email?.toLowerCase().includes(normalizedQuery));
+        });
     }, [options, query]);
 
     useEffect(() => {

@@ -280,11 +280,12 @@ export default function EditContractPage() {
             value: `${c.first_name} ${c.last_name}`,
             label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
             email: contactEmails.get(`${c.first_name} ${c.last_name}`.trim()),
+            searchText: `${c.first_name} ${c.last_name}`.trim(),
         }));
         const knownValues = new Set(contactOptions.map(option => option.value));
         const restoredOptions = selectedValues
             .filter(value => !knownValues.has(value))
-            .map(value => ({ value, label: value, email: contactEmails.get(value.trim()) }));
+            .map(value => ({ value, label: value, email: contactEmails.get(value.trim()), searchText: value }));
 
         return (
             <SearchableDropdown
