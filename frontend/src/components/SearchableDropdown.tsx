@@ -240,13 +240,13 @@ export default function SearchableDropdown({
                     </div>
                     <div className="overflow-y-auto py-1" style={{ maxHeight: menuStyle.maxHeight }}>
                         {filteredOptions.length > 0 ? (
-                            filteredOptions.map(option => {
+                            filteredOptions.map((option, optionIndex) => {
                                 const active = multiple
                                     ? selectedValues.includes(option.value)
                                     : option.value === value;
                                 return (
                                     <div
-                                        key={`${option.value}-${option.label}`}
+                                        key={`${option.value}-${option.label}-${optionIndex}`}
                                         className={clsx(
                                             'flex w-full items-center gap-2 pr-3 text-left text-xl transition-colors',
                                             active

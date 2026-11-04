@@ -276,12 +276,19 @@ export default function EditContractPage() {
 
     const ContactDropdown = ({ field }: { field: FormField }) => {
         const selectedValues = form[field] as string[];
-        const contactOptions = contacts.map(c => ({
-            value: `${c.first_name} ${c.last_name}`,
-            label: `${c.first_name} ${c.last_name}${c.job_title ? ` - ${c.job_title}` : ''}`,
-            email: contactEmails.get(`${c.first_name} ${c.last_name}`.trim()),
-            searchText: `${c.first_name} ${c.last_name}`.trim(),
-        }));
+        const contactOptionsByName = new Map<string, { value: string; label: string; email: string | null | undefined; searchText: string }>();
+        for (const contact of contacts) {
+            const fullName = `${contact.first_name} ${contact.last_name}`.trim();
+            const normalizedName = fullName.toLocaleLowerCase();
+            if (!fullName || contactOptionsByName.has(normalizedName)) continue;
+            contactOptionsByName.set(normalizedName, {
+                value: fullName,
+                label: fullName,
+                email: contactEmails.get(fullName),
+                searchText: fullName,
+            });
+        }
+        const contactOptions = Array.from(contactOptionsByName.values());
         const knownValues = new Set(contactOptions.map(option => option.value));
         const restoredOptions = selectedValues
             .filter(value => !knownValues.has(value))
