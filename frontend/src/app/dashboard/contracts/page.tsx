@@ -70,7 +70,9 @@ export default function ContractsPage() {
     }, []);
 
     const filteredContracts = contracts.filter(contract => {
-        const matchesActive = showInactive || contract.is_active !== false;
+        const matchesActive = showInactive
+            ? contract.is_active === false
+            : contract.is_active !== false;
         const titleParts = splitContractTitle(contract);
         const query = searchQuery.toLowerCase();
         const matchesSearch = titleParts.beneficiaryTitle.toLowerCase().includes(query) ||
@@ -150,7 +152,7 @@ export default function ContractsPage() {
                     <InactiveToggle
                         checked={showInactive}
                         onChange={setShowInactive}
-                        label="Show inactive contracts?"
+                        label="Show inactive contracts only?"
                     />
                 </div>
 

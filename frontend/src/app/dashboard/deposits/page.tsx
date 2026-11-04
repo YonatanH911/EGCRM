@@ -56,7 +56,9 @@ export default function DepositsPage() {
     }, []);
 
     const filteredDeposits = deposits.filter(deposit => {
-        const matchesActive = showInactive || deposit.is_active !== false;
+        const matchesActive = showInactive
+            ? deposit.is_active === false
+            : deposit.is_active !== false;
         const q = searchQuery.toLowerCase();
         const matchesSearch = (
             (deposit.reference_number || '').toLowerCase().includes(q) ||
@@ -131,7 +133,7 @@ export default function DepositsPage() {
                     <InactiveToggle
                         checked={showInactive}
                         onChange={setShowInactive}
-                        label="Show inactive deposits?"
+                        label="Show inactive deposits only?"
                     />
                 </div>
 

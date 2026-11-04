@@ -39,7 +39,9 @@ export default function AccountsPage() {
     }, []);
 
     const filteredAccounts = accounts.filter(account => {
-        const matchesActive = showInactive || account.is_active !== false;
+        const matchesActive = showInactive
+            ? account.is_active === false
+            : account.is_active !== false;
         const matchesSearch = account.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (account.website && account.website.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesColumns = matchesColumnFilters(columnFilters, {
@@ -111,7 +113,7 @@ export default function AccountsPage() {
                     <InactiveToggle
                         checked={showInactive}
                         onChange={setShowInactive}
-                        label="Show inactive accounts?"
+                        label="Show inactive accounts only?"
                     />
                 </div>
 

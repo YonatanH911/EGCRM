@@ -44,7 +44,9 @@ export default function VaultsPage() {
     }, []);
 
     const filteredVaults = vaults.filter(vault => {
-        const matchesActive = showInactive || vault.is_active !== false;
+        const matchesActive = showInactive
+            ? vault.is_active === false
+            : vault.is_active !== false;
         const matchesSearch = vault.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (vault.location && vault.location.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesColumns = matchesColumnFilters(columnFilters, {
@@ -106,7 +108,7 @@ export default function VaultsPage() {
                     <InactiveToggle
                         checked={showInactive}
                         onChange={setShowInactive}
-                        label="Show inactive vaults?"
+                        label="Show inactive vaults only?"
                     />
                 </div>
 

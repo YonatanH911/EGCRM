@@ -126,7 +126,9 @@ export default function ActivitiesPage() {
     };
 
     const filtered = activities.filter(activity => {
-        const matchesActive = showInactive || activity.is_active !== false;
+        const matchesActive = showInactive
+            ? activity.is_active === false
+            : activity.is_active !== false;
         const matchesType = filter === 'All' || activity.task_type_id === filter;
         const query = searchQuery.trim().toLocaleLowerCase();
         const matchesSearch = !query || [
@@ -233,7 +235,7 @@ export default function ActivitiesPage() {
                     <InactiveToggle
                         checked={showInactive}
                         onChange={setShowInactive}
-                        label="Show inactive activities?"
+                        label="Show inactive activities only?"
                     />
                 </div>
                 <div className="min-w-0">

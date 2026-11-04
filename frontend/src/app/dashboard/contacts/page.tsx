@@ -60,7 +60,9 @@ export default function ContactsPage() {
     };
 
     const filteredContacts = contacts.filter(contact => {
-        const matchesActive = showInactive || contact.is_active !== false;
+        const matchesActive = showInactive
+            ? contact.is_active === false
+            : contact.is_active !== false;
         const fullName = `${contact.first_name || ''} ${contact.last_name || ''}`.toLowerCase();
         const query = searchQuery.toLowerCase();
         const matchesSearch = fullName.includes(query) ||
@@ -130,7 +132,7 @@ export default function ContactsPage() {
                     <InactiveToggle
                         checked={showInactive}
                         onChange={setShowInactive}
-                        label="Show inactive contacts?"
+                        label="Show inactive contacts only?"
                     />
                 </div>
 
