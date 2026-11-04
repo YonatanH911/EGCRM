@@ -66,6 +66,18 @@ export default function VaultsPage() {
         return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
+    const handleReactivate = async (event: React.MouseEvent, vaultId: number) => {
+        event.stopPropagation();
+        try {
+            await api.patch(`/vaults/${vaultId}/reactivate`);
+            setVaults(current => current.map(vault =>
+                vault.id === vaultId ? { ...vault, is_active: true } : vault
+            ));
+        } catch (error) {
+            console.error('Failed to reactivate vault', error);
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -134,13 +146,14 @@ export default function VaultsPage() {
                                         </div>
                                     </th>
                                 ))}
+                                <th scope="col" className={thCls}>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-text text-xl">Loading vaults…</td></tr>
+                                <tr><td colSpan={6} className="px-6 py-12 text-center text-muted-text text-xl">Loading vaults…</td></tr>
                             ) : sortedVaults.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-16 text-center">
+                                <tr><td colSpan={6} className="px-6 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <Shield className="h-10 w-10 text-muted-text mb-3" />
                                         <p className="text-foreground text-xl font-semibold">No vaults found.</p>
@@ -148,17 +161,22 @@ export default function VaultsPage() {
                                 </td></tr>
                             ) : (
                                 sortedVaults.map((vault) => {
+                                    const isActive = vault.is_active !== false;
+                                    const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     const st = getStatusStyle(vault.status);
                                     const href = `/dashboard/vaults/${vault.id}`;
                                     return (
-                                        <tr key={vault.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5">
+                                        <tr key={vault.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5" style={rowStyle}>
                                             <td className="p-0 whitespace-nowrap">
                                                 <Link href={href} className={`${tdCls} flex items-center gap-3`}>
                                                     <div className="w-9 h-9 rounded-lg flex items-center justify-center"
                                                         style={{ background: 'rgba(99,102,241,0.12)' }}>
                                                         <Shield className="h-4 w-4 text-indigo-500" />
                                                     </div>
-                                                    <span className="text-xl font-medium text-foreground">{vault.name}</span>
+                                                    <span className="flex flex-col">
+                                                        <span className="text-xl font-medium text-foreground">{vault.name}</span>
+                                                        {!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}
+                                                    </span>
                                                 </Link>
                                             </td>
                                             <td className="p-0 whitespace-nowrap">
@@ -178,6 +196,14 @@ export default function VaultsPage() {
                                                 </Link>
                                             </td>
                                             <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block text-xl text-muted-text`}>{new Date(vault.created_at).toLocaleDateString()}</Link></td>
+                                            <td className={tdCls}>
+                                                {!isActive && (
+                                                    <button onClick={(event) => handleReactivate(event, vault.id)}
+                                                        className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                        Reactivate
+                                                    </button>
+                                                )}
+                                            </td>
                                         </tr>
                                     );
                                 })

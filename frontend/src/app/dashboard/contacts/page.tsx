@@ -91,6 +91,18 @@ export default function ContactsPage() {
         return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
+    const handleReactivate = async (event: React.MouseEvent, contactId: number) => {
+        event.stopPropagation();
+        try {
+            await api.patch(`/contacts/${contactId}/reactivate`);
+            setContacts(current => current.map(contact =>
+                contact.id === contactId ? { ...contact, is_active: true } : contact
+            ));
+        } catch (error) {
+            console.error('Failed to reactivate contact', error);
+        }
+    };
+
     return (
         <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -171,12 +183,17 @@ export default function ContactsPage() {
                                             </div>
                                         </th>
                                     ))}
+                                    <th scope="col" className={thCls}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-border-subtle">
-                                {sortedContacts.map((contact) => (
+                                {sortedContacts.map((contact) => {
+                                    const isActive = contact.is_active !== false;
+                                    const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
+                                    return (
                                     <tr key={contact.id}
                                         className="group transition-colors duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                                        style={rowStyle}
                                     >
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-3">
@@ -186,6 +203,7 @@ export default function ContactsPage() {
                                                     </div>
                                                     <div className="flex min-w-0 flex-col">
                                                         <span className="text-xl font-medium text-foreground">{contact.first_name} {contact.last_name}</span>
+                                                        {!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}
                                                         {contact.job_title && <span className="text-lg text-muted-text">{contact.job_title}</span>}
                                                     </div>
                                                 </Link>
@@ -207,8 +225,17 @@ export default function ContactsPage() {
                                         </td>
                                         <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/contacts/${contact.id}`} className={`${tdCls} block text-xl text-muted-text`}>{contact.is_israeli === null || contact.is_israeli === undefined ? dash : (contact.is_israeli ? 'Yes' : 'No')}</Link></td>
                                         <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/contacts/${contact.id}`} className={`${tdCls} block ltr:text-right rtl:text-left text-xl text-muted-text`}>{new Date(contact.created_at).toLocaleDateString()}</Link></td>
+                                        <td className={tdCls}>
+                                            {!isActive && (
+                                                <button onClick={(event) => handleReactivate(event, contact.id)}
+                                                    className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                    Reactivate
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
-                                ))}
+                                    );
+                                })}
                             </tbody>
                         </table>
                     )}

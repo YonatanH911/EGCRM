@@ -159,6 +159,18 @@ export default function ActivitiesPage() {
         return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
+    const handleReactivate = async (event: React.MouseEvent, activityId: number) => {
+        event.stopPropagation();
+        try {
+            await api.patch(`/activities/${activityId}/reactivate`);
+            setActivities(current => current.map(activity =>
+                activity.id === activityId ? { ...activity, is_active: true } : activity
+            ));
+        } catch (error) {
+            console.error('Failed to reactivate activity', error);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -299,11 +311,13 @@ export default function ActivitiesPage() {
                             </thead>
                             <tbody className="block divide-y divide-border-subtle lg:table-row-group">
                                 {sortedActivities.map(activity => {
+                                    const isActive = activity.is_active !== false;
+                                    const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     const tColor = activity.task_type?.color || '#9ca3af';
                                     const tName = activity.task_type?.name || 'Unassigned';
                                     const href = `/dashboard/activities/${activity.id}/edit`;
                                     return (
-                                        <tr key={activity.id} className="group grid w-full grid-cols-2 gap-x-3 gap-y-1 p-3 transition-colors duration-150 hover:bg-background-subtle/50 lg:table-row lg:p-0">
+                                        <tr key={activity.id} className="group grid w-full grid-cols-2 gap-x-3 gap-y-1 p-3 transition-colors duration-150 hover:bg-background-subtle/50 lg:table-row lg:p-0" style={rowStyle}>
                                             <td className="col-start-1 row-start-1 min-w-0 lg:table-cell lg:px-3 lg:py-2">
                                                 <Link href={href} className="inline-flex max-w-full items-center gap-1.5 rounded-md px-2 py-0.5 text-sm font-semibold"
                                                     style={{ background: hexToRgba(tColor), color: tColor, border: `1px solid ${hexToRgba(tColor, 0.3)}` }}>
@@ -312,7 +326,10 @@ export default function ActivitiesPage() {
                                                 </Link>
                                             </td>
                                             <td className="col-span-2 min-w-0 font-semibold text-foreground transition-colors group-hover:text-crm-500 lg:table-cell lg:px-3 lg:py-2">
-                                                <Link href={href} className="block line-clamp-2 break-words" title={activity.subject}>{activity.subject}</Link>
+                                                <Link href={href} className="flex flex-col" title={activity.subject}>
+                                                    <span className="line-clamp-2 break-words">{activity.subject}</span>
+                                                    {!isActive && <span className="text-xs text-muted-text uppercase tracking-wider">Inactive</span>}
+                                                </Link>
                                             </td>
                                             <td className="col-span-2 min-w-0 text-muted-text lg:table-cell lg:px-3 lg:py-2">
                                                 <Link href={href} className="block line-clamp-2 break-words" title={activity.regarding || undefined}>{activity.regarding || '—'}</Link>
@@ -325,6 +342,13 @@ export default function ActivitiesPage() {
                                             </td>
                                             <td className="col-start-2 row-start-1 min-w-0 lg:table-cell lg:px-1 lg:py-2">
                                                 <div className="flex justify-end opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100">
+                                                    {!isActive && (
+                                                        <button onClick={(event) => handleReactivate(event, activity.id)}
+                                                            className="px-2 py-1 text-xs font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-md transition-colors border border-emerald-500/20 uppercase"
+                                                            title="Reactivate activity">
+                                                            Reactivate
+                                                        </button>
+                                                    )}
                                                     <button onClick={(e) => { e.stopPropagation(); handleDelete(activity.id); }} disabled={deletingId === activity.id}
                                                         className="rounded-md p-1.5 text-muted-text transition-colors hover:bg-red-500/10 hover:text-red-500 disabled:opacity-50"
                                                         title="Delete activity" aria-label="Delete activity">

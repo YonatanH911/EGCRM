@@ -89,6 +89,18 @@ export default function DepositsPage() {
         return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
 
+    const handleReactivate = async (event: React.MouseEvent, depositId: number) => {
+        event.stopPropagation();
+        try {
+            await api.patch(`/deposits/${depositId}/reactivate`);
+            setDeposits(current => current.map(deposit =>
+                deposit.id === depositId ? { ...deposit, is_active: true } : deposit
+            ));
+        } catch (error) {
+            console.error('Failed to reactivate deposit', error);
+        }
+    };
+
     const dash = <span className="text-slate-600 italic">—</span>;
 
     return (
@@ -154,13 +166,14 @@ export default function DepositsPage() {
                                         </div>
                                     </th>
                                 ))}
+                                <th scope="col" className={thCls}>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
                             {loading ? (
-                                <tr><td colSpan={7} className="px-3 py-12 text-center text-muted-text text-xl">Loading deposits…</td></tr>
+                                <tr><td colSpan={8} className="px-3 py-12 text-center text-muted-text text-xl">Loading deposits…</td></tr>
                             ) : sortedDeposits.length === 0 ? (
-                                <tr><td colSpan={7} className="px-3 py-16 text-center">
+                                <tr><td colSpan={8} className="px-3 py-16 text-center">
                                     <div className="flex flex-col items-center opacity-50">
                                         <Landmark className="h-10 w-10 text-muted-text mb-3" />
                                         <p className="text-foreground text-xl font-semibold">No deposits found.</p>
@@ -168,10 +181,12 @@ export default function DepositsPage() {
                                 </td></tr>
                             ) : (
                                 sortedDeposits.map((deposit) => {
+                                    const isActive = deposit.is_active !== false;
+                                    const rowStyle = isActive ? {} : { opacity: 0.5, filter: 'grayscale(100%)' };
                                     const href = `/dashboard/deposits/${deposit.id}`;
                                     return (
-                                    <tr key={deposit.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5">
-                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground max-w-[160px] truncate">{deposit.product_name || dash}</div></Link></td>
+                                    <tr key={deposit.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5" style={rowStyle}>
+                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} flex flex-col`}><span className="text-xl text-foreground max-w-[160px] truncate">{deposit.product_name || dash}</span>{!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}</Link></td>
                                         <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground font-medium max-w-[120px] truncate">{deposit.version || dash}</div></Link></td>
                                         <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-muted-text whitespace-nowrap">{deposit.supplier || dash}</div></Link></td>
                                         <td className="p-0 whitespace-nowrap">
@@ -203,6 +218,14 @@ export default function DepositsPage() {
                                             }`} style={{ border: '1px solid' }}>
                                                 {deposit.status || 'Open'}
                                             </span></Link>
+                                        </td>
+                                        <td className={tdCls}>
+                                            {!isActive && (
+                                                <button onClick={(event) => handleReactivate(event, deposit.id)}
+                                                    className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
+                                                    Reactivate
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                     );
