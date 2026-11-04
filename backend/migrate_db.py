@@ -106,6 +106,7 @@ def migrate():
         "ALTER TABLE accounts ADD COLUMN IF NOT EXISTS description TEXT NULL;",
 
         # 6. Active / Inactive records
+        "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS mobile_phone VARCHAR(50) NULL;",
         "ALTER TABLE contacts ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
         "ALTER TABLE activities ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",
         "ALTER TABLE vaults ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE;",

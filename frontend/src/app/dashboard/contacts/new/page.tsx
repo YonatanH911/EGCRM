@@ -30,6 +30,7 @@ export default function NewContactPage() {
         job_title: '',
         email: '',
         phone: '',
+        mobile_phone: '',
         company_name: '',
         supplier: '',
         is_israeli: '',
@@ -155,11 +156,21 @@ export default function NewContactPage() {
                         </div>
 
                         <div>
-                            <label className="block text-xl font-medium text-foreground mb-1">Phone Number</label>
+                            <label className="block text-xl font-medium text-foreground mb-1">Business Phone</label>
                             <input
                                 type="text"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-xl font-medium text-foreground mb-1">Mobile Phone</label>
+                            <input
+                                type="text"
+                                value={formData.mobile_phone}
+                                onChange={(e) => setFormData({ ...formData, mobile_phone: e.target.value })}
                                 className="w-full px-4 py-2 border border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-lg focus:ring-2 focus:ring-crm-500 focus:border-crm-500 outline-none transition-all shadow-sm"
                             />
                         </div>

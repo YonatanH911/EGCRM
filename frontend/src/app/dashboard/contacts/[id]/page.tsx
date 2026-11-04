@@ -32,7 +32,7 @@ export default function EditContactPage() {
 
     const [formData, setFormData] = useState({
         first_name: '', last_name: '', job_title: '', email: '',
-        phone: '', company_name: '', supplier: '', is_israeli: '', description: '', account_ids: [] as string[],
+        phone: '', mobile_phone: '', company_name: '', supplier: '', is_israeli: '', description: '', account_ids: [] as string[],
     });
 
     useEffect(() => {
@@ -47,7 +47,7 @@ export default function EditContactPage() {
                 setFormData({
                     first_name: data.first_name || '', last_name: data.last_name || '',
                     job_title: data.job_title || '', email: data.email || '',
-                    phone: data.phone || '', company_name: data.company_name || '',
+                    phone: data.phone || '', mobile_phone: data.mobile_phone || '', company_name: data.company_name || '',
                     supplier: data.supplier || '', is_israeli: data.is_israeli === null || data.is_israeli === undefined ? '' : (data.is_israeli ? 'yes' : 'no'),
                     description: data.description || '',
                     account_ids: (data.account_ids?.length ? data.account_ids : (data.account_id ? [data.account_id] : [])).map(String)
@@ -179,7 +179,8 @@ export default function EditContactPage() {
                         <Field label="Job Title" field="job_title" placeholder="" />
                         <Field label="Company Name" field="company_name" placeholder="" />
                         <Field label="Email Address" field="email" type="email" placeholder="" />
-                        <Field label="Phone Number" field="phone" placeholder="" />
+                        <Field label="Business Phone" field="phone" placeholder="" />
+                        <Field label="Mobile Phone" field="mobile_phone" placeholder="" />
 
                         <div>
                             <label className={labelCls}>Associated Account</label>

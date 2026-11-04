@@ -67,6 +67,8 @@ export default function ContactsPage() {
         const query = searchQuery.toLowerCase();
         const matchesSearch = fullName.includes(query) ||
             (contact.email && contact.email.toLowerCase().includes(query)) ||
+            (contact.phone && contact.phone.toLowerCase().includes(query)) ||
+            (contact.mobile_phone && contact.mobile_phone.toLowerCase().includes(query)) ||
             getAccountNames(contact).toLowerCase().includes(query);
         const isIsraeli = contact.is_israeli === null || contact.is_israeli === undefined
             ? dash
@@ -75,7 +77,8 @@ export default function ContactsPage() {
             name: `${contact.first_name || ''} ${contact.last_name || ''}`,
             account: getAccountNames(contact),
             email: contact.email,
-            phone: contact.phone,
+            businessPhone: contact.phone,
+            mobilePhone: contact.mobile_phone,
             isIsraeli,
             created: new Date(contact.created_at).toLocaleDateString(),
         });
@@ -168,7 +171,8 @@ export default function ContactsPage() {
                                         { key: 'name', label: 'Name' },
                                         { key: 'account', label: 'Account' },
                                         { key: 'email', label: 'Email' },
-                                        { key: 'phone', label: 'Phone' },
+                                        { key: 'businessPhone', label: 'Business Phone' },
+                                        { key: 'mobilePhone', label: 'Mobile Phone' },
                                         { key: 'isIsraeli', label: 'Is Israeli?' },
                                         { key: 'created', label: 'Created' },
                                     ].map(column => (
@@ -220,7 +224,13 @@ export default function ContactsPage() {
                                         <td className={tdCls}>
                                             <div className="flex items-center gap-1.5">
                                                 <Link href={`/dashboard/contacts/${contact.id}`} className="flex-1 text-xl text-foreground">{contact.phone || dash}</Link>
-                                                <CopyButton value={contact.phone} label="Copy phone number" />
+                                                <CopyButton value={contact.phone} label="Copy business phone" />
+                                            </div>
+                                        </td>
+                                        <td className={tdCls}>
+                                            <div className="flex items-center gap-1.5">
+                                                <Link href={`/dashboard/contacts/${contact.id}`} className="flex-1 text-xl text-foreground">{contact.mobile_phone || dash}</Link>
+                                                <CopyButton value={contact.mobile_phone} label="Copy mobile phone" />
                                             </div>
                                         </td>
                                         <td className="p-0 whitespace-nowrap"><Link href={`/dashboard/contacts/${contact.id}`} className={`${tdCls} block text-xl text-muted-text`}>{contact.is_israeli === null || contact.is_israeli === undefined ? dash : (contact.is_israeli ? 'Yes' : 'No')}</Link></td>
