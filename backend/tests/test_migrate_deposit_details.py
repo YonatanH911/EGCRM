@@ -58,6 +58,34 @@ ATTRIBUTES = [
         "type": "DateTime",
         "readable": True,
     },
+    {
+        "logical_name": "ey_b_is_confirmation_sentname",
+        "schema_name": "ey_b_is_confirmation_sentName",
+        "display_name": "",
+        "type": "Virtual",
+        "readable": True,
+    },
+    {
+        "logical_name": "ey_verified_by_idname",
+        "schema_name": "ey_verified_by_idName",
+        "display_name": "",
+        "type": "Virtual",
+        "readable": True,
+    },
+    {
+        "logical_name": "ey_verified_by_idyominame",
+        "schema_name": "ey_verified_by_idYomiName",
+        "display_name": "",
+        "type": "Virtual",
+        "readable": True,
+    },
+    {
+        "logical_name": "ey_b_is_report_sentname",
+        "schema_name": "ey_b_is_report_sentName",
+        "display_name": "",
+        "type": "Virtual",
+        "readable": True,
+    },
 ]
 
 CONTACT_GUID = "01234567-89ab-cdef-0123-456789abcdef"

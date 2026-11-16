@@ -104,9 +104,15 @@ def resolve_fields(
         else:
             matches = []
             for attribute in readable:
+                logical_name = str(attribute.get("logical_name") or "").casefold()
+                if (
+                    not normalize_label(attribute.get("display_name"))
+                    and logical_name.endswith(("name", "yominame"))
+                ):
+                    continue
                 labels = [
                     normalize_label(attribute.get("display_name")),
-                    normalize_label(attribute.get("logical_name")),
+                    normalize_label(logical_name),
                     normalize_label(attribute.get("schema_name")),
                 ]
                 compact_labels = [label.replace(" ", "") for label in labels if label]
