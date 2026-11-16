@@ -36,6 +36,13 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
+            title: 'Reliable Account Editing',
+            description: 'Account edit fields now retain keyboard focus while typing, so details can be updated continuously without clicking the field again.',
+            icon: CheckCircle2,
+            color: 'text-rose-500',
+            bg: 'bg-rose-500/10',
+        },
+        {
             title: 'Contract Accounts',
             description: 'Beneficiary and Supplier titles now select their related accounts directly, replacing the separate Related Account field.',
             icon: Building2,
