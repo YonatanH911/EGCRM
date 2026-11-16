@@ -15,6 +15,29 @@ import CopyButton from '@/components/CopyButton';
 const labelCls = "block text-base font-bold text-muted-text uppercase tracking-widest mb-1.5";
 const inputCls = "w-full px-4 py-2.5 text-xl rounded-xl text-foreground placeholder-muted-text bg-background-subtle border border-border-subtle focus:border-crm-500/50 focus:ring-4 focus:ring-crm-500/10 focus:outline-none transition-all";
 
+function AccountField({
+    label, value, onChange, type = 'text', placeholder,
+}: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    type?: string;
+    placeholder?: string;
+}) {
+    return (
+        <div>
+            <label className={labelCls}>{label}</label>
+            <input
+                type={type}
+                value={value}
+                placeholder={placeholder}
+                onChange={event => onChange(event.target.value)}
+                className={inputCls}
+            />
+        </div>
+    );
+}
+
 interface Contact {
     id: number;
     first_name: string;
@@ -270,17 +293,6 @@ export default function EditAccountPage() {
         formData.name && activity.regarding?.toLowerCase() === formData.name.toLowerCase()
     );
 
-    const Field = ({ label, field, type = 'text', placeholder }: {
-        label: string; field: keyof typeof formData; type?: string; placeholder?: string;
-    }) => (
-        <div>
-            <label className={labelCls}>{label}</label>
-            <input type={type} value={formData[field]} placeholder={placeholder}
-                onChange={e => setFormData({ ...formData, [field]: e.target.value })}
-                className={inputCls} />
-        </div>
-    );
-
     return (
         <div className="w-full max-w-[1600px] mx-auto space-y-6">
             {/* Header */}
@@ -326,7 +338,12 @@ export default function EditAccountPage() {
                                 <span className="w-1.5 h-1.5 rounded-full bg-crm-500" />
                                 <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">General Information</h3>
                             </div>
-                            <Field label="Account Name *" field="name" placeholder="" />
+                            <AccountField
+                                label="Account Name *"
+                                value={formData.name}
+                                onChange={value => setFormData(current => ({ ...current, name: value }))}
+                                placeholder=""
+                            />
                             <div>
                                 <label className={labelCls}>Primary Contact</label>
                                 <SearchableDropdown
@@ -363,13 +380,20 @@ export default function EditAccountPage() {
                                 <h3 className="text-lg font-bold text-muted-text uppercase tracking-widest">Account Information</h3>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                <Field label="Phone Number" field="phone" placeholder="" />
-                                <Field label="Website" field="website" type="url" placeholder="" />
-                                <Field label="Street" field="street" placeholder="" />
-                                <Field label="City" field="city" placeholder="" />
-                                <Field label="State / Province" field="state_or_province" placeholder="" />
-                                <Field label="ZIP / Postal Code" field="zip_code" placeholder="" />
-                                <Field label="Country / Region" field="country" placeholder="" />
+                                <AccountField label="Phone Number" value={formData.phone}
+                                    onChange={value => setFormData(current => ({ ...current, phone: value }))} placeholder="" />
+                                <AccountField label="Website" value={formData.website} type="url"
+                                    onChange={value => setFormData(current => ({ ...current, website: value }))} placeholder="" />
+                                <AccountField label="Street" value={formData.street}
+                                    onChange={value => setFormData(current => ({ ...current, street: value }))} placeholder="" />
+                                <AccountField label="City" value={formData.city}
+                                    onChange={value => setFormData(current => ({ ...current, city: value }))} placeholder="" />
+                                <AccountField label="State / Province" value={formData.state_or_province}
+                                    onChange={value => setFormData(current => ({ ...current, state_or_province: value }))} placeholder="" />
+                                <AccountField label="ZIP / Postal Code" value={formData.zip_code}
+                                    onChange={value => setFormData(current => ({ ...current, zip_code: value }))} placeholder="" />
+                                <AccountField label="Country / Region" value={formData.country}
+                                    onChange={value => setFormData(current => ({ ...current, country: value }))} placeholder="" />
                             </div>
                         </div>
                     </div>
