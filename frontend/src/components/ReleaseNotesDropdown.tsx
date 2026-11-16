@@ -36,6 +36,13 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
+            title: 'Project Cleanup',
+            description: 'Removed obsolete maintenance utilities and unused starter assets while preserving current migrations, imports, and production data tools.',
+            icon: CheckCircle2,
+            color: 'text-violet-500',
+            bg: 'bg-violet-500/10',
+        },
+        {
             title: 'Reliable Account Editing',
             description: 'Account edit fields now retain keyboard focus while typing, so details can be updated continuously without clicking the field again.',
             icon: CheckCircle2,

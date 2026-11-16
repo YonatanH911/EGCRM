@@ -4,7 +4,7 @@
 
 ### New Features & Enhancements
 - **Intelligent Data Linking**: Revolutionized the Accounts dashboard by replacing static text fields (like Industry) with dynamic, interactive dropdowns. Users can now seamlessly link and unlink related Contacts and Deposits directly from an Account page.
-- **Unified Data Importer**: Consolidated multiple independent Excel import scripts into a powerful `import_all.py` engine that strictly processes dependencies (Accounts -> Contacts -> Vaults -> Deposits) to prevent orphaned records.
+- **Unified Data Importer**: Consolidated multiple independent Excel import scripts into `import_excel_exports.py`, which processes dependencies in order and supports active and inactive Dynamics exports.
 
 ## Version 2.0
 
