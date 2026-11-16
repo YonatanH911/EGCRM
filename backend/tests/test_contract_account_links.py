@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 import crud
 import models
 import schemas
-from migrate_contract_accounts import match_contract_accounts
+from migrations.migrate_contract_accounts import match_contract_accounts
 
 
 class ContractAccountLinkTests(unittest.TestCase):

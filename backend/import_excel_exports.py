@@ -201,7 +201,9 @@ class ExcelImporter:
                 text("SELECT entity_type, source_id, local_id FROM legacy_import_ids")
             )
         except Exception as exc:
-            raise RuntimeError("Run python migrate_db.py before this importer.") from exc
+            raise RuntimeError(
+                "Run python -m migrations.migrate_db before this importer."
+            ) from exc
         self.mappings = {(row[0], row[1]): row[2] for row in rows}
 
     def mapped(self, entity_type: str, source_id: str, model):

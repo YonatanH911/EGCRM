@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 
-from repair_contract_import_mappings import (
+from migrations.repair_contract_import_mappings import (
     SourceContract,
     create_contract,
     exact_source_match,

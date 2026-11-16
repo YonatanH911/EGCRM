@@ -1,6 +1,6 @@
 import unittest
 
-from migrate_contract_contacts import (
+from migrations.migrate_contract_contacts import (
     canonicalize_contact_cell,
     normalize_title,
     resolve_contact_columns,

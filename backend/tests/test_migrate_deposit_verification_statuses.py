@@ -9,8 +9,8 @@ from unittest.mock import patch
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-import migrate_deposit_verification_statuses
-from migrate_deposit_verification_statuses import deposit_status, load_statuses
+from migrations import migrate_deposit_verification_statuses
+from migrations.migrate_deposit_verification_statuses import deposit_status, load_statuses
 import models
 
 

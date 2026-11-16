@@ -15,7 +15,7 @@ from pathlib import Path
 from sqlalchemy import text
 
 from database import SessionLocal
-from migrate_activity_notes import normalize_guid
+from migrations.migrate_activity_notes import normalize_guid
 import models
 
 

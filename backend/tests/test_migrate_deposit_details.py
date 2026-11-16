@@ -10,8 +10,8 @@ from unittest.mock import patch
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-import migrate_deposit_details
-from migrate_deposit_details import details_from_record, load_export
+from migrations import migrate_deposit_details
+from migrations.migrate_deposit_details import details_from_record, load_export
 import models
 
 

@@ -6,8 +6,8 @@ Contract only when title, dates, and active state match exactly, and otherwise
 creates a distinct Contract from the Dynamics JSON.
 
 Usage:
-    python repair_contract_import_mappings.py contract_data.json ../excel_exports/excel
-    python repair_contract_import_mappings.py contract_data.json ../excel_exports/excel --apply
+    python -m migrations.repair_contract_import_mappings contract_data.json ../excel_exports/excel
+    python -m migrations.repair_contract_import_mappings contract_data.json ../excel_exports/excel --apply
 """
 from __future__ import annotations
 
@@ -22,7 +22,12 @@ from sqlalchemy import text
 
 from database import SessionLocal
 from import_excel_exports import WorkbookRows, clean, normalized, parse_date
-from migrate_contract_data import FIELD_SPECS, load_contracts, normalize_guid, source_value
+from migrations.migrate_contract_data import (
+    FIELD_SPECS,
+    load_contracts,
+    normalize_guid,
+    source_value,
+)
 import models
 
 

@@ -5,9 +5,9 @@ Verified By contact are matched through legacy_import_ids. Existing non-default
 EGCRM values are preserved unless --overwrite is also supplied.
 
 Usage:
-    python migrate_deposit_details.py dynamics_deposit_details.json
-    python migrate_deposit_details.py dynamics_deposit_details.json --apply
-    python migrate_deposit_details.py dynamics_deposit_details.json --apply --overwrite
+    python -m migrations.migrate_deposit_details dynamics_deposit_details.json
+    python -m migrations.migrate_deposit_details dynamics_deposit_details.json --apply
+    python -m migrations.migrate_deposit_details dynamics_deposit_details.json --apply --overwrite
 """
 from __future__ import annotations
 

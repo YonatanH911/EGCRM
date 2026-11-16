@@ -4,8 +4,8 @@ The migration is a dry run by default and only touches activities recorded in
 legacy_import_ids by import_excel_exports.py.
 
 Usage:
-    python migrate_imported_activity_types.py
-    python migrate_imported_activity_types.py --apply
+    python -m migrations.migrate_imported_activity_types
+    python -m migrations.migrate_imported_activity_types --apply
 """
 from __future__ import annotations
 
@@ -40,7 +40,8 @@ def run(apply: bool) -> None:
             ).mappings().all()
         except Exception as exc:
             raise RuntimeError(
-                "The import mapping table is unavailable. Run python migrate_db.py first."
+                "The import mapping table is unavailable. "
+                "Run python -m migrations.migrate_db first."
             ) from exc
 
         task_types = {

@@ -4,9 +4,9 @@ The migration is a dry run by default. It matches records using the original
 Dynamics GUID stored in legacy_import_ids and preserves non-empty EGCRM notes.
 
 Usage:
-    python migrate_activity_notes.py activity_descriptions.json
-    python migrate_activity_notes.py activity_descriptions.json --apply
-    python migrate_activity_notes.py activity_descriptions.json --apply --overwrite
+    python -m migrations.migrate_activity_notes activity_descriptions.json
+    python -m migrations.migrate_activity_notes activity_descriptions.json --apply
+    python -m migrations.migrate_activity_notes activity_descriptions.json --apply --overwrite
 """
 from __future__ import annotations
 
@@ -83,7 +83,8 @@ def run(json_file: Path, apply: bool, overwrite: bool) -> None:
             ).all()
         except Exception as exc:
             raise RuntimeError(
-                "The import mapping table is unavailable. Run python migrate_db.py first."
+                "The import mapping table is unavailable. "
+                "Run python -m migrations.migrate_db first."
             ) from exc
 
         changed = 0

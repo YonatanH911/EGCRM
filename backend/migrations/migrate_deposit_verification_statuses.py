@@ -5,8 +5,8 @@ legacy_import_ids. It is a dry run unless --apply is provided. A nonblank
 Dynamics status is authoritative for its matched EGCRM deposit.
 
 Usage:
-    python migrate_deposit_verification_statuses.py dynamics_deposit_verification_statuses.json
-    python migrate_deposit_verification_statuses.py dynamics_deposit_verification_statuses.json --apply
+    python -m migrations.migrate_deposit_verification_statuses dynamics_deposit_verification_statuses.json
+    python -m migrations.migrate_deposit_verification_statuses dynamics_deposit_verification_statuses.json --apply
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from typing import Any
 from sqlalchemy import text
 
 from database import SessionLocal
-from migrate_activity_notes import normalize_guid
+from migrations.migrate_activity_notes import normalize_guid
 import models
 
 
@@ -153,7 +153,8 @@ def run(json_file: Path, apply: bool = False) -> None:
             ).all()
         except Exception as exc:
             raise RuntimeError(
-                "The import mapping table is unavailable. Run python migrate_db.py first."
+                "The import mapping table is unavailable. "
+                "Run python -m migrations.migrate_db first."
             ) from exc
 
         mappings: dict[str, int] = {}

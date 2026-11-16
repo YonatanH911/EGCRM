@@ -9,8 +9,8 @@ from unittest.mock import patch
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
-import migrate_activity_followups
-from migrate_activity_followups import load_followups
+from migrations import migrate_activity_followups
+from migrations.migrate_activity_followups import load_followups
 import models
 
 

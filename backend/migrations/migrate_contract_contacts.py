@@ -5,8 +5,8 @@ values are preserved by default; use --overwrite only when the spreadsheet must
 replace values that are already present.
 
 Examples:
-    python migrate_contract_contacts.py "../excel_exports/Active Contracts.xlsx"
-    python migrate_contract_contacts.py "../excel_exports/Active Contracts.xlsx" --apply
+    python -m migrations.migrate_contract_contacts "../excel_exports/Active Contracts.xlsx"
+    python -m migrations.migrate_contract_contacts "../excel_exports/Active Contracts.xlsx" --apply
 """
 from __future__ import annotations
 

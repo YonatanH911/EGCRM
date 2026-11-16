@@ -3,7 +3,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from migrate_activity_notes import clean_description, load_descriptions, normalize_guid
+from migrations.migrate_activity_notes import (
+    clean_description,
+    load_descriptions,
+    normalize_guid,
+)
 
 
 class ActivityNotesMigrationTests(unittest.TestCase):

@@ -5,9 +5,9 @@ Dynamics GUID stored in legacy_import_ids. Existing values are preserved unless
 --overwrite is supplied with --apply.
 
 Usage:
-    python migrate_contract_data.py dynamics_contract_data.json
-    python migrate_contract_data.py dynamics_contract_data.json --apply
-    python migrate_contract_data.py dynamics_contract_data.json --apply --overwrite
+    python -m migrations.migrate_contract_data dynamics_contract_data.json
+    python -m migrations.migrate_contract_data dynamics_contract_data.json --apply
+    python -m migrations.migrate_contract_data dynamics_contract_data.json --apply --overwrite
 """
 from __future__ import annotations
 
@@ -157,7 +157,8 @@ def run(json_file: Path, apply: bool, overwrite: bool) -> None:
             ).all()
         except Exception as exc:
             raise RuntimeError(
-                "The import mapping table is unavailable. Run python migrate_db.py first."
+                "The import mapping table is unavailable. "
+                "Run python -m migrations.migrate_db first."
             ) from exc
 
         local_id_counts = Counter(local_id for _, local_id in mappings)

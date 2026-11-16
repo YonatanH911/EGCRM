@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from migrate_contract_data import (
+from migrations.migrate_contract_data import (
     contract_type,
     load_contracts,
     normalize_guid,

@@ -5,7 +5,7 @@ const vm = require("node:vm");
 
 async function main() {
   const source = fs.readFileSync(
-    path.join(__dirname, "export_dynamics_activity_followups.js"),
+    path.join(__dirname, "..", "export_dynamics_activity_followups.js"),
     "utf8"
   );
   const requests = [];
