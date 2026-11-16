@@ -33,6 +33,7 @@ LOOKUP_ENTITY_SUFFIX = "@Microsoft.Dynamics.CRM.lookuplogicalname"
 # and schema names. Forbidden words keep similarly named date/boolean fields
 # from being confused with one another.
 FIELD_RULES: dict[str, tuple[set[str], set[str]]] = {
+    "date_vaulted": ({"date", "vaulted"}, set()),
     "confirmation_sent": ({"confirmation", "sent"}, {"date", "report"}),
     "date_confirmation_sent": ({"date", "confirmation", "sent"}, {"report"}),
     "verified_by_contact_id": ({"verified", "by"}, {"status"}),
@@ -50,6 +51,7 @@ class AttributeValue:
 
 @dataclass(frozen=True)
 class DepositDetails:
+    date_vaulted: datetime | None
     confirmation_sent: bool | None
     date_confirmation_sent: datetime | None
     verified_by_source_id: str
@@ -191,6 +193,9 @@ def details_from_record(
     verified_raw = str(verified.raw or "").strip()
     verified_guid = normalize_guid(verified_raw)
     return DepositDetails(
+        date_vaulted=parse_datetime(
+            attribute_value(record, fields["date_vaulted"]), "date_vaulted"
+        ),
         confirmation_sent=parse_yes_no(
             attribute_value(record, fields["confirmation_sent"]), "confirmation_sent"
         ),
@@ -385,6 +390,7 @@ def run(
                         )
 
             values = {
+                "date_vaulted": incoming.date_vaulted,
                 "confirmation_sent": incoming.confirmation_sent,
                 "date_confirmation_sent": incoming.date_confirmation_sent,
                 "verified_by_contact_id": verified_by_contact_id,

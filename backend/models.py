@@ -266,6 +266,7 @@ class Deposit(Base):
     version = Column(String(255), nullable=True)
     supplier = Column(String(255), nullable=True)
     box = Column(String(255), nullable=True)
+    date_vaulted = Column(DateTime, nullable=True)
     is_confirmation_sent = Column(Boolean, default=False, nullable=True)
     confirmation_sent = Column(Boolean, default=False, nullable=True)
     date_confirmation_sent = Column(DateTime, nullable=True)

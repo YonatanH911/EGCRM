@@ -17,6 +17,13 @@ import models
 
 ATTRIBUTES = [
     {
+        "logical_name": "ey_datevaulted",
+        "schema_name": "ey_DateVaulted",
+        "display_name": "Date Vaulted",
+        "type": "DateTime",
+        "readable": True,
+    },
+    {
         "logical_name": "ey_confirmationsent",
         "schema_name": "ey_ConfirmationSent",
         "display_name": "Is Confirmation Sent?",
@@ -60,6 +67,7 @@ def deposit_record(source_id: str = "DEP-GUID") -> dict:
     return {
         "ey_depositid": source_id,
         "ey_name": "Deposit Product",
+        "ey_datevaulted": "2026-07-10T00:00:00Z",
         "ey_confirmationsent": True,
         "ey_dateconfirmationsent": "2026-07-12T00:00:00Z",
         "_ey_verifiedbyid_value": CONTACT_GUID,
@@ -94,6 +102,7 @@ class DepositDetailsMigrationTests(unittest.TestCase):
             export = load_export(path)
             details = details_from_record(export.records["dep-guid"], export.fields)
 
+        self.assertEqual(details.date_vaulted, datetime(2026, 7, 10))
         self.assertTrue(details.confirmation_sent)
         self.assertEqual(details.date_confirmation_sent, datetime(2026, 7, 12))
         self.assertEqual(details.verified_by_source_id, CONTACT_GUID)
@@ -185,6 +194,7 @@ class DepositDetailsMigrationTests(unittest.TestCase):
 
         with session_factory() as db:
             updated = db.get(models.Deposit, deposit_id)
+            self.assertEqual(updated.date_vaulted, datetime(2026, 7, 10))
             self.assertTrue(updated.confirmation_sent)
             self.assertEqual(updated.date_confirmation_sent, datetime(2026, 7, 12))
             self.assertEqual(updated.verified_by_contact_id, contact_id)

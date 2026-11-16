@@ -41,6 +41,7 @@ export default function NewDepositPage() {
         amount: 0,
         status: 'Open',
         date: new Date().toISOString().split('T')[0],
+        date_vaulted: '',
         contact_ids: [] as string[],
         vault_ids: [] as string[],
         supplier: [] as string[],
@@ -87,6 +88,7 @@ export default function NewDepositPage() {
                 vault_id: formData.vault_ids[0] ? Number(formData.vault_ids[0]) : null,
                 supplier: formData.supplier.join(', '),
                 date: formData.date ? new Date(formData.date).toISOString() : null,
+                date_vaulted: formData.date_vaulted ? new Date(formData.date_vaulted).toISOString() : null,
                 date_confirmation_sent: formData.date_confirmation_sent ? new Date(formData.date_confirmation_sent).toISOString() : null,
                 verified_by_contact_id: formData.verified_by_contact_id ? Number(formData.verified_by_contact_id) : null,
                 date_report_sent: formData.date_report_sent ? new Date(formData.date_report_sent).toISOString() : null,
@@ -268,7 +270,7 @@ export default function NewDepositPage() {
                                                 const yes = val === 'Yes';
                                                 setIsVaulted(yes);
                                                 if (!yes) {
-                                                    setFormData(prev => ({ ...prev, vault_ids: [] }));
+                                                    setFormData(prev => ({ ...prev, vault_ids: [], date_vaulted: '' }));
                                                 } else if (formData.vault_ids.length === 0 && vaults.length > 0) {
                                                     setFormData(prev => ({ ...prev, vault_ids: [String(vaults[0].id)] }));
                                                 }
@@ -290,6 +292,19 @@ export default function NewDepositPage() {
                                             placeholder="Select a storage vault"
                                             className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                             options={vaults.map(vault => ({ value: String(vault.id), label: vault.name }))}
+                                        />
+                                    </div>
+                                </div>
+                                <div className={!isVaulted ? "opacity-50" : ""}>
+                                    <label htmlFor="date_vaulted" className="block text-xl font-medium text-foreground">Date Vaulted</label>
+                                    <div className="mt-1">
+                                        <input
+                                            type="date"
+                                            id="date_vaulted"
+                                            value={formData.date_vaulted}
+                                            disabled={!isVaulted}
+                                            onChange={(event) => setFormData(prev => ({ ...prev, date_vaulted: event.target.value }))}
+                                            className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border disabled:cursor-not-allowed"
                                         />
                                     </div>
                                 </div>

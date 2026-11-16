@@ -70,6 +70,14 @@ records; it does not create, edit, or delete anything in Dynamics.
     'odata.include-annotations="OData.Community.Display.V1.FormattedValue,' +
     'Microsoft.Dynamics.CRM.lookuplogicalname",odata.maxpagesize=5000';
   const deposits = await getPages(`${apiBase}${entity.EntitySetName}`, annotations);
+  const requestedFields = [
+    "Date Vaulted",
+    "Is Confirmation Sent?",
+    "Date Confirmation Sent",
+    "Verified By",
+    "Is Report Sent",
+    "Date Report Sent",
+  ];
 
   const payload = {
     exported_at: new Date().toISOString(),
@@ -83,6 +91,7 @@ records; it does not create, edit, or delete anything in Dynamics.
       primary_id_attribute: entity.PrimaryIdAttribute,
       primary_name_attribute: entity.PrimaryNameAttribute,
     },
+    requested_fields: requestedFields,
     attributes,
     count: deposits.length,
     deposits,

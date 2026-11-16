@@ -29,6 +29,7 @@ interface DepositForm {
     amount: number;
     status: string;
     date: string;
+    date_vaulted: string;
     contact_ids: string[];
     vault_ids: string[];
     supplier: string[];
@@ -60,6 +61,7 @@ export default function EditDepositPage() {
         amount: 0,
         status: 'Open',
         date: '',
+        date_vaulted: '',
         contact_ids: [],
         vault_ids: [],
         supplier: [],
@@ -87,13 +89,14 @@ export default function EditDepositPage() {
                 setIsActive(deposit.is_active !== false);
 
                 const mappedVaultIds = (deposit.vault_ids?.length ? deposit.vault_ids : (deposit.vault_id ? [deposit.vault_id] : [])).map(String);
-                setIsVaulted(mappedVaultIds.length > 0);
+                setIsVaulted(mappedVaultIds.length > 0 || Boolean(deposit.date_vaulted));
 
                 setFormData({
                     reference_number: deposit.reference_number || '',
                     amount: Number(deposit.amount || 0),
                     status: deposit.status || 'Open',
                     date: deposit.date ? deposit.date.substring(0, 10) : '',
+                    date_vaulted: deposit.date_vaulted ? deposit.date_vaulted.substring(0, 10) : '',
                     contact_ids: (deposit.contact_ids || []).map(String),
                     vault_ids: mappedVaultIds,
                     supplier: Array.isArray(deposit.supplier)
@@ -139,6 +142,7 @@ export default function EditDepositPage() {
                 vault_id: formData.vault_ids[0] ? Number(formData.vault_ids[0]) : null,
                 supplier: formData.supplier.join(', '),
                 date: formData.date ? new Date(formData.date).toISOString() : null,
+                date_vaulted: formData.date_vaulted ? new Date(formData.date_vaulted).toISOString() : null,
                 date_confirmation_sent: formData.date_confirmation_sent ? new Date(formData.date_confirmation_sent).toISOString() : null,
                 verified_by_contact_id: formData.verified_by_contact_id ? Number(formData.verified_by_contact_id) : null,
                 date_report_sent: formData.date_report_sent ? new Date(formData.date_report_sent).toISOString() : null,
@@ -368,7 +372,7 @@ export default function EditDepositPage() {
                                                     const yes = val === 'Yes';
                                                     setIsVaulted(yes);
                                                     if (!yes) {
-                                                        setFormData(prev => ({ ...prev, vault_ids: [] }));
+                                                        setFormData(prev => ({ ...prev, vault_ids: [], date_vaulted: '' }));
                                                     } else if (formData.vault_ids.length === 0 && vaults.length > 0) {
                                                         setFormData(prev => ({ ...prev, vault_ids: [String(vaults[0].id)] }));
                                                     }
@@ -390,6 +394,19 @@ export default function EditDepositPage() {
                                                 placeholder="Select a storage vault"
                                                 className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border"
                                                 options={vaults.map(vault => ({ value: String(vault.id), label: vault.name }))}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className={!isVaulted ? "opacity-50" : ""}>
+                                        <label htmlFor="date_vaulted" className="block text-xl font-medium text-foreground">Date Vaulted</label>
+                                        <div className="mt-1">
+                                            <input
+                                                type="date"
+                                                id="date_vaulted"
+                                                value={formData.date_vaulted}
+                                                disabled={!isVaulted}
+                                                onChange={(event) => setFormData(prev => ({ ...prev, date_vaulted: event.target.value }))}
+                                                className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border disabled:cursor-not-allowed"
                                             />
                                         </div>
                                     </div>

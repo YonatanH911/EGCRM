@@ -202,6 +202,7 @@ class DepositBase(BaseSchema):
     version: Optional[str] = None
     supplier: Optional[str] = None
     box: Optional[str] = None
+    date_vaulted: Optional[datetime] = None
     is_confirmation_sent: Optional[bool] = False
     confirmation_sent: Optional[bool] = False
     date_confirmation_sent: Optional[datetime] = None
@@ -228,6 +229,7 @@ class DepositUpdate(BaseModel):
     version: Optional[str] = None
     supplier: Optional[str] = None
     box: Optional[str] = None
+    date_vaulted: Optional[datetime] = None
     is_confirmation_sent: Optional[bool] = None
     confirmation_sent: Optional[bool] = None
     date_confirmation_sent: Optional[datetime] = None

@@ -643,6 +643,9 @@ class ExcelImporter:
                 changed |= self.set_value(deposit, "date", parse_date(book.value(row, "Date Received")))
                 changed |= self.set_value(deposit, "box", clean(book.value(row, "Box")))
                 changed |= self.set_value(deposit, "received_by", clean(book.value(row, "Received By")))
+                changed |= self.set_value(
+                    deposit, "date_vaulted", parse_date(book.value(row, "Date Vaulted"))
+                )
                 vault = self.vault_by_name(book.value(row, "Vault"))
                 if vault:
                     changed |= self.set_value(deposit, "vault_id", vault.id)

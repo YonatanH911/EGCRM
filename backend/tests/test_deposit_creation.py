@@ -17,11 +17,13 @@ class DepositCreationTests(unittest.TestCase):
 
         with session_factory() as db:
             confirmation_date = datetime(2026, 10, 26)
+            vaulted_date = datetime(2026, 10, 25)
             payload = schemas.DepositCreate(
                 reference_number="REPEATED-1",
                 amount=0,
                 confirmation_sent=True,
                 date_confirmation_sent=confirmation_date,
+                date_vaulted=vaulted_date,
             )
             first = crud.create_deposit(db, payload)
             second = crud.create_deposit(db, payload)
@@ -29,6 +31,7 @@ class DepositCreationTests(unittest.TestCase):
             self.assertNotEqual(first.id, second.id)
             self.assertTrue(first.confirmation_sent)
             self.assertEqual(first.date_confirmation_sent, confirmation_date)
+            self.assertEqual(first.date_vaulted, vaulted_date)
             self.assertEqual(
                 db.query(models.Deposit)
                 .filter(models.Deposit.reference_number == "REPEATED-1")
