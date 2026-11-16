@@ -2,7 +2,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Bell, X, Sparkles, CheckCircle2, Building2, Filter, Phone, Search, Users } from 'lucide-react';
+import {
+    Bell, X, Sparkles, CheckCircle2, Building2, Filter, Phone, Search, Users,
+    CalendarDays, Database, FolderTree,
+} from 'lucide-react';
 import packageInfo from '../../package.json';
 
 const RELEASE_STORAGE_KEY = 'egcrm:last-read-release';
@@ -35,6 +38,27 @@ export default function ReleaseNotesDropdown() {
     };
 
     const notes = [
+        {
+            title: 'Date Vaulted',
+            description: 'Deposits now include a Date Vaulted calendar field under Vault Information, supported by forms, the API, Excel imports, and Dynamics recovery.',
+            icon: CalendarDays,
+            color: 'text-blue-500',
+            bg: 'bg-blue-500/10',
+        },
+        {
+            title: 'Deposit Data Recovery',
+            description: 'A safe Dynamics exporter and dry-run migration can restore confirmation, vaulting, verification, and report details missing from historical deposits.',
+            icon: Database,
+            color: 'text-emerald-500',
+            bg: 'bg-emerald-500/10',
+        },
+        {
+            title: 'Organized Maintenance Tools',
+            description: 'Backend migrations and regression tests now live in dedicated folders with updated commands and full test coverage.',
+            icon: FolderTree,
+            color: 'text-amber-500',
+            bg: 'bg-amber-500/10',
+        },
         {
             title: 'Project Cleanup',
             description: 'Removed obsolete maintenance utilities and unused starter assets while preserving current migrations, imports, and production data tools.',
