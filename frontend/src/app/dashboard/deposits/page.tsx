@@ -27,8 +27,8 @@ const formatDepositDate = (date: string | null) => date
 const depositColumns = [
     { key: 'productName', label: 'Product Name', icon: Package },
     { key: 'version', label: 'Version', icon: Tag },
+    { key: 'date', label: 'Date Received', icon: Calendar },
     { key: 'supplier', label: 'Supplier', icon: User },
-    { key: 'date', label: 'Date', icon: Calendar },
     { key: 'vault', label: 'Vault', icon: Shield },
     { key: 'depositNumber', label: 'Deposit number', icon: Landmark },
     { key: 'status', label: 'Verification Status', icon: CheckSquare },
@@ -42,7 +42,7 @@ export default function DepositsPage() {
     const [deposits, setDeposits] = useState<Deposit[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [sortBy, setSortBy] = useState('created_at');
+    const [sortBy, setSortBy] = useState('date');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [showInactive, setShowInactive] = useState(false);
     const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
@@ -177,14 +177,14 @@ export default function DepositsPage() {
                                     return (
                                     <tr key={deposit.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5" style={rowStyle}>
                                         <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} flex flex-col`}><span className="text-xl text-foreground max-w-[160px] truncate">{deposit.product_name || dash}</span>{!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}</Link></td>
-                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground font-medium max-w-[120px] truncate">{deposit.version || dash}</div></Link></td>
-                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-muted-text whitespace-nowrap">{deposit.supplier || dash}</div></Link></td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground font-medium whitespace-nowrap">{deposit.version || dash}</div></Link></td>
                                         <td className="p-0 whitespace-nowrap">
                                             <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text whitespace-nowrap`}>
                                                 <Calendar className="mr-1 h-3.5 w-3.5 text-muted-text" />
                                                 {formatDepositDate(deposit.date) || dash}
                                             </Link>
                                         </td>
+                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="max-w-[140px] truncate text-xl text-muted-text" title={deposit.supplier || undefined}>{deposit.supplier || dash}</div></Link></td>
                                         <td className="p-0 whitespace-nowrap">
                                             <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text whitespace-nowrap`}>
                                                 <Shield className="mr-1 h-3.5 w-3.5 text-muted-text" />
