@@ -17,7 +17,7 @@ interface Deposit {
     id: number; reference_number: string; date: string | null;
     vault: Vault | null; is_confirmation_sent: boolean | null; version: string | null;
     supplier: string | null; received_by: string | null; product_name: string | null; status: string;
-    created_at: string; date_report_sent: string | null; is_active?: boolean;
+    description: string | null; created_at: string; date_report_sent: string | null; is_active?: boolean;
 }
 
 const formatDepositDate = (date: string | null) => date
@@ -32,6 +32,7 @@ const depositColumns = [
     { key: 'vault', label: 'Vault', icon: Shield },
     { key: 'depositNumber', label: 'Deposit number', icon: Landmark },
     { key: 'status', label: 'Verification Status', icon: CheckSquare },
+    { key: 'box', label: 'Box', icon: Box },
 ];
 
 const thCls = "px-3 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
@@ -65,7 +66,8 @@ export default function DepositsPage() {
             (deposit.supplier || '').toLowerCase().includes(q) ||
             (deposit.version || '').toLowerCase().includes(q) ||
             (deposit.vault?.name || '').toLowerCase().includes(q) ||
-            (deposit.received_by || '').toLowerCase().includes(q)
+            (deposit.received_by || '').toLowerCase().includes(q) ||
+            (deposit.description || '').toLowerCase().includes(q)
         );
         const matchesColumns = matchesColumnFilters(columnFilters, {
             productName: deposit.product_name,
@@ -75,6 +77,7 @@ export default function DepositsPage() {
             vault: deposit.vault?.name,
             depositNumber: deposit.reference_number,
             status: deposit.status || 'Open',
+            box: deposit.description,
         });
         return matchesActive && matchesSearch && matchesColumns;
     });
@@ -88,18 +91,6 @@ export default function DepositsPage() {
         }
         return compareSortValues(dateSortValue(a.created_at), dateSortValue(b.created_at), sortDirection);
     });
-
-    const handleReactivate = async (event: React.MouseEvent, depositId: number) => {
-        event.stopPropagation();
-        try {
-            await api.patch(`/deposits/${depositId}/reactivate`);
-            setDeposits(current => current.map(deposit =>
-                deposit.id === depositId ? { ...deposit, is_active: true } : deposit
-            ));
-        } catch (error) {
-            console.error('Failed to reactivate deposit', error);
-        }
-    };
 
     const dash = <span className="text-slate-600 italic">—</span>;
 
@@ -166,7 +157,6 @@ export default function DepositsPage() {
                                         </div>
                                     </th>
                                 ))}
-                                <th scope="col" className={thCls}>Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-subtle">
@@ -219,13 +209,12 @@ export default function DepositsPage() {
                                                 {deposit.status || 'Open'}
                                             </span></Link>
                                         </td>
-                                        <td className={tdCls}>
-                                            {!isActive && (
-                                                <button onClick={(event) => handleReactivate(event, deposit.id)}
-                                                    className="px-3 py-1.5 text-base font-bold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 rounded-lg transition-colors border border-emerald-500/20 uppercase tracking-widest">
-                                                    Reactivate
-                                                </button>
-                                            )}
+                                        <td className="p-0">
+                                            <Link href={href} className={`${tdCls} block`}>
+                                                <span className="block max-w-[180px] truncate text-xl text-muted-text" title={deposit.description || undefined}>
+                                                    {deposit.description || dash}
+                                                </span>
+                                            </Link>
                                         </td>
                                     </tr>
                                     );
