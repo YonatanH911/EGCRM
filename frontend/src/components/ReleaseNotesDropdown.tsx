@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
     Bell, X, Sparkles, CheckCircle2, Building2, Filter, Phone, Search, Users,
-    CalendarDays, Database, FolderTree,
+    Box, CalendarDays, Database, FolderTree,
 } from 'lucide-react';
 import packageInfo from '../../package.json';
 
@@ -38,6 +38,13 @@ export default function ReleaseNotesDropdown() {
     };
 
     const notes = [
+        {
+            title: 'Deposit Box and Table',
+            description: 'Deposits now show Box in the list and under Vault Information, with Date Received before Supplier, complete version values, and newest deposits first.',
+            icon: Box,
+            color: 'text-cyan-500',
+            bg: 'bg-cyan-500/10',
+        },
         {
             title: 'Date Vaulted',
             description: 'Deposits now include a Date Vaulted calendar field under Vault Information, supported by forms, the API, Excel imports, and Dynamics recovery.',
