@@ -141,6 +141,107 @@ class ExcelImportTests(unittest.TestCase):
                 finally:
                     importer.close()
 
+    def test_keeps_distinct_deposits_with_the_same_number(self):
+        engine = create_engine("sqlite:///:memory:")
+        models.Base.metadata.create_all(engine)
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "CREATE TABLE legacy_import_ids ("
+                    "entity_type VARCHAR(32), source_id VARCHAR(64), local_id INT)"
+                )
+            )
+        session_factory = sessionmaker(bind=engine)
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "Active Deposits.xlsx"
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+            worksheet.append(
+                [
+                    "(Do Not Modify) Deposit",
+                    "Deposit Number",
+                    "Product Name",
+                ]
+            )
+            worksheet.append(["deposit-axon", "2022070701", "Axon Pipeline"])
+            worksheet.append(["deposit-files", "2022070701", "Updated files"])
+            workbook.save(path)
+            workbook.close()
+
+            with patch.object(import_excel_exports, "SessionLocal", session_factory):
+                importer = import_excel_exports.ExcelImporter(
+                    Path(directory),
+                    apply=False,
+                    overwrite=True,
+                )
+                try:
+                    importer.load_mappings()
+                    importer.import_deposits("active_deposits", True)
+                    deposits = importer.db.query(models.Deposit).order_by(models.Deposit.id).all()
+                    self.assertEqual(len(deposits), 2)
+                    self.assertEqual(
+                        [deposit.product_name for deposit in deposits],
+                        ["Axon Pipeline", "Updated files"],
+                    )
+                    self.assertNotEqual(
+                        importer.mappings[("deposit", "deposit-axon")],
+                        importer.mappings[("deposit", "deposit-files")],
+                    )
+                finally:
+                    importer.close()
+
+    def test_keeps_distinct_contacts_with_the_same_email(self):
+        engine = create_engine("sqlite:///:memory:")
+        models.Base.metadata.create_all(engine)
+        with engine.begin() as connection:
+            connection.execute(
+                text(
+                    "CREATE TABLE legacy_import_ids ("
+                    "entity_type VARCHAR(32), source_id VARCHAR(64), local_id INT)"
+                )
+            )
+        session_factory = sessionmaker(bind=engine)
+
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "Active Contacts.xlsx"
+            workbook = openpyxl.Workbook()
+            worksheet = workbook.active
+            worksheet.append(
+                [
+                    "(Do Not Modify) Contact",
+                    "First Name",
+                    "Last Name",
+                    "Email",
+                ]
+            )
+            worksheet.append(["contact-first", "First", "Person", "shared@example.com"])
+            worksheet.append(["contact-second", "Second", "Person", "shared@example.com"])
+            workbook.save(path)
+            workbook.close()
+
+            with patch.object(import_excel_exports, "SessionLocal", session_factory):
+                importer = import_excel_exports.ExcelImporter(
+                    Path(directory),
+                    apply=False,
+                    overwrite=True,
+                )
+                try:
+                    importer.load_mappings()
+                    importer.import_contacts("active_contacts", True)
+                    contacts = importer.db.query(models.Contact).order_by(models.Contact.id).all()
+                    self.assertEqual(len(contacts), 2)
+                    self.assertEqual(
+                        [contact.first_name for contact in contacts],
+                        ["First", "Second"],
+                    )
+                    self.assertNotEqual(
+                        importer.mappings[("contact", "contact-first")],
+                        importer.mappings[("contact", "contact-second")],
+                    )
+                finally:
+                    importer.close()
+
 
 if __name__ == "__main__":
     unittest.main()

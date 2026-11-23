@@ -133,7 +133,7 @@ class Contact(Base):
     first_name = Column(String(255), nullable=False)
     last_name = Column(String(255), nullable=False)
     middle_name = Column(String(255), nullable=True)
-    email = Column(String(255), unique=True, index=True)
+    email = Column(String(255), index=True)
     phone = Column(String(50))
     mobile_phone = Column(String(50), nullable=True)
     is_israeli = Column(Boolean, default=False, nullable=True)

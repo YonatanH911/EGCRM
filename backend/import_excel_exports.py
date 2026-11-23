@@ -185,6 +185,7 @@ class ExcelImporter:
         self.overwrite = overwrite
         self.db: Session = SessionLocal()
         self.mappings: dict[tuple[str, str], int] = {}
+        self.claimed_ids: dict[str, set[int]] = defaultdict(set)
         self.active_ids: dict[str, set[int]] = defaultdict(set)
         self.pending_primary_contacts: list[tuple[int, str, str]] = []
         self.stats: dict[str, Stats] = {}
@@ -205,6 +206,9 @@ class ExcelImporter:
                 "Run python -m migrations.migrate_db before this importer."
             ) from exc
         self.mappings = {(row[0], row[1]): row[2] for row in rows}
+        self.claimed_ids.clear()
+        for (entity_type, _), local_id in self.mappings.items():
+            self.claimed_ids[entity_type].add(local_id)
 
     def mapped(self, entity_type: str, source_id: str, model):
         local_id = self.mappings.get((entity_type, source_id))
@@ -214,6 +218,7 @@ class ExcelImporter:
         if not source_id:
             return
         self.mappings[(entity_type, source_id)] = local_id
+        self.claimed_ids[entity_type].add(local_id)
         if not self.apply:
             return
         self.db.execute(
@@ -278,7 +283,7 @@ class ExcelImporter:
                 account = self.mapped("account", source_id, models.Account)
                 if account is None:
                     candidates = by_name.get(normalized(name), [])
-                    account = candidates[0] if len(candidates) == 1 else None
+                    account = unique_unclaimed(candidates, self.claimed_ids["account"])
                 created = account is None
                 if created:
                     account = models.Account(name=name, is_active=active)
@@ -335,24 +340,31 @@ class ExcelImporter:
             return contact
         if self._contacts is None:
             self._contacts = self.db.query(models.Contact).all()
-        contacts = self._contacts
+        contacts = [
+            contact
+            for contact in self._contacts
+            if contact.id not in self.claimed_ids["contact"]
+        ]
         if email:
             matches = [c for c in contacts if normalized(c.email) == normalized(email)]
-            if len(matches) == 1:
-                return matches[0]
+            email_match = unique_unclaimed(matches, self.claimed_ids["contact"])
+            if email_match:
+                return email_match
         matches = [
             c for c in contacts
             if normalized(c.first_name) == normalized(first_name)
             and normalized(c.last_name) == normalized(last_name)
             and c.account_id == account_id
         ]
-        if len(matches) == 1:
-            return matches[0]
+        name_match = unique_unclaimed(matches, self.claimed_ids["contact"])
+        if name_match:
+            return name_match
         phone_key = normalized_phone(phone)
         if phone_key:
             phone_matches = [c for c in matches if normalized_phone(c.phone) == phone_key]
-            if len(phone_matches) == 1:
-                return phone_matches[0]
+            phone_match = unique_unclaimed(phone_matches, self.claimed_ids["contact"])
+            if phone_match:
+                return phone_match
         return None
 
     def import_contacts(self, key: str, active: bool) -> None:
@@ -463,11 +475,6 @@ class ExcelImporter:
         by_title: dict[str, list[models.Contract]] = defaultdict(list)
         for contract in contracts:
             by_title[normalized(contract.title)].append(contract)
-        claimed_ids = {
-            local_id
-            for (entity_type, _), local_id in self.mappings.items()
-            if entity_type == "contract"
-        }
         try:
             for row in book.rows():
                 stats.scanned += 1
@@ -479,7 +486,7 @@ class ExcelImporter:
                 contract = self.mapped("contract", source_id, models.Contract)
                 if contract is None:
                     candidates = by_title.get(normalized(title), [])
-                    contract = unique_unclaimed(candidates, claimed_ids)
+                    contract = unique_unclaimed(candidates, self.claimed_ids["contract"])
                 beneficiary, supplier = split_contract_title(title)
                 beneficiary_account = unique_account_match(account_index, beneficiary)
                 supplier_account = unique_account_match(account_index, supplier)
@@ -523,7 +530,6 @@ class ExcelImporter:
                 )
                 changed |= self.set_activity(contract, "contract", active)
                 self.remember("contract", source_id, contract.id)
-                claimed_ids.add(contract.id)
                 if changed and not created:
                     stats.changed += 1
         finally:
@@ -568,8 +574,13 @@ class ExcelImporter:
                 vault = self.mapped("vault", source_id, models.Vault)
                 if vault is None:
                     candidates = by_name.get(normalized(name), [])
-                    vault = candidates[0] if len(candidates) == 1 else None
-                    if len(candidates) > 1:
+                    vault = unique_unclaimed(candidates, self.claimed_ids["vault"])
+                    available = [
+                        candidate
+                        for candidate in candidates
+                        if candidate.id not in self.claimed_ids["vault"]
+                    ]
+                    if len(available) > 1:
                         stats.unresolved += 1
                         self.warnings.append(
                             f"{label}: vault name '{name}' was not uniquely matched."
@@ -618,9 +629,10 @@ class ExcelImporter:
                 reference = clean(book.value(row, "Deposit Number"))
                 deposit = self.mapped("deposit", source_id, models.Deposit)
                 if deposit is None and reference:
-                    deposit = self.db.query(models.Deposit).filter(
+                    candidates = self.db.query(models.Deposit).filter(
                         models.Deposit.reference_number == reference
-                    ).first()
+                    ).all()
+                    deposit = unique_unclaimed(candidates, self.claimed_ids["deposit"])
                 created = deposit is None
                 if created:
                     safe_reference = reference or f"IMPORT-{source_id}"
@@ -694,7 +706,7 @@ class ExcelImporter:
                     start = parse_date(book.value(row, "Start Date"))
                     due = parse_date(book.value(row, "Due Date"))
                     candidates = self._activities_by_key.get((normalized(subject), start, due), [])
-                    activity = candidates[0] if len(candidates) == 1 else None
+                    activity = unique_unclaimed(candidates, self.claimed_ids["activity"])
                 created = activity is None
                 if created:
                     activity = models.Activity(subject=subject, is_active=True)

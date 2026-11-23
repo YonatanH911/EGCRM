@@ -24,6 +24,25 @@ def ensure_non_unique_deposit_reference_index(connection):
         )
         connection.commit()
 
+
+def ensure_non_unique_contact_email_index(connection):
+    """Allow separate Dynamics contacts to share an email address."""
+    indexes = inspect(connection).get_indexes("contacts")
+    for index in indexes:
+        if index.get("unique") and index.get("column_names") == ["email"]:
+            name = str(index["name"]).replace("`", "``")
+            connection.execute(text(f"ALTER TABLE contacts DROP INDEX `{name}`"))
+            connection.commit()
+
+    indexes = inspect(connection).get_indexes("contacts")
+    has_email_index = any(
+        not index.get("unique") and index.get("column_names") == ["email"]
+        for index in indexes
+    )
+    if not has_email_index:
+        connection.execute(text("CREATE INDEX ix_contacts_email ON contacts (email)"))
+        connection.commit()
+
 def migrate():
     SQL_COMMANDS = [
         # 1. Task Types
@@ -136,6 +155,8 @@ def migrate():
                 print(f"Skipped/Error: {e}")
         print("Ensuring Deposit Number uses a non-unique index...")
         ensure_non_unique_deposit_reference_index(connection)
+        print("Ensuring Contact Email uses a non-unique index...")
+        ensure_non_unique_contact_email_index(connection)
     
     print("✅ Migration process finished!")
 
