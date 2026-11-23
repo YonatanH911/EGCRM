@@ -1,6 +1,13 @@
 # EGCRM Release Notes
 
-## Version 2.1 (Latest)
+## Version 0.2.6 (Latest)
+
+### Data Integrity
+- **Dynamics Record Recovery**: Added guarded migrations that separate distinct Dynamics records previously merged by duplicate names, contact emails, contract titles, or deposit numbers.
+- **Complete Snapshot Validation**: Added a read-only full Dynamics exporter and coverage checks for accounts, contacts, contracts, vaults, deposits, and their relationships.
+- **Safer Future Imports**: Excel imports now claim each matched CRM row once, preventing multiple Dynamics GUIDs from silently sharing one local record.
+
+## Version 2.1
 
 ### New Features & Enhancements
 - **Intelligent Data Linking**: Revolutionized the Accounts dashboard by replacing static text fields (like Industry) with dynamic, interactive dropdowns. Users can now seamlessly link and unlink related Contacts and Deposits directly from an Account page.
