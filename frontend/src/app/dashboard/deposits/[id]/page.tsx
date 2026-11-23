@@ -410,12 +410,12 @@ export default function EditDepositPage() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="sm:col-span-2">
+                                    <div>
                                         <label htmlFor="description" className="block text-xl font-medium text-foreground">Box</label>
                                         <div className="mt-1">
-                                            <textarea
+                                            <input
+                                                type="text"
                                                 id="description"
-                                                rows={3}
                                                 value={formData.description}
                                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                                 className="shadow-sm focus:ring-crm-500 focus:border-crm-500 block w-full sm:text-xl border-border-subtle bg-black/5 dark:bg-white/5 text-foreground rounded-md py-2 px-3 border placeholder-muted-text"

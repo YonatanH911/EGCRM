@@ -30,9 +30,9 @@ const depositColumns = [
     { key: 'date', label: 'Date Received', icon: Calendar },
     { key: 'supplier', label: 'Supplier', icon: User },
     { key: 'vault', label: 'Vault', icon: Shield },
+    { key: 'box', label: 'Box', icon: Box },
     { key: 'depositNumber', label: 'Deposit number', icon: Landmark },
     { key: 'status', label: 'Verification Status', icon: CheckSquare },
-    { key: 'box', label: 'Box', icon: Box },
 ];
 
 const thCls = "px-3 py-3.5 ltr:text-left rtl:text-right text-base font-bold text-muted-text uppercase tracking-widest";
@@ -140,15 +140,15 @@ export default function DepositsPage() {
                     />
                 </div>
 
-                <ScrollableTable>
-                    <table className="min-w-full">
+                <ScrollableTable className="[&_td]:!overflow-visible [&_td>a]:!overflow-visible">
+                    <table className="w-full table-fixed">
                         <thead className="border-b border-border-subtle bg-black/5 dark:bg-white/5">
                             <tr>
                                 {depositColumns.map(({ key, label, icon: Icon }) => (
                                     <th key={key} className={thCls}>
-                                        <div className="flex items-center gap-1">
-                                            <Icon className="h-3 w-3" />
-                                            <span>{label}</span>
+                                        <div className="flex min-w-0 flex-wrap items-start gap-1">
+                                            <Icon className="mt-0.5 h-3 w-3 shrink-0" />
+                                            <span className="break-words leading-tight">{label}</span>
                                             <ColumnFilter
                                                 label={label}
                                                 value={columnFilters[key] || ''}
@@ -176,24 +176,31 @@ export default function DepositsPage() {
                                     const href = `/dashboard/deposits/${deposit.id}`;
                                     return (
                                     <tr key={deposit.id} className="transition-colors duration-150 group hover:bg-black/5 dark:hover:bg-white/5" style={rowStyle}>
-                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} flex flex-col`}><span className="text-xl text-foreground max-w-[160px] truncate">{deposit.product_name || dash}</span>{!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}</Link></td>
-                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="text-xl text-foreground font-medium whitespace-nowrap">{deposit.version || dash}</div></Link></td>
+                                        <td className="p-0"><Link href={href} className={`${tdCls} flex flex-col`}><span className="break-words text-xl text-foreground">{deposit.product_name || dash}</span>{!isActive && <span className="text-base text-muted-text uppercase tracking-wider">Inactive</span>}</Link></td>
+                                        <td className="p-0"><Link href={href} className={`${tdCls} block`}><div className="break-all text-xl font-medium text-foreground">{deposit.version || dash}</div></Link></td>
                                         <td className="p-0 whitespace-nowrap">
                                             <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text whitespace-nowrap`}>
                                                 <Calendar className="mr-1 h-3.5 w-3.5 text-muted-text" />
                                                 {formatDepositDate(deposit.date) || dash}
                                             </Link>
                                         </td>
-                                        <td className="p-0 whitespace-nowrap"><Link href={href} className={`${tdCls} block`}><div className="max-w-[140px] truncate text-xl text-muted-text" title={deposit.supplier || undefined}>{deposit.supplier || dash}</div></Link></td>
-                                        <td className="p-0 whitespace-nowrap">
-                                            <Link href={href} className={`${tdCls} flex items-center text-xl text-muted-text whitespace-nowrap`}>
-                                                <Shield className="mr-1 h-3.5 w-3.5 text-muted-text" />
-                                                {deposit.vault ? deposit.vault.name : dash}
+                                        <td className="p-0"><Link href={href} className={`${tdCls} block`}><div className="break-words text-xl text-muted-text">{deposit.supplier || dash}</div></Link></td>
+                                        <td className="p-0">
+                                            <Link href={href} className={`${tdCls} flex items-start text-xl text-muted-text`}>
+                                                <Shield className="mr-1 mt-1 h-3.5 w-3.5 shrink-0 text-muted-text" />
+                                                <span className="min-w-0 break-words">{deposit.vault ? deposit.vault.name : dash}</span>
+                                            </Link>
+                                        </td>
+                                        <td className="p-0">
+                                            <Link href={href} className={`${tdCls} block`}>
+                                                <span className="block whitespace-pre-wrap break-words text-xl text-muted-text">
+                                                    {deposit.description || dash}
+                                                </span>
                                             </Link>
                                         </td>
                                         <td className={tdCls}>
-                                            <div className="flex items-center gap-1.5">
-                                                <Link href={href} className="inline-flex items-center px-2 py-0.5 rounded-lg text-lg font-mono font-semibold"
+                                            <div className="flex min-w-0 items-start gap-1.5">
+                                                <Link href={href} className="inline-flex min-w-0 break-all whitespace-normal rounded-lg px-2 py-0.5 text-lg font-mono font-semibold"
                                                     style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
                                                     {deposit.reference_number}
                                                 </Link>
@@ -208,13 +215,6 @@ export default function DepositsPage() {
                                             }`} style={{ border: '1px solid' }}>
                                                 {deposit.status || 'Open'}
                                             </span></Link>
-                                        </td>
-                                        <td className="p-0">
-                                            <Link href={href} className={`${tdCls} block`}>
-                                                <span className="block max-w-[180px] truncate text-xl text-muted-text" title={deposit.description || undefined}>
-                                                    {deposit.description || dash}
-                                                </span>
-                                            </Link>
                                         </td>
                                     </tr>
                                     );
