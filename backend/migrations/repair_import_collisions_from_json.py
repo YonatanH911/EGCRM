@@ -30,6 +30,7 @@ from migrations.repair_import_collisions import (
     MODEL_BY_ENTITY,
     SourceRecord,
     comparable,
+    current_field_value,
     similarity_score,
     source_signature,
 )
@@ -37,6 +38,7 @@ from migrations.repair_import_collisions import (
 
 LOCAL_TIMEZONE = ZoneInfo("Asia/Jerusalem")
 ENTITY_ORDER = ("account", "contact", "vault", "contract", "deposit", "activity")
+IMPORT_UNMAPPED_ENTITIES = ("account", "contact", "vault", "contract", "deposit")
 
 
 @dataclass(frozen=True)
@@ -54,6 +56,14 @@ class RepairPlan:
     stale_source_ids: tuple[str, ...]
     scores: dict[str, int]
     retained_reason: str
+
+
+@dataclass(frozen=True)
+class SourceImportPlan:
+    entity_type: str
+    source_id: str
+    local_id: int | None
+    reason: str
 
 
 def normalize_guid(value: Any) -> str:
@@ -266,6 +276,106 @@ def load_mappings(db) -> dict[tuple[str, str], int]:
     }
 
 
+def exact_source_match(current: Any, source: JsonSource) -> bool:
+    if hasattr(current, "is_active") and current.is_active != source.source.active:
+        return False
+    compared = 0
+    for field, value in source.source.fields.items():
+        if field == "created_at":
+            continue
+        if comparable(current_field_value(current, field)) != comparable(value):
+            return False
+        if value not in (None, ""):
+            compared += 1
+    return compared > 0
+
+
+def build_source_import_plans(db, mappings, sources) -> list[SourceImportPlan]:
+    claimed: dict[str, set[int]] = defaultdict(set)
+    for (entity_type, _source_id), local_id in mappings.items():
+        claimed[entity_type].add(local_id)
+
+    records = {
+        entity_type: db.query(MODEL_BY_ENTITY[entity_type]).all()
+        for entity_type in IMPORT_UNMAPPED_ENTITIES
+    }
+    plans: list[SourceImportPlan] = []
+    for entity_type in IMPORT_UNMAPPED_ENTITIES:
+        for (kind, source_id), source in sorted(sources.items()):
+            if kind != entity_type or (kind, source_id) in mappings:
+                continue
+            candidates = [
+                current
+                for current in records[entity_type]
+                if current.id not in claimed[entity_type]
+                and exact_source_match(current, source)
+            ]
+            if len(candidates) == 1:
+                local_id = candidates[0].id
+                claimed[entity_type].add(local_id)
+                reason = "exact unclaimed local match"
+            else:
+                local_id = None
+                reason = (
+                    "new Dynamics record"
+                    if not candidates
+                    else "multiple exact local matches; create separate row"
+                )
+            plans.append(
+                SourceImportPlan(
+                    entity_type=entity_type,
+                    source_id=source_id,
+                    local_id=local_id,
+                    reason=reason,
+                )
+            )
+    return plans
+
+
+def relationship_targets(
+    entity_type: str, record: dict[str, Any]
+) -> list[tuple[str, str, str]]:
+    targets: list[tuple[str, str, str]] = []
+
+    def add(target_type: str, logical_name: str, field: str) -> None:
+        source_id = lookup_guid(record, logical_name)
+        if source_id:
+            targets.append((target_type, source_id, field))
+
+    if entity_type == "account":
+        add("contact", "primarycontactid", "primary_contact_id")
+    elif entity_type == "contact":
+        if record.get(
+            "_parentcustomerid_value@Microsoft.Dynamics.CRM.lookuplogicalname"
+        ) == "account":
+            add("account", "parentcustomerid", "account_id")
+    elif entity_type == "contract":
+        add("account", "ey_beneficiary_id", "beneficiary_account_id")
+        add("account", "ey_supplier_id", "supplier_account_id")
+    elif entity_type == "deposit":
+        add("vault", "ey_vault_id", "vault_id")
+        add("contact", "ey_verified_by_id", "verified_by_contact_id")
+    return targets
+
+
+def relationship_coverage_failures(sources, mappings, import_plans) -> list[str]:
+    available = set(mappings)
+    available.update((plan.entity_type, plan.source_id) for plan in import_plans)
+    failures: list[str] = []
+    for (entity_type, source_id), source in sources.items():
+        if entity_type not in IMPORT_UNMAPPED_ENTITIES:
+            continue
+        for target_type, target_source_id, field in relationship_targets(
+            entity_type, source.raw
+        ):
+            if (target_type, target_source_id) not in available:
+                failures.append(
+                    f"{entity_type} {source_id} field {field} references missing "
+                    f"{target_type} {target_source_id}"
+                )
+    return failures
+
+
 def collision_groups(mappings: dict[tuple[str, str], int]) -> dict[tuple[str, int], list[str]]:
     grouped: dict[tuple[str, int], list[str]] = defaultdict(list)
     for (entity_type, source_id), local_id in mappings.items():
@@ -399,6 +509,33 @@ def write_mapping(db, entity_type: str, source_id: str, local_id: int) -> None:
     )
 
 
+def apply_source_import_plans(db, plans, sources, mappings) -> Counter:
+    from collections import Counter
+
+    changed = Counter()
+    for entity_type in IMPORT_UNMAPPED_ENTITIES:
+        for plan in (item for item in plans if item.entity_type == entity_type):
+            source = sources[(entity_type, plan.source_id)]
+            if plan.local_id is None:
+                target = MODEL_BY_ENTITY[entity_type](
+                    **required_defaults(entity_type, source)
+                )
+                db.add(target)
+                db.flush()
+                changed[f"{entity_type}.created"] += 1
+            else:
+                target = db.get(MODEL_BY_ENTITY[entity_type], plan.local_id)
+                if target is None:
+                    raise RuntimeError(
+                        f"Planned {entity_type} local_id={plan.local_id} is missing."
+                    )
+                changed[f"{entity_type}.matched"] += 1
+            assign_fields(target, source)
+            write_mapping(db, entity_type, plan.source_id, target.id)
+            mappings[(entity_type, plan.source_id)] = target.id
+    return changed
+
+
 def mapped_id(mappings, entity_type: str, source_id: Any) -> int | None:
     normalized = normalize_guid(source_id)
     return mappings.get((entity_type, normalized)) if normalized else None
@@ -428,6 +565,8 @@ def relink_records(db, sources, mappings) -> Counter:
                 updates["account_id"] = mapped_id(
                     mappings, "account", lookup_guid(record, "parentcustomerid")
                 )
+            else:
+                updates["account_id"] = None
         elif entity_type == "contract":
             updates["beneficiary_account_id"] = mapped_id(
                 mappings, "account", lookup_guid(record, "ey_beneficiary_id")
@@ -472,11 +611,43 @@ def main() -> int:
     db = SessionLocal()
     try:
         mappings = load_mappings(db)
+        import_plans = build_source_import_plans(db, mappings, sources)
         groups = collision_groups(mappings)
         plans, failures = build_plans(db, mappings, sources)
+        relationship_failures = relationship_coverage_failures(
+            sources, mappings, import_plans
+        )
+        import_counts = defaultdict(int)
+        for plan in import_plans:
+            action = "matched" if plan.local_id is not None else "create"
+            import_counts[f"{plan.entity_type}.{action}"] += 1
+        skipped_activities = sum(
+            1
+            for key in sources
+            if key[0] == "activity" and key not in mappings
+        )
+        print("Unmapped core records:", len(import_plans))
+        print("Unmapped core actions:", dict(import_counts))
+        print(
+            "Core rows to create:",
+            sum(plan.local_id is None for plan in import_plans),
+        )
+        print(
+            "Historical activitypointer records intentionally excluded:",
+            skipped_activities,
+        )
+        for plan in import_plans:
+            if plan.local_id is not None:
+                print(
+                    f"  {plan.entity_type} {plan.source_id}: "
+                    f"map existing local_id={plan.local_id} ({plan.reason})"
+                )
         print(f"Collided local rows: {len(groups)}")
         print(f"Resolved plans: {len(plans)}")
-        print(f"Rows to create: {sum(len(plan.split_source_ids) for plan in plans)}")
+        print(
+            "Collision rows to create:",
+            sum(len(plan.split_source_ids) for plan in plans),
+        )
         print(f"Stale mappings to remove: {sum(len(plan.stale_source_ids) for plan in plans)}")
         counts = defaultdict(int)
         for plan in plans:
@@ -494,16 +665,30 @@ def main() -> int:
                 print(f"  - {failure}")
             print("Refusing repair until every collision group is resolved.")
             return 2
-        if not groups:
-            print("No import collisions remain.")
+        if relationship_failures:
+            print("\nUnresolved Dynamics relationships:")
+            for failure in relationship_failures[:50]:
+                print(f"  - {failure}")
+            if len(relationship_failures) > 50:
+                print(f"  ... and {len(relationship_failures) - 50} more")
+            print("Refusing repair until every relationship target is available.")
+            return 2
+        if not groups and not import_plans:
+            print("No import collisions or unmapped core records remain.")
             return 0
         if not args.apply:
             print("Dry run only; no changes were made.")
             return 0
-        if any(plan.entity_type == "contact" for plan in plans) and contact_email_is_unique(db):
+        contact_changes = any(
+            plan.entity_type == "contact" for plan in plans
+        ) or any(plan.entity_type == "contact" for plan in import_plans)
+        if contact_changes and contact_email_is_unique(db):
             print("Refusing repair: run python -m migrations.migrate_db first.")
             return 2
 
+        source_import_changes = apply_source_import_plans(
+            db, import_plans, sources, mappings
+        )
         for entity_type in ENTITY_ORDER:
             for plan in (item for item in plans if item.entity_type == entity_type):
                 retained = db.get(MODEL_BY_ENTITY[entity_type], plan.local_id)
@@ -529,12 +714,33 @@ def main() -> int:
                     mappings[(entity_type, source_id)] = clone.id
 
         relationship_changes = relink_records(db, sources, mappings)
-        remaining = collision_groups(load_mappings(db))
+        final_mappings = load_mappings(db)
+        remaining = collision_groups(final_mappings)
         if remaining:
             db.rollback()
             print(f"Refusing commit: {len(remaining)} collision groups remain.")
             return 2
+        missing_core = [
+            key
+            for key in sources
+            if key[0] in IMPORT_UNMAPPED_ENTITIES and key not in final_mappings
+        ]
+        if missing_core:
+            db.rollback()
+            print(f"Refusing commit: {len(missing_core)} core records remain unmapped.")
+            return 2
+        final_relationship_failures = relationship_coverage_failures(
+            sources, final_mappings, []
+        )
+        if final_relationship_failures:
+            db.rollback()
+            print(
+                "Refusing commit: "
+                f"{len(final_relationship_failures)} relationship targets remain unmapped."
+            )
+            return 2
         db.commit()
+        print("Core import changes:", dict(source_import_changes))
         print("Relationship changes:", dict(relationship_changes))
         print("Repair committed. Import mapping collisions remaining: 0")
         return 0
