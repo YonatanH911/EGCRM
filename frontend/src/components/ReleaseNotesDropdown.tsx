@@ -4,7 +4,7 @@
 import { useState, useRef, useEffect } from 'react';
 import {
     Bell, X, Sparkles, CheckCircle2, Building2, Filter, Phone, Search, Users,
-    Box, CalendarDays, Database, FolderTree,
+    Box, CalendarDays, Database, FolderTree, LayoutGrid,
 } from 'lucide-react';
 import packageInfo from '../../package.json';
 
@@ -38,6 +38,13 @@ export default function ReleaseNotesDropdown() {
     };
 
     const notes = [
+        {
+            title: 'Compact Deposit Layout',
+            description: 'Box now sits beside Date Vaulted and directly after Vault in the list, while every deposit column wraps its full value within the page.',
+            icon: LayoutGrid,
+            color: 'text-indigo-500',
+            bg: 'bg-indigo-500/10',
+        },
         {
             title: 'Deposit Box and Table',
             description: 'Deposits now show Box in the list and under Vault Information, with Date Received before Supplier, complete version values, and newest deposits first.',
