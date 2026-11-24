@@ -1,6 +1,23 @@
 # EGCRM Release Notes
 
-## Version 2.1 (Latest)
+## Version 0.2.8 (Latest)
+
+### Data Integrity
+- **Account Field Recovery**: Added a guarded migration that restores blank website, phone, description, and address fields from each account's mapped Dynamics record without overwriting existing EGCRM values.
+
+## Version 0.2.7
+
+### Bug Fixes
+- **Legacy Contact Compatibility**: Contact responses now preserve malformed historical Dynamics email text without causing Contracts, Activities, or other contact-dependent views to fail. New and edited contacts still require valid email addresses.
+
+## Version 0.2.6
+
+### Data Integrity
+- **Dynamics Record Recovery**: Added guarded migrations that separate distinct Dynamics records previously merged by duplicate names, contact emails, contract titles, or deposit numbers.
+- **Complete Snapshot Validation**: Added a read-only full Dynamics exporter and coverage checks for accounts, contacts, contracts, vaults, deposits, and their relationships.
+- **Safer Future Imports**: Excel imports now claim each matched CRM row once, preventing multiple Dynamics GUIDs from silently sharing one local record.
+
+## Version 2.1
 
 ### New Features & Enhancements
 - **Intelligent Data Linking**: Revolutionized the Accounts dashboard by replacing static text fields (like Industry) with dynamic, interactive dropdowns. Users can now seamlessly link and unlink related Contacts and Deposits directly from an Account page.

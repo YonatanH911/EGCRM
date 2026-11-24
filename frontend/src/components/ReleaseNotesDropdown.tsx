@@ -39,6 +39,34 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
+            title: 'Account Field Recovery',
+            description: 'Missing website, phone, description, and address values can now be restored from mapped Dynamics accounts without replacing existing EGCRM data.',
+            icon: Database,
+            color: 'text-emerald-500',
+            bg: 'bg-emerald-500/10',
+        },
+        {
+            title: 'Legacy Contact Compatibility',
+            description: 'Contracts, activities, and contact-dependent views now remain available when imported Dynamics records contain historical email text that does not meet modern validation rules.',
+            icon: CheckCircle2,
+            color: 'text-rose-500',
+            bg: 'bg-rose-500/10',
+        },
+        {
+            title: 'Dynamics Record Recovery',
+            description: 'Accounts, contacts, deposits, and their relationships can now be safely separated when duplicate names, emails, or deposit numbers previously merged distinct Dynamics records.',
+            icon: Database,
+            color: 'text-emerald-500',
+            bg: 'bg-emerald-500/10',
+        },
+        {
+            title: 'Complete Dynamics Snapshot',
+            description: 'A read-only browser exporter and validated migration workflow now recover active and inactive core CRM data while checking every mapping before database changes are committed.',
+            icon: CheckCircle2,
+            color: 'text-blue-500',
+            bg: 'bg-blue-500/10',
+        },
+        {
             title: 'Compact Deposit Layout',
             description: 'Box now sits beside Date Vaulted and directly after Vault in the list, while every deposit column wraps its full value within the page.',
             icon: LayoutGrid,
