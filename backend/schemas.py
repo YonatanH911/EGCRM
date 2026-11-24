@@ -87,6 +87,9 @@ class ContactUpdate(ContactBase):
     pass
 
 class ContactResponse(ContactBase):
+    # Dynamics contains a few legacy values that are useful to display even
+    # though they do not satisfy modern email-address validation.
+    email: Optional[str] = None
     id: int
     is_active: bool
     created_at: datetime
