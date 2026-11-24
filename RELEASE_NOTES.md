@@ -1,6 +1,11 @@
 # EGCRM Release Notes
 
-## Version 0.2.6 (Latest)
+## Version 0.2.7 (Latest)
+
+### Bug Fixes
+- **Legacy Contact Compatibility**: Contact responses now preserve malformed historical Dynamics email text without causing Contracts, Activities, or other contact-dependent views to fail. New and edited contacts still require valid email addresses.
+
+## Version 0.2.6
 
 ### Data Integrity
 - **Dynamics Record Recovery**: Added guarded migrations that separate distinct Dynamics records previously merged by duplicate names, contact emails, contract titles, or deposit numbers.

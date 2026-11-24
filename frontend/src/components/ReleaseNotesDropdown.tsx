@@ -39,6 +39,13 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
+            title: 'Legacy Contact Compatibility',
+            description: 'Contracts, activities, and contact-dependent views now remain available when imported Dynamics records contain historical email text that does not meet modern validation rules.',
+            icon: CheckCircle2,
+            color: 'text-rose-500',
+            bg: 'bg-rose-500/10',
+        },
+        {
             title: 'Dynamics Record Recovery',
             description: 'Accounts, contacts, deposits, and their relationships can now be safely separated when duplicate names, emails, or deposit numbers previously merged distinct Dynamics records.',
             icon: Database,
