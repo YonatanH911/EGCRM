@@ -1,6 +1,11 @@
 # EGCRM Release Notes
 
-## Version 0.2.7 (Latest)
+## Version 0.2.8 (Latest)
+
+### Data Integrity
+- **Account Field Recovery**: Added a guarded migration that restores blank website, phone, description, and address fields from each account's mapped Dynamics record without overwriting existing EGCRM values.
+
+## Version 0.2.7
 
 ### Bug Fixes
 - **Legacy Contact Compatibility**: Contact responses now preserve malformed historical Dynamics email text without causing Contracts, Activities, or other contact-dependent views to fail. New and edited contacts still require valid email addresses.

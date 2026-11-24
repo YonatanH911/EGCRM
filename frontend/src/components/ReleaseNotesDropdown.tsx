@@ -39,6 +39,13 @@ export default function ReleaseNotesDropdown() {
 
     const notes = [
         {
+            title: 'Account Field Recovery',
+            description: 'Missing website, phone, description, and address values can now be restored from mapped Dynamics accounts without replacing existing EGCRM data.',
+            icon: Database,
+            color: 'text-emerald-500',
+            bg: 'bg-emerald-500/10',
+        },
+        {
             title: 'Legacy Contact Compatibility',
             description: 'Contracts, activities, and contact-dependent views now remain available when imported Dynamics records contain historical email text that does not meet modern validation rules.',
             icon: CheckCircle2,
